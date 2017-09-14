@@ -1,0 +1,34 @@
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1" session="false"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<%@ taglib uri="http://java.sun.com/jstl/core_rt" prefix="c" %>
+<%@ taglib uri="/WEB-INF/patterns.tld" prefix="p" %>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Patterns -- Index page</title>
+<link rel="shortcut icon" href="../img/venu.ico">
+<link type="text/css" rel="stylesheet" href="../css/patterns.css">
+</head>
+<body>
+  <div id="mvc" class="main">
+   <div class="srchheader" id="sheader" mvc-con="headerController">
+         <div style="float:left;width:70%; padding-top: 15px;"><a style="color: teal!important;font-size: 20px" href="#/home">VenuGopal</a></div>
+         <div style="float:right;width: 30%;">
+         <span style="float:right;">
+			    <a href="#/home" >Sign In</a>
+		</span>
+         </div>
+         <div style="clear: both;padding-top: 25px;">
+           <hr>
+         </div>
+         
+	</div>
+	<div class="middle" id="view"></div>
+	
+	<div class="footer"><br>Copy Right :&copy;Venugopal reddy </div>
+	</div>
+<script type="text/javascript" src="../js/mvc.js"></script>
+<script type="text/javascript" src="../js/home.js"></script>	
+</body>
+</html>

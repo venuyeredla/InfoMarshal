@@ -1,0 +1,6 @@
+Message application
+<div id="msgDiv">
+	<div class="msg_container" id="msg_container">
+	  
+	 </div>
+</div>
