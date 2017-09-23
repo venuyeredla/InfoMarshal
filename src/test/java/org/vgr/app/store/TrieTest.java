@@ -1,5 +1,7 @@
 package org.vgr.app.store;
 
+import java.util.Scanner;
+
 import org.junit.Test;
 
 public class TrieTest {
@@ -7,10 +9,15 @@ public class TrieTest {
 	public void testInsert() {
 		Trie trie=new Trie();
 		trie.insert("venugopal");
-		trie.insert("venkat");
+		trie.insert("venu");
 		trie.insert("ananya");
-		trie.insert("sex");
-		trie.delete("sex");
-		System.out.println("Does 'sex' exists? :: "+trie.search("sex"));
+		trie.insert("job");
+		//trie.delete("job");
+		System.out.print("Enter your query term ?");
+		Scanner scanner=new Scanner(System.in);
+		String input=scanner.next();
+		scanner.close();
+		System.out.println("Does '"+input+"' exists? :: "+trie.search(input));
 	}
 }
+	

@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 public class DataWriter implements Closeable {
-	
  BufferedOutputStream bufferedOutputStream=null;
  private int bytesWritten=0;
  

@@ -45,8 +45,6 @@ public class DataIOTest {
 			e.printStackTrace();
 		}
 	}
-	
-	
 	@Test
 	@Ignore
 	public void testPointer() {

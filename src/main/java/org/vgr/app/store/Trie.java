@@ -5,7 +5,6 @@ public class Trie {
      public Trie() {
     	 root=new TrieNode();
      	}
-	
 	public void insert(String key) {
 		int keyLen=key.length();
         TrieNode current=root;
