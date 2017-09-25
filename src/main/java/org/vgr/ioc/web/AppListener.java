@@ -24,7 +24,6 @@ public class AppListener    {
 			//String configLocation = (String) serveletContext.getInitParameter("configLocation");
 			URL url= serveletContext.getResource("/WEB-INF/classes.txt");
 			logger.info("Context path:" +url.getFile() );
-			IocContainer container = new IocContainer(url.getFile(),true);
 			serveletContext.setAttribute("ioc", container);
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -17,7 +17,10 @@ import org.slf4j.LoggerFactory;
 	private static final String SINGLTON="singleton";
 	private static final String PROTOTYPE="prototype";
 	public IocContainer(){}
-	
+	/**
+	 * Class path text file for reading list of classes to scan for beans.
+	 * @param classPathTxt
+	 */
 	public IocContainer(String classPathTxt){
 		new AnnotaionReader().classPath(this,classPathTxt);
 		this.initializeSingletons();
@@ -54,6 +57,7 @@ import org.slf4j.LoggerFactory;
 		else if (PROTOTYPE.equals(beanDefinition.getScope())) {
 			   object=BeanCreation.createNewBean(beanID,this);
 		   }
+		   this.injectContainer(object);
 			   return object;
 	}
 	
@@ -135,6 +139,11 @@ import org.slf4j.LoggerFactory;
 			}
       }
 
+    public void injectContainer(Object obj) {
+    	if(obj instanceof ContainerAware) {
+    		((ContainerAware) obj).setContainer(this);
+    		}
+    	}
     
 	@Override
 	public boolean destroy() {

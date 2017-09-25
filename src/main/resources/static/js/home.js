@@ -1,10 +1,10 @@
 "use strict"; 
 var module=mvc.module("patterns");
 //Routing configuration.  
-module.routing().when('/home',   "/views/welcome.jsp",null)
-	 			.when('/about',  "/views/about.jsp",null )
-	 			.when('/signup', "/views/signup.jsp",null)
-	 			.when('/search', "/views/search.jsp",null)
+module.routing().when('/home',   "welcome.htm",null)
+	 			.when('/about',  "/static/html/about.html",null )
+	 			.when('/signup', "/static/html/signup.html",null)
+	 			.when('/search', "/static/html/search.html",null)
 	 			.otherwise("/search");
 module.run(function(){
 	console.log("run funciton");

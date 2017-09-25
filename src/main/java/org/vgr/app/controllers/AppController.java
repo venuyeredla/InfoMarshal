@@ -1,14 +1,16 @@
 package org.vgr.app.controllers;
 
+import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vgr.app.domain.Profile;
 import org.vgr.app.service.LoginService;
-import org.vgr.http.server.Cookie;
 import org.vgr.http.server.HttpRequest;
 import org.vgr.http.server.HttpResponse;
 import org.vgr.http.server.HttpSession;
+import org.vgr.http.server.MimeType;
 import org.vgr.ioc.annot.Controller;
 import org.vgr.ioc.annot.Handler;
 import org.vgr.ioc.annot.Inject;
@@ -19,54 +21,30 @@ public class AppController {
 	
  	@Inject(ref="loginService")
     private LoginService loginService=null;
-   // AppCacheManager cacheManager=null;
-	
-	/**
-	 * This mehtod returns the Home Page Of User
-	 * @param servletRequest
-	 * @param servletResponse
-	 * @return
-	 */
 
- @Handler(path="/home.htm")
- public String indexPage(HttpRequest servletRequest,HttpResponse servletResponse) {
-	 return "home";
- }
- 
- @Handler(path="/login.htm")
-		public String authenticate(HttpRequest servletRequest,HttpResponse servletResponse) {
+ 	
+	 @Handler(path="/home.htm")
+	 public String indexPage(HttpRequest servletRequest,HttpResponse servletResponse) {
+		 return "home";
+	 }
+	 @Handler(path="/welcome.htm")
+	 public String welcome(HttpRequest servletRequest,HttpResponse servletResponse) {
+		 return "welcome";
+	 }
+	 @Handler(path="/login.htm",mimeType=MimeType.JSON)
+	public String authenticate(HttpRequest req,HttpResponse res) {
 		try {
-		      String userEmail=servletRequest.getParameter("uname");
-		      String passWord=servletRequest.getParameter("pwd");
-		      StringBuilder jsonString=new StringBuilder("{\"token\":\"");
-		     // Profile loginUser =loginService.authenticateUser(userEmail ,passWord);
-		     // cacheManager.put("loginUser", loginUser);
-		      Profile loginUser=new Profile();
-		      loginUser.setUserId(2);
-		      loginUser.setFirstName("venugopal");
-		      loginUser.setLastName("Reddy");
-		      loginUser.setEmail("venugopal@venu.org");
-		      if(loginUser!=null && loginUser.getUserId()!=0){
-		    	  jsonString.append("true");
-		    	  
-		    	  HttpSession session=  servletRequest.getSession(true);
-		    	  session.setAttribute("loginUser", loginUser);
-		    	  session.setAttribute("valid", true);
-		    	  
-		    	  LOG.debug("Session ID : "+session.getId());
-		    	  Cookie firstName=new Cookie("fname", loginUser.getFirstName());
-		    	  Cookie lastName=new Cookie("lname", loginUser.getLastName());
-		    	  Cookie email=new Cookie("email", loginUser.getEmail());
-		    	  servletResponse.addCookie(firstName);
-		    	  servletResponse.addCookie(lastName);
-		    	  servletResponse.addCookie(email);
-		        }
-		      else{
-		    	  jsonString.append("false");
+		      String user=req.getParameter("name");
+		      String pass=req.getParameter("pwd");
+		      Map<String,String> data=new HashMap<String,String>(); 
+		      if(user.equals("venu")&&pass.equals("gopal")) {
+		    	  data.put("sucess", "true");
+		    	  data.put("user", "true");
+		    	  data.put("password", "true");
+		      }else {
+		    	  data.put("sucess", "false");  
 		      }
-		      jsonString.append("\"}");
-	    	  servletRequest.setAttribute("jsonString", jsonString);
-		      
+		      res.setData(data);
 			 }catch (Exception e) {
 				e.printStackTrace();
 			}

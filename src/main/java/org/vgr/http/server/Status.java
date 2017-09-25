@@ -92,18 +92,18 @@ public enum Status{
 
     public static Status lookup(int requestStatus) {
         for (Status status : Status.values()) {
-            if (status.getRequestStatus() == requestStatus) {
+            if (status.getStatus() == requestStatus) {
                 return status;
             }
         }
         return null;
     }
 
-    public String getDescription() {
-        return "" + this.requestStatus + " " + this.description;
+    public String getDesc() {
+        return this.requestStatus+" " +this.description;
     }
 
-    public int getRequestStatus() {
+    public int getStatus() {
         return this.requestStatus;
     }
 }

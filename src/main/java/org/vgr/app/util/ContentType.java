@@ -1,4 +1,4 @@
-package org.vgr.http.server;
+package org.vgr.app.util;
 
 /*
  * #%L

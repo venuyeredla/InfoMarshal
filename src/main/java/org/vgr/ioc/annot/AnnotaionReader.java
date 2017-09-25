@@ -47,7 +47,7 @@ public class AnnotaionReader {
 							        	.filter(handler -> handler instanceof Handler)
 							        	.forEach(handler -> {
 							        		Handler h=(Handler)handler;
-											HandlerConfig config=new HandlerConfig(h.path(), controller.id(), method.getName());								
+											HandlerConfig config=new HandlerConfig(h.path(), controller.id(), method.getName(),h.mimeType());								
 											handlers.put(h.path(), config);
 							        	});
 							        });
@@ -102,7 +102,6 @@ public class AnnotaionReader {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
 	}
 	
 	public void webPath(IocContainer iocContainer, String fileName){

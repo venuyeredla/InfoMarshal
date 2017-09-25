@@ -2,8 +2,19 @@ package org.vgr.http.server;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.vgr.ioc.annot.Inject;
+import org.vgr.ioc.annot.Service;
+import org.vgr.ioc.web.RequestDispatcher;
+
+@Service(id="httpServer")
 public class HttpServer implements Runnable{
+	private static final Logger LOG=LoggerFactory.getLogger(HttpServer.class);
    /**
      * Maximum time to wait on Socket.getInputStream().read() (in milliseconds)
      * This is required as the Keep-Alive HTTP connections would otherwise block
@@ -12,24 +23,11 @@ public class HttpServer implements Runnable{
     public static final int SOCKET_READ_TIMEOUT = 5000;
     private int SERVER_PORT=8080;
     ServerSocket socketServer=null;
-    /**
-     * Common MIME type for dynamic content: plain text
-     */
-    public static final String MIME_PLAINTEXT = "text/plain";
-
-    /**
-     * Common MIME type for dynamic content: html
-     */
-    public static final String MIME_HTML = "text/html";
-	
-	ClientRequestHandler clientRequestHandler=new ClientRequestHandler();
-
+    ExecutorService executorService=Executors.newFixedThreadPool(10);
+	@Inject(ref="requestDispatcher")
+	RequestDispatcher requestDispatcher=null;
 	private boolean stopSignal=false;
-	
-	
-	public HttpServer() {
-	}
-	
+	public HttpServer() {	}
 	public HttpServer(int port) {
 		this.SERVER_PORT=port;
 	}
@@ -38,28 +36,38 @@ public class HttpServer implements Runnable{
 	public void run() {
 	try{
 		socketServer=new ServerSocket(SERVER_PORT);
-		System.out.println("HttpSever Started on port : "+SERVER_PORT);
+		LOG.info("Server Started at port: "+SERVER_PORT);
 		while(!stopSignal) {
 			 Thread.sleep(0);
 		  	 socketServer.setReuseAddress(true);
-		  	 clientRequestHandler.handleRequest(socketServer.accept());
+		  	 this.handleRequest(socketServer.accept());
 		   }
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 		}
 	}
 	
+	public boolean handleRequest(Socket socket) {
+		RequestProcessor processor= new RequestProcessor(socket, new HttpRequest(socket), new HttpResponse());
+		processor.setRequestDispatcher(requestDispatcher);
+		executorService.submit(processor);
+		return true;
+	}
+	
 	public boolean start() {
-		 Thread dThread= new Thread(new HttpServer(), "Server Deamon Thread");
-       //  dThread.setDaemon(true);
+		 Thread dThread= new Thread(this, "Server Deamon Thread");
+         //dThread.setDaemon(true);
 		 dThread.start();
 		 return true;
 	}
  
 	public boolean stop() {
 		this.stopSignal=true;
-		System.out.println("HttpSever Stopped on port:2017");
+		LOG.info("Server Stop request submitted at port: "+SERVER_PORT);
 		return true;
+	}
+	public void setRequestDispatcher(RequestDispatcher requestDispatcher) {
+		this.requestDispatcher = requestDispatcher;
 	}
 	
 	
