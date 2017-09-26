@@ -1,11 +1,12 @@
-package org.vgr.app.store;
+package org.vgr.store.io;
 
 import java.io.BufferedInputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 public class DataReader implements Closeable{
 	
@@ -15,15 +16,16 @@ public class DataReader implements Closeable{
 	 public DataReader(InputStream in) {
 			bufferedInputStream=new BufferedInputStream(in); 
 	  }
-	public byte readByte() {
+	public int readByte() {
 		try {
 			pointerPosition++;
-			return (byte)bufferedInputStream.read();
+			int b=bufferedInputStream.read();
+			return b;
 			
 		} catch (IOException e) {
 			e.printStackTrace();
+			return -1;
 		}
-		return 0;
 	}
 	
 	public int readInt() {
@@ -48,7 +50,7 @@ public class DataReader implements Closeable{
 	}
 	
 	public int readVInt() {
-		byte b=readByte();
+		int b=readByte();
 		if(b>0) return b;  // it means like it is less than < 127 and it is one bit integer. i.e last bit is used for sign in byte
 		int i=b & 0x7F;
 		b=readByte();
@@ -76,22 +78,33 @@ public class DataReader implements Closeable{
 	
 	public void readBytes(byte[] bytes,int len) {
 		for (int i = 0; i < len; i++) {
-			bytes[i]=readByte();
+			bytes[i]=(byte)readByte();
 		}
 	}
 	public void readBytes(byte[] bytes,int offset, int len) {
 		for (int i = offset; i < len; i++) {
-			bytes[i]=readByte();
+			bytes[i]=(byte) readByte();
 		}
 	}
-	public Map<String,String> readMap(){
-		Map<String,String> map=new HashMap<>();
+	public LinkedHashMap<String,String> readMap(){
+		LinkedHashMap<String,String> map=new LinkedHashMap<>();
 		int size=readVInt();
 		for (int i = 0; i < size; i++) {
 		map.put(readString(), readString());
 		}
 		return map;
 	}
+	
+	public List<String> readList() {
+		List<String> list=new ArrayList<>();
+		int size=readInt();
+		for(int i=0;i<size;i++) {
+			list.add(readString());
+		}
+		return list;
+	}
+	
+	
 
 	public long getFilePointer() {
 		return pointerPosition;
@@ -104,7 +117,11 @@ public class DataReader implements Closeable{
 		bytes=null;
 	}
 	@Override
-	public void close() throws IOException {
-		bufferedInputStream.close();
+	public void close() {
+		try {
+			bufferedInputStream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

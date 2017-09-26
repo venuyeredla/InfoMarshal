@@ -1,4 +1,4 @@
-package org.vgr.app.store;
+package org.vgr.store.ds;
 
 public enum Traversal {
 	PRE,IN,POST;

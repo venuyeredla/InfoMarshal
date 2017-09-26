@@ -1,4 +1,4 @@
-package org.vgr.app.store;
+package org.vgr.store.io;
 
 public class PostingsWriter {
 	

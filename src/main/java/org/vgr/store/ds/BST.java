@@ -1,8 +1,12 @@
-package org.vgr.app.store;
+package org.vgr.store.ds;
+
+import org.vgr.store.io.DataReader;
+import org.vgr.store.io.DataWriter;
 
 public class BST {
 	private Node root;
 	private boolean balanced=false;
+	private static int totalNodes=0;
 	
 	public BST() {
 		this.balanced=false;
@@ -10,28 +14,28 @@ public class BST {
 	public BST(boolean balance) {
 		this.balanced=balance;
 	}
-	public void insert(int key) {
-		if(root==null) { root=creatNode(key);  }
+	public void insert(int key,long pointer) {
+		if(root==null) { root=creatNode(key,pointer);  }
 		else {
 			if(!balanced) {
-				insert(root, key);
+				insert(root, key,pointer);
 			}else if(balanced) {
-				insertAndBalance(root,key);
+				insertAndBalance(root,key,pointer);
 			}
 		}
 	  }
 
-	private boolean insert(Node node,int key) {
+	private boolean insert(Node node,int key,long pointer) {
 		if(node!=null){
 			if(node.key==key) return false;
 			else if(key<node.key) {	
 				 if(node.left==null) {
-					 node.left=creatNode(key); return true;
-				 }else return insert(node.left, key);
+					 node.left=creatNode(key,pointer); return true;
+				 }else return insert(node.left, key,pointer);
 				}
 			else if(key>node.key) {
-				   if(node.right==null) {node.right=creatNode(key); return true;}
-				   else return insert(node.right, key);
+				   if(node.right==null) {node.right=creatNode(key,pointer); return true;}
+				   else return insert(node.right, key,pointer);
 				}
 			}
 		return false;
@@ -43,17 +47,17 @@ public class BST {
 	 * @param key
 	 * @return
 	 */
-	private boolean insertAndBalance(Node node,int key) {
+	private boolean insertAndBalance(Node node,int key,long pointer) {
 		if(node!=null){
 			if(node.key==key) return false;
 			else if(key<node.key) {	
 				 if(node.left==null) {
-					 node.left=creatNode(key); return true;
-				 }else return insert(node.left, key);
+					 node.left=creatNode(key,pointer); return true;
+				 }else return insert(node.left, key,pointer);
 				}
 			else if(key>node.key) {
-				   if(node.right==null) {node.right=creatNode(key); return true;}
-				   else return insert(node.right, key);
+				   if(node.right==null) {node.right=creatNode(key,pointer); return true;}
+				   else return insert(node.right, key,pointer);
 				}
 			}
 		return false;
@@ -70,12 +74,13 @@ public class BST {
 		return null;
 	}
 	
-	public boolean search(int key) {
-		return root==null?false:search(root, key);
+	public long search(int key) {
+		Node node=search(root, key);
+		return root==null?-1:node.dp;
 	}
 	
-	private boolean search(Node node,int key) {
-		return node==null?false:node.key==key?true:key<node.key?this.search(node.left, key):this.search(node.right, key);
+	private Node search(Node node,int key) {
+		return node==null?null:node.key==key?node:key<node.key?this.search(node.left, key):this.search(node.right, key);
 	}
 
 	public boolean delete(int key) {
@@ -135,8 +140,9 @@ public class BST {
 	     
 	}
 	
-	private static Node creatNode(int key) {
-		return new Node(key);
+	private static Node creatNode(int key,long pointer) {
+		totalNodes++;
+		return new Node(key,pointer);
 	}
 	
 		
@@ -144,16 +150,10 @@ public class BST {
 		return node!=null?node.height:0;
 	}
 	
-	
-	
-	
-	
-	
-	
 	public void traverse(Traversal mode) {
 		switch (mode) {
 		case PRE:
-			preOrder(root);
+			preOrder(root,null);
 			break;
 		case POST:
 			postOrder(root);
@@ -164,7 +164,6 @@ public class BST {
 		default:
 			break;
 		}
-		
 	}
 	
 	public void inOrder(Node node) {
@@ -174,11 +173,11 @@ public class BST {
 			if(node.right!=null) inOrder(node.right); 
 		 }
 	}
-	public void preOrder(Node node) {
+	public void preOrder(Node node,DataWriter dw) {
 		if(node!=null) {
-			System.out.print(node.key+",");
-			if(node.left!=null) preOrder(node.left);
-			if(node.right!=null) preOrder(node.right); 
+			dw.writeInt(node.key);dw.writeInt((int) node.dp);
+			if(node.left!=null) preOrder(node.left,dw);
+			if(node.right!=null) preOrder(node.right,dw); 
 		 }
 	}
 	public void postOrder(Node node) {
@@ -190,20 +189,39 @@ public class BST {
 	}
 	
 	public void writeToFile(DataWriter dataWriter) {
-		dataWriter.writeString("BST#inorder");
+		dataWriter.writeString("BST#pre");
+		dataWriter.writeInt(totalNodes);
+		preOrder(root,dataWriter);
+		dataWriter.close();
 	}
 	
-	public void readFrom(DataReader dataReader) {
-				
+	public void readFromFile(DataReader dataReader) {
+		String codec=dataReader.readString();
+		int totalNodes=dataReader.readInt();
+		for(int i=0;i<totalNodes;i++) {
+			 int key=dataReader.readInt();
+			 int pointer= dataReader.readInt();
+			insert(key,pointer);
+		}
+		dataReader.close();
 	}
 	
 	static class Node{
 		private int key, height;
+		private long dp; //dataponter;
 		private Node left,right;
 		public Node(int key) {
 			this.key = key;
 			this.height=1;
 		}
+		public Node(int key,long pointer) {
+			this.key = key;
+			this.height=1;
+			this.dp=pointer;
+		}
 	}
 
 }
+
+	
+

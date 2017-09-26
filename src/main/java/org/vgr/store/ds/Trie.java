@@ -1,4 +1,7 @@
-package org.vgr.app.store;
+package org.vgr.store.ds;
+
+import org.vgr.store.io.DataReader;
+import org.vgr.store.io.DataWriter;
 
 public class Trie {
      TrieNode root=null;
@@ -45,6 +48,54 @@ public class Trie {
 		}
 		return false;
 	}
+	
+	
+	
+	
+	public boolean writeToFile(DataWriter dw) {
+		 writeNode(root,dw);
+		return true;
+	}
+	
+	public void writeNode(TrieNode node,DataWriter dw) {
+		 if(node==null)
+			 return;
+		 else {
+			 for(int i=0;i<26;i++) {
+				  TrieNode child=node.childs[i];
+				 if(child!=null) {
+					 int b=i;
+					 char c=(char) (b+'a');
+					 if(child.isLeaf==true) {
+						 b=b|0X80;
+					 }
+					 System.out.print(c+",");
+					 dw.writeByte(b);
+					 writeNode(child, dw);
+				 }
+			 }
+		 }
+	}
+	
+	
+	public boolean readFromFile(DataReader dr) {
+		 root=new TrieNode();
+		
+		return true;
+	}
+	
+	public boolean readNode(DataReader dr) {
+		 int b=dr.readByte();
+		 boolean isLeaf=(b&0x80) == 0x80;
+		 if(isLeaf) {
+			 return true;
+		 }
+		 b=b&~0x7f;
+		 TrieNode node =new TrieNode();
+		 return false;
+	}
+	
+	
 	
 	static class TrieNode{
 		private static final int size=26;

@@ -51,7 +51,15 @@ public class HttpResponse  {
 	     printWriter.close();
    }
 	
-	     
+	public void writeBinary(Socket socket) throws IOException {
+		 PrintWriter printWriter=new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
+		 this.writeHeader(printWriter, 0);		 
+	     printWriter.append(JsonUtil.toJson(data)+"\n");
+	     printWriter.flush();
+	     printWriter.close();
+  }     
+	
+	
 	private void writeHeader(PrintWriter printWriter,int contentSize) {
 		 headers.put("HTTP/1.1", status.getDesc());
 		 headers.put("Content-Type", mimeType.getMimeType());

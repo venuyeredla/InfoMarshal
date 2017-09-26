@@ -1,11 +1,11 @@
-package org.vgr.app.store;
+package org.vgr.store.io;
 
 import java.io.BufferedOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Map;
-import java.util.Set;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 public class DataWriter implements Closeable {
  BufferedOutputStream bufferedOutputStream=null;
@@ -29,26 +29,26 @@ public class DataWriter implements Closeable {
 	}
 
 	public void writeInt(int i) {
-		writeByte((byte)i >> 24 );
-		writeByte((byte)i >> 16 );
-		writeByte((byte)i >> 8 );
-		writeByte(i);
+		writeByte((int)i >> 24 );
+		writeByte((int)i >> 16 );
+		writeByte((int)i >> 8);
+		writeByte((int)i);
 	}
 
-	public void writeLong(int l) {
-		writeByte((byte)l >> 56 );
-		writeByte((byte)l >> 48 );
-		writeByte((byte)l >> 40 );
-		writeByte((byte)l >> 32 );
-		writeByte((byte)l >> 24 );
-		writeByte((byte)l >> 16 );
-		writeByte((byte)l >> 8 );
-		writeByte(l);
+	public void writeLong(long pointer) {
+		writeByte((int)(pointer >> 56) );
+		writeByte((int)pointer >> 48 );
+		writeByte((int)pointer >> 40 );
+		writeByte((int)pointer >> 32 );
+		writeByte((int)pointer >> 24 );
+		writeByte((int)pointer >> 16 );
+		writeByte((int)pointer >> 8 );
+		writeByte((int)pointer);
 		
 	}
 
 	public void writeShort(int s) {
-		writeByte((byte)s >> 8 );
+		writeByte((int)s >> 8 );
 		writeByte(s);
 	}
 
@@ -85,7 +85,7 @@ public class DataWriter implements Closeable {
 		}
 	}
 	
-	public void writeMap(Map<String,String> map) {
+	public void writeMap(LinkedHashMap<String,String> map) {
 		writeVint(map.keySet().size());
 		map.forEach((key,value)-> {
 			writeString(key);
@@ -93,7 +93,9 @@ public class DataWriter implements Closeable {
 		});
 	}
 
-	public void writeSet(Set<String> strings) {
+
+	public void writeList(List<String> strings) {
+		writeInt(strings.size());
 		strings.forEach(str -> writeString(str));
 	}
 	
@@ -101,9 +103,13 @@ public class DataWriter implements Closeable {
 		return bytesWritten;
 	}
 	@Override
-	public void close() throws IOException {
-		bufferedOutputStream.flush();
-		bufferedOutputStream.close();
+	public void close(){
+		try {
+			bufferedOutputStream.flush();
+			bufferedOutputStream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 }

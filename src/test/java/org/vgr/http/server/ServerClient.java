@@ -12,9 +12,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class ServerClient {
-	
 	static HttpServer   httpServer=null;
-	
 	@BeforeClass
 	public static void startServer() {
 		httpServer=new HttpServer();
@@ -29,7 +27,6 @@ public class ServerClient {
 		e.printStackTrace();
 	}
 	}
-	
 	@Test
 	public void testServer(){
 		  String serverName = "localhost"; int port =8080;
