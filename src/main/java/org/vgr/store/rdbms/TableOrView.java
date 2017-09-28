@@ -1,7 +1,7 @@
 package org.vgr.store.rdbms;
 
 import java.util.LinkedHashMap;
-public class Table {
+public class TableOrView {
 	private String tableName;
 	private LinkedHashMap<String,String> columns;
 	  

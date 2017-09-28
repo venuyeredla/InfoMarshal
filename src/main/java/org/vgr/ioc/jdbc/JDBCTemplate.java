@@ -13,60 +13,38 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
-import org.vgr.ioc.annot.Inject;
-import org.vgr.ioc.annot.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vgr.ioc.annot.Inject;
+import org.vgr.ioc.annot.Service;
 
 @Service(id="jdbcTemplate")
 public class JDBCTemplate {
 	public static final Logger logger=LoggerFactory.getLogger(JDBCTemplate.class);
-	
-	private static DataSource dataSource=null;
-	
-	@Inject(value="jdbc:mysql://localhost:3306/venugopal")
-	private String url=null;
-	@Inject(value="root")
-	private String user=null;
-	@Inject(value="venugopal")
-	private String password=null;
-	
-	public Connection getConnection(){
-		if(dataSource==null){
-		   }
-		try {
-			return dataSource.getConnection();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
 	public JDBCTemplate(){ }
-/**
- *  If it is DML gives the number of rows affected otherwise it gives zero(0) for DDL.
- * @param sql   SQL Query either DML or DDL .
- * @return
- */
-	public int executeUpdate(String sql){
-	    int rows=0;
-		Statement statement=null;
-		Connection connection=null;
-		try {
-			connection=getConnection();
-			statement=TemplateUtils.getStatement(connection);
-	     	rows=statement.executeUpdate(sql);
-	     	logger.debug("No of rows affected : "+rows);
-	     	connection.commit();
-		  } catch (SQLException e) {
-			TemplateUtils.callRollBack(connection, e);
-		  }
-		finally{
-			TemplateUtils.finallyBlock(connection, statement);
-			}
-		return rows;
-	}
+   /**
+    *  If it is DML gives the number of rows affected otherwise it gives zero(0) for DDL.
+    * @param sql   SQL Query either DML or DDL .
+    * @return
+   */
 	
+   public int executeUpdate(String sql){
+		Statement statement=null;
+		try {
+			statement=getStatement(); 
+			int rows=statement.executeUpdate(sql);
+	     	return rows;
+		  } catch (SQLException e) {
+			  rollBack(statement, e);
+		  }
+		  finally{
+			 commitClose(statement,null);
+			}
+		   return 0;
+	}
+   
+   
+   
 /**
  * This method will execute the query for insert and will give us auto generated key
  * @param sql
@@ -74,12 +52,12 @@ public class JDBCTemplate {
  */
 	public int executePK(String sql){
 		int PK=0;
-		Statement statement=null;
+		 PreparedStatement  preparedStatement =null;
 		Connection connection=null;
 		try {
 			 connection=getConnection();
 			 connection.setAutoCommit(false);
-			 PreparedStatement  preparedStatement=connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+			 preparedStatement=connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 			 preparedStatement.executeUpdate();
 			 ResultSet rs = preparedStatement.getGeneratedKeys();
 			 if(rs.next()){
@@ -87,11 +65,10 @@ public class JDBCTemplate {
 			 }
 			 connection.commit();
 		} catch (SQLException e) {
-			TemplateUtils.callRollBack(connection, e);
-		}
-		finally{
-		TemplateUtils.finallyBlock(connection, statement);
-		}
+			 rollBack(preparedStatement, e);
+		}finally{
+			commitClose(preparedStatement,null);
+			}
 		return PK;
 	}
 	
@@ -102,24 +79,21 @@ public class JDBCTemplate {
 	 * @return
 	 */
 	public int executeUpdate(String sql ,Object[] objects){
-		int rows=0;
 		PreparedStatement preparedStatement=null;
-		Connection connection=null;
 		try {
-			connection=getConnection();
-			preparedStatement=TemplateUtils.getPreparedStatement(connection, sql);
+			preparedStatement=getPreparedStatement(getConnection(), sql);
 			for (int i = 0; i < objects.length; i++) {
 				preparedStatement.setObject(i+1, objects[i]);
               }
-	     	rows=preparedStatement.executeUpdate();
-	     	connection.commit();
+	        int rows=preparedStatement.executeUpdate();
+	     	return rows;
     		} catch (SQLException e) {
-		    	TemplateUtils.callRollBack(connection, e);
+    			rollBack(preparedStatement, e);
 	     	}
    		  finally{
-			  TemplateUtils.finallyBlock(connection, preparedStatement);
+			  commitClose( preparedStatement,null);
 		    }
-		return rows;
+		return 0;
 	}
 
 	/**
@@ -130,22 +104,18 @@ public class JDBCTemplate {
 	 */
 	public int[] executeBatch(List<String> sqls){
 		Statement statement=null;
-		Connection connection=null;
 		int[] count=null;
 		try {
-			connection=getConnection();
-			statement=TemplateUtils.getStatement(connection);
-			
+			statement=getStatement();
 			for (String string : sqls) {
 				statement.addBatch(string);
 			}
 		    count=statement.executeBatch();
-			connection.commit();
 		} catch (SQLException e) {
-			TemplateUtils.callRollBack(connection, e);
+			rollBack(statement, e);
 		}
 		finally{
-		TemplateUtils.finallyBlock(connection, statement);
+		commitClose(statement,null);
 		}
 			
 		return count;
@@ -158,30 +128,44 @@ public class JDBCTemplate {
 	 * @return
 	 */
 	
-	public Object queryForObj(String sql ,RowMapper<?> rowMapper){
-		 Object object=null;
+	public void queryForObj(String sql ,RowMapper<?> rowMapper){
 		 ResultSet resultSet=null;
 		 PreparedStatement preparedStatement=null;
-		 Connection connection=null;
 		try {
-			connection=getConnection();
-			preparedStatement=TemplateUtils.getPreparedStatement(connection, sql);
+			preparedStatement=getPreparedStatement(getConnection(), sql);
 			resultSet=preparedStatement.executeQuery();
-		
 			if(resultSet!=null){
-				 object =rowMapper.mapRowToObj(resultSet);
+				rowMapper.mapRowToObj(resultSet);
 			  }
-			connection.commit();
 				
 		} catch (SQLException e) {
-		  TemplateUtils.callRollBack(connection, e);
+		  rollBack(preparedStatement, e);
 		}
 		
 		finally{
-			TemplateUtils.finallyBlock(connection, resultSet, preparedStatement);
+			commitClose(preparedStatement,resultSet);
 		}
-		return object;
 	}
+	
+	
+	public void queryForObjTemp(String sql ,RowMapper<?> rowMapper){
+		 ResultSet resultSet=null;
+		 PreparedStatement preparedStatement=null;
+		try {
+			preparedStatement=getPreparedStatement(getConnection(), sql);
+			resultSet=preparedStatement.executeQuery();
+			if(resultSet!=null){
+				rowMapper.mapRowToObj(resultSet);
+			  }
+		} catch (SQLException e) {
+		  rollBack(preparedStatement, e);
+		}
+		finally{
+			commitClose(preparedStatement,resultSet);
+		}
+	}
+	
+	
 	
 	
 /**
@@ -190,23 +174,19 @@ public class JDBCTemplate {
  * @param rowMapper RowMapper Implementation class to read data from ResultSet and stuffing it into Object
  * @return
  */
-public List<?> queryForObjList(String sql ,RowsMpper<?> rowMapper){
-	 List<?> object=null;
+public void queryForObjList(String sql ,RowsMpper<?> rowMapper){
 	 ResultSet resultSet=null;
 	 PreparedStatement preparedStatement=null;
-	 Connection connection=null;
 	try {
-		connection=getConnection();
-		preparedStatement=TemplateUtils.getPreparedStatement(connection, sql);
+		preparedStatement=getPreparedStatement(getConnection(), sql);
 		resultSet=preparedStatement.executeQuery();
 		if(resultSet!=null)
-			object =(List<?>)rowMapper.mapRowsToObjList(resultSet);
-		connection.commit();
-    	} catch (SQLException e) { TemplateUtils.callRollBack(connection, e); }
+			rowMapper.mapRowsToObjList(resultSet);
+		resultSet.close();
+    	} catch (SQLException e) { rollBack(preparedStatement, e); }
     	finally{
-		TemplateUtils.finallyBlock(connection, resultSet, preparedStatement);
+		commitClose(preparedStatement,resultSet);
     	}
-	return object;
 }
 
 /**
@@ -218,24 +198,16 @@ public List<?> queryForObjList(String sql ,RowsMpper<?> rowMapper){
 public int callProcedure(String procedureCall,Object[] objects){
 	   int rowNbrs=0;
 	   CallableStatement callableStatement=null;
-	   Connection connection=null;
 	try {
-		connection=getConnection();
-		callableStatement=TemplateUtils.getCallableStatement(connection, procedureCall);
-		
+		callableStatement=getCallableStatement(getConnection(), procedureCall);
 		for (int i = 0; i < objects.length; i++) {
 			callableStatement.setObject(i+1, objects[i]);
 			}
 		rowNbrs=callableStatement.executeUpdate();
-		
-		connection.commit();
-			
-	} catch (SQLException e) {
-		TemplateUtils.callRollBack(connection, e);
-	}
-	
-	finally{
-		TemplateUtils.finallyBlock(connection, callableStatement);
+   	} catch (SQLException e) {
+		rollBack(callableStatement, e);
+	}finally{
+		commitClose(callableStatement,null);
 	}
 			
 	return rowNbrs;
@@ -249,10 +221,8 @@ public int callProcedure(String procedureCall,Object[] objects){
  */
 public Map<Integer,Object> callProcWithIndex(String procedureCall,Map<Integer,Object> inputParams ,Map<Integer,Object> outMap){
 	   CallableStatement callableStatement=null;
-	   Connection connection=null;
 	 try {
-		 connection=getConnection();
-		  callableStatement=TemplateUtils.getCallableStatement(connection, procedureCall);
+		  callableStatement=getCallableStatement(getConnection(), procedureCall);
 		 for (Integer in : inputParams.keySet()) { 
 			   callableStatement.setObject(in,inputParams.get(in));
 		     }
@@ -263,24 +233,18 @@ public Map<Integer,Object> callProcWithIndex(String procedureCall,Map<Integer,Ob
     	 for (Integer out : outMap.keySet()) {
 			 outMap.put(out, callableStatement.getObject(out));
 		   }
-    	 
-    	 connection.commit();
-
          } catch (SQLException e) {
-		    TemplateUtils.callRollBack(connection, e);
-	     }
-	 finally{
-		TemplateUtils.finallyBlock(connection, callableStatement);
-	  }
+     		rollBack(callableStatement, e);
+     	}finally{
+     		commitClose(callableStatement,null);
+     	}
 	return outMap;
 }
 
 public Map<String,Object> callProcedure(String procedureCall,Map<String,Object> inputParams ,Map<String,Object> outMap){
 	   CallableStatement callableStatement=null;
-	   Connection connection=null;
 	 try {
-		 connection=getConnection();
-		  callableStatement=TemplateUtils.getCallableStatement(connection, procedureCall);
+		  callableStatement=getCallableStatement(getConnection(), procedureCall);
 		 Set<String> input= inputParams.keySet();
 		 for (String in : input) { 
 			   callableStatement.setObject(in,inputParams.get(in));
@@ -292,40 +256,103 @@ public Map<String,Object> callProcedure(String procedureCall,Map<String,Object> 
      	 for (String out : outMap.keySet()) {
 			 outMap.put(out, callableStatement.getObject(out));
 		   }
-     	 connection.commit();
       } catch (SQLException e) {
-		    TemplateUtils.callRollBack(connection, e);
-	     }
-	 finally{
-		TemplateUtils.finallyBlock(connection, callableStatement);
-	  }
+	   		rollBack(callableStatement, e);
+	   	}finally{
+	   		commitClose(callableStatement,null);
+	   	}
 	return outMap;
 }
 
+private static DataSource dataSource=null;
+@Inject(value="jdbc:mysql://localhost:3306/venugopal")
+private String url=null;
+@Inject(value="root")
+private String user=null;
+@Inject(value="venugopal")
+private String password=null;
 
-public Set<?> queryForObjser(String sql ,RowsMpper<?> rowMapper){
-	 Set<?> object=null;
-	 ResultSet resultSet=null;
-	 PreparedStatement preparedStatement=null;
-	 Connection connection=null;
-	try {
-		connection=getConnection();
-		preparedStatement=TemplateUtils.getPreparedStatement(connection, sql);
-		resultSet=preparedStatement.executeQuery();
-		if(resultSet!=null)
-			object =(Set<?>)rowMapper.mapRowsToObjList(resultSet);
-		connection.commit();
-   	} catch (SQLException e) { TemplateUtils.callRollBack(connection, e); }
-   	finally{
-		TemplateUtils.finallyBlock(connection, resultSet, preparedStatement);
-   	}
-	return object;
+public Connection getConnection() throws SQLException{
+	return dataSource==null?null:dataSource.getConnection();
 }
+
+public Statement  getStatement(){
+	try {
+		Connection connection=getConnection();
+	    Statement statement=getConnection().createStatement();
+		logger.info("Statment is created");
+		connection.setAutoCommit(false);
+	    logger.info("transaction AutoCommit is set to false");
+	    return  statement;
+	 }catch(Exception e) {
+		 e.printStackTrace();
+	 }
+	return null;
+	}
+
+/**
+ * This is finally These methods are overloaded.
+ * @param connection
+ * @param resultSet
+ * @param statement
+ */
+public static void commitClose(Statement statement,ResultSet resultSet){
+		try{
+			if(resultSet!=null) {
+				resultSet.close();
+	      	}
+	      	if(statement!=null){
+	      		statement.getConnection().close();
+				statement.close();
+				//logger.info("Statement is Closed");
+	      	}
+	      
+	      	
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+}
+
+public void rollBack(Statement statement ,Exception e){
+	  try {
+		  statement.getConnection().rollback();
+	     } catch (SQLException e1) {
+	    	 e.printStackTrace();
+	    	e1.printStackTrace();
+	        }
+	    e.printStackTrace();
+}
+
+
+public static CallableStatement getCallableStatement(Connection connection ,String sql)throws SQLException{
+	 CallableStatement callableStatement=connection.prepareCall(sql);
+	 logger.info("Callable Statment is created");
+	 connection.setAutoCommit(false);
+    logger.info("transaction AutoCommit is set to false");
+    return  callableStatement;
+}
+
+
+/**
+ * This methods gives the PreparedStatement.
+ * @param connection
+ * @param sql
+ * @return
+ * @throws SQLException
+ */
+     public  PreparedStatement  getPreparedStatement(Connection connection,String sql) throws SQLException{
+	    PreparedStatement	preparedStatement=connection.prepareStatement(sql);
+		logger.info("Statment is created");
+		connection.setAutoCommit(false);
+    	logger.info("transaction AutoCommit is set to false");
+    	return  preparedStatement;
+	}
+
+
 
 public String getUrl() {
 	return url;
 }
-
 public void setUrl(String url) {
 	this.url = url;
 }
@@ -341,7 +368,6 @@ public void setUser(String user) {
 public String getPassword() {
 	return password;
 }
-
 public void setPassword(String password) {
 	this.password = password;
 }

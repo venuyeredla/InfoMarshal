@@ -1,18 +1,15 @@
 package org.vgr.app.dao;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vgr.app.domain.Friend;
 import org.vgr.app.domain.Profile;
 import org.vgr.ioc.annot.Dao;
 import org.vgr.ioc.annot.Inject;
 import org.vgr.ioc.jdbc.JDBCTemplate;
-import org.vgr.ioc.jdbc.RowsMpper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Dao(id="friendsDao")
 public class FriendsDao {
@@ -22,10 +19,8 @@ public class FriendsDao {
 		
 	public List<Profile> getFriends(int userId) {
 		String sql = "SELECT profile.* FROM profile INNER JOIN friends  ON profile.usrid=friends.friendid and friendid=2";
-		@SuppressWarnings("unchecked")
-		List<Profile> friends =(List<Profile>) jdbcTemplate.queryForObjList(sql, new RowsMpper<Profile>() {
-			public List<Profile> mapRowsToObjList(ResultSet resultSet) throws SQLException {
-					List<Profile> friends=new ArrayList<Profile>();
+		List<Profile> friends=new ArrayList<Profile>();
+		jdbcTemplate.queryForObjList(sql, resultSet->{
 					while(resultSet.next()) {
 						Profile friend=new Profile();
 						friend.setUserId(resultSet.getInt("usrid"));
@@ -41,13 +36,9 @@ public class FriendsDao {
 						friend.setReligionId(resultSet.getInt("religion_id"));
 						friend.setReligionId(resultSet.getInt("marital_id"));*/
 						friend.setImg(resultSet.getString("img"));
-						
 						friends.add(friend);
 					}
-				return friends;
-			} 
-			
-		});
+				});
 		
 		return friends;
 		

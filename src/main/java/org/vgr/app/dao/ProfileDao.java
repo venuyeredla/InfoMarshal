@@ -1,7 +1,5 @@
 package org.vgr.app.dao;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,7 +10,6 @@ import org.vgr.app.domain.Profile;
 import org.vgr.ioc.annot.Dao;
 import org.vgr.ioc.annot.Inject;
 import org.vgr.ioc.jdbc.JDBCTemplate;
-import org.vgr.ioc.jdbc.RowsMpper;
 
 @Dao(id="profileDao")
 public class ProfileDao {
@@ -39,11 +36,8 @@ public class ProfileDao {
 	public List<Image>  getImageList(int userid){
 		
 	String sql ="select * from images where userid="+userid;
-		
-	 @SuppressWarnings("unchecked")
-		List<Image> images=(List<Image>)jdbcTemplate.queryForObjList(sql, new RowsMpper<Image>() {   // Anonymous innner class implemetation
-	    		public List<Image> mapRowsToObjList(ResultSet resultSet) throws SQLException {
-	    			List<Image> images=new ArrayList<Image>();
+	List<Image> images=new ArrayList<Image>();
+	 jdbcTemplate.queryForObjList(sql, resultSet-> {
 	    			while(resultSet.next()){
 	    				Image img=new Image();
 	    				img.setNbr(resultSet.getInt("imgid"));
@@ -52,9 +46,7 @@ public class ProfileDao {
 	    				img.setPath(resultSet.getString("path"));
 	    				images.add(img);
 	    			}
-	    			return images;
-	    		}
-		});
+		     });
 	 return images;
 	}
 	

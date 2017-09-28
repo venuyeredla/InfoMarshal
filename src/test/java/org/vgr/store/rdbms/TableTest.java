@@ -10,7 +10,7 @@ public class TableTest {
 
 	@Test
 	public void createTable() {
-		Table table=new Table();
+		TableOrView table=new TableOrView();
 		table.setTableName("student");
 		LinkedHashMap<String,String> map=new LinkedHashMap<String,String>();
 		map.put("id", "Integer");
@@ -21,7 +21,7 @@ public class TableTest {
 		table.setColumns(map);
 		DBSchema schema=new DBSchema(IoUtil.getDw(fileName) , IoUtil.getDr(fileName));
 		schema.createTable(table);
-		Table t=schema.getTable();
+		TableOrView t=schema.getTable();
 		System.out.println("Table Name: "+t.getTableName());
 		t.getColumns().forEach((key,value)->{
 			System.out.println(key +" -- "+value);
