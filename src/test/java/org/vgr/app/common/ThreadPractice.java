@@ -14,7 +14,6 @@ public class ThreadPractice {
 	@Test
 	@Ignore
 	public void waitNotifyNotifyAll(){
-		
 		    Message msg = new Message();
 	        Reader reader = new Reader(msg);
 	        new Thread(reader,"Reader1").start();

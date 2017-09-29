@@ -7,7 +7,6 @@ public class BST {
 	private Node root;
 	private boolean balanced=false;
 	private static int totalNodes=0;
-	
 	public BST() {
 		this.balanced=false;
 	}
@@ -24,7 +23,6 @@ public class BST {
 			}
 		}
 	  }
-
 	private boolean insert(Node node,int key,long pointer) {
 		if(node!=null){
 			if(node.key==key) return false;

@@ -1,6 +1,5 @@
 package org.vgr.store.io;
 
-import java.io.BufferedOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -8,12 +7,19 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 public class DataWriter implements Closeable {
- BufferedOutputStream bufferedOutputStream=null;
+ OutputStream is=null;
+ RamStorage ramStorage=null;
+ boolean isRamStorage=false;
  private int bytesWritten=0;
  
-	public DataWriter(OutputStream out) {
-			bufferedOutputStream=new BufferedOutputStream(out);
+	public DataWriter(OutputStream os) {
+			this.is=os;
 	}
+	public DataWriter(RamStorage ramStorage) {
+		isRamStorage=true;
+		this.ramStorage=ramStorage;
+	}
+	
 	/**
 	 * Writes one byte data
 	 * @param b
@@ -21,7 +27,11 @@ public class DataWriter implements Closeable {
 	 */
 	public void writeByte(int b) {
 		try {
-			bufferedOutputStream.write(b);
+			if(isRamStorage) {
+				ramStorage.write(b);
+			}else {
+				is.write(b);
+			}
 			bytesWritten++;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -105,8 +115,10 @@ public class DataWriter implements Closeable {
 	@Override
 	public void close(){
 		try {
-			bufferedOutputStream.flush();
-			bufferedOutputStream.close();
+			if(!isRamStorage) {
+				is.flush();
+				is.close();
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

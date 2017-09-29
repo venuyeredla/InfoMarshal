@@ -1,6 +1,5 @@
 package org.vgr.store.io;
 
-import java.io.BufferedInputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,19 +8,26 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 public class DataReader implements Closeable{
-	
-	BufferedInputStream bufferedInputStream=null;
-	private long pointerPosition;
-
-	 public DataReader(InputStream in) {
-			bufferedInputStream=new BufferedInputStream(in); 
+	InputStream is=null;
+	RamStorage ramStorage=null;
+	boolean isRamStorage=false;
+	private long offSet;
+	public DataReader(InputStream in) {
+			this.is=in; 
 	  }
+	public DataReader(RamStorage ramStorage) {
+		isRamStorage=true;
+		this.ramStorage=ramStorage; 
+     }
+	
 	public int readByte() {
 		try {
-			pointerPosition++;
-			int b=bufferedInputStream.read();
+		   offSet++;
+		   if(isRamStorage) {
+			return ramStorage.read();
+			}
+			int b=is.read();
 			return b;
-			
 		} catch (IOException e) {
 			e.printStackTrace();
 			return -1;
@@ -104,14 +110,12 @@ public class DataReader implements Closeable{
 		return list;
 	}
 	
-	
-
-	public long getFilePointer() {
-		return pointerPosition;
+	public long getPointer() {
+		return offSet;
 	}
 	
 	public void seek(int offset) {
-		pointerPosition=offset;
+		offSet=offset;
 		byte[] bytes=new byte[offset];
 		this.readBytes(bytes, offset);
 		bytes=null;
@@ -119,7 +123,9 @@ public class DataReader implements Closeable{
 	@Override
 	public void close() {
 		try {
-			bufferedInputStream.close();
+			if(!isRamStorage) {
+				is.close();
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -4,11 +4,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Set;
 
-import org.vgr.ioc.annot.AnnotaionReader;
-import org.vgr.ioc.web.HandlerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vgr.ioc.annot.AnnotaionReader;
+import org.vgr.ioc.web.HandlerConfig;
 
     public class IocContainer implements BeanFactory {
 	private static final Logger LOGGER=LoggerFactory.getLogger(IocContainer.class);
@@ -17,17 +18,22 @@ import org.slf4j.LoggerFactory;
 	private static final String SINGLTON="singleton";
 	private static final String PROTOTYPE="prototype";
 	public IocContainer(){}
+	
+	public IocContainer(Set<String> classList){
+		new AnnotaionReader(this,classList);
+		this.initializeSingletons();
+	  }
 	/**
 	 * Class path text file for reading list of classes to scan for beans.
 	 * @param classPathTxt
 	 */
-	public IocContainer(String classPathTxt){
-		new AnnotaionReader().classPath(this,classPathTxt);
+	public IocContainer(String classPath){
+		new AnnotaionReader(this,classPath,false);
 		this.initializeSingletons();
 	}
 	
-	public IocContainer(String classPathTxt,boolean web){
-		new AnnotaionReader().webPath(this,classPathTxt);
+	public IocContainer(String classPath,boolean isWeb){
+		new AnnotaionReader(this,classPath,isWeb);
 		this.initializeSingletons();
 	}
 	
@@ -58,7 +64,7 @@ import org.slf4j.LoggerFactory;
 			   object=BeanCreation.createNewBean(beanID,this);
 		   }
 		   this.injectContainer(object);
-			   return object;
+		   return object;
 	}
 	
 	

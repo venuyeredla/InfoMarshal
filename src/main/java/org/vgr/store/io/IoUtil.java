@@ -7,8 +7,7 @@ import java.io.OutputStream;
 
 public class IoUtil {
 	
-	
-	public static DataWriter getDw(String fileName) {
+public static DataWriter getDw(String fileName) {
 		try {
 		   return new DataWriter(new FileOutputStream(fileName));
 		}catch(Exception e) {

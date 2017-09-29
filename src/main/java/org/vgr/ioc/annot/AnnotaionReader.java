@@ -11,15 +11,35 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vgr.ioc.core.BeanDefinition;
 import org.vgr.ioc.core.BeanProperty;
 import org.vgr.ioc.core.IocContainer;
 import org.vgr.ioc.web.HandlerConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class AnnotaionReader {
 	private static final Logger LOGGER=LoggerFactory.getLogger(AnnotaionReader.class);
+	public AnnotaionReader() {}
+	public AnnotaionReader(IocContainer iocContainer,Set<String> classesToScan) {
+		this.createConfig(iocContainer, classesToScan);
+	}
+	public AnnotaionReader(IocContainer iocContainer, String fileName,boolean isWeb){
+		LOGGER.info("Web Resource?"+isWeb+"File : "+fileName);
+		try {
+		Set<String> classesToScan=null;
+		if(!isWeb) {
+			URL url=ClassLoader.getSystemResource(fileName);
+			LOGGER.info("Absolute path : "+url.getPath());
+			classesToScan = Files.lines(Paths.get(url.getFile())).filter(line -> !line.startsWith("#")).collect(Collectors.toSet());
+		 }else {
+			 classesToScan = Files.lines(Paths.get(fileName)).filter(line -> !line.startsWith("#")).collect(Collectors.toSet());
+		 }
+		this.createConfig(iocContainer, classesToScan);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	/**
 	 * Provides  application config by reading annotation information.
 	 */
@@ -91,30 +111,4 @@ public class AnnotaionReader {
 			LOGGER.info("Handlers :{ "+handlers.keySet().stream().collect(Collectors.joining(","))+" }");
 			LOGGER.info("Beans : { "+beansConfigMap.keySet().stream().collect(Collectors.joining(",")) +" }");
 	}
-	
-	public void classPath(IocContainer iocContainer, String fileName){
-		LOGGER.info("file name : "+fileName);
-		try {
-		URL url=ClassLoader.getSystemResource(fileName);
-		LOGGER.info("Absolute path : "+url.getPath());
-		Set<String> classesToScan = Files.lines(Paths.get(url.getFile())).filter(line -> !line.startsWith("#")).collect(Collectors.toSet());
-		this.createConfig(iocContainer, classesToScan);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public void webPath(IocContainer iocContainer, String fileName){
-		LOGGER.info("file name : "+fileName);
-		try {
-		LOGGER.info("Absolute path : "+fileName);
-		Set<String> classesToScan = Files.lines(Paths.get(fileName)).filter(line -> !line.startsWith("#")).collect(Collectors.toSet());
-		this.createConfig(iocContainer, classesToScan);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-	}
-	
-	
 }
