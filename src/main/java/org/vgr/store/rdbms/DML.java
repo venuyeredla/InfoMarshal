@@ -36,12 +36,12 @@ public class DML {
 	}
 
 	public void loadIndex() {
-	 this.bst=new BST(false);
+	 this.bst=new BST();
 	  bst.readFromFile(idxReader);
 	}
 	
 	public void intIndex() {
-	  this.bst=new BST(false);
+	  this.bst=new BST();
   	}
 	
     public boolean insert(String tableName,LinkedHashMap<String,String> data) {

@@ -3,78 +3,103 @@ package org.vgr.store.ds;
 import org.vgr.store.io.DataReader;
 import org.vgr.store.io.DataWriter;
 
+/**
+ * BST balanced using AVL Tree concept
+ * @author venugopal
+ *
+ */
 public class BST {
 	private Node root;
-	private boolean balanced=false;
 	private static int totalNodes=0;
-	public BST() {
-		this.balanced=false;
-	}
-	public BST(boolean balance) {
-		this.balanced=balance;
-	}
+	public BST() {	}
 	public void insert(int key,long pointer) {
-		if(root==null) { root=creatNode(key,pointer);  }
-		else {
-			if(!balanced) {
-				insert(root, key,pointer);
-			}else if(balanced) {
-				insertAndBalance(root,key,pointer);
-			}
-		}
+	    root=insert(root,key, pointer);
 	  }
-	private boolean insert(Node node,int key,long pointer) {
-		if(node!=null){
-			if(node.key==key) return false;
-			else if(key<node.key) {	
-				 if(node.left==null) {
-					 node.left=creatNode(key,pointer); return true;
-				 }else return insert(node.left, key,pointer);
-				}
-			else if(key>node.key) {
-				   if(node.right==null) {node.right=creatNode(key,pointer); return true;}
-				   else return insert(node.right, key,pointer);
-				}
-			}
-		return false;
+  private Node insert(Node node,int key,long data) {
+	if(node==null){
+		return newNode(key,data); 
+	}if(key<node.key) {
+		node.left=insert(node.left, key,data);
+	}else if(key>node.key) {
+		node.right=insert(node.right, key,data);
+	}else 	return node;
+	
+	 node.height = 1 + max(height(node.left),height(node.right));
+	 int balance = getBalance(node);
+ 
+	 if (balance > 1 && key < node.left.key)
+        return rightRotate(node);
+    // Right Right Case
+    if (balance < -1 && key > node.right.key)
+        return leftRotate(node);
+    // Left Right Case
+    if (balance > 1 && key > node.left.key) {
+        node.left = leftRotate(node.left);
+        return rightRotate(node);
+    }
+    // Right Left Case
+    if (balance < -1 && key < node.right.key) {
+        node.right = rightRotate(node.right);
+        return leftRotate(node);
+    }
+
+	return node;
+	
 	}
 	
-	/**
-	 * Tree is balanced usingn AVL Tree.
-	 * @param node
-	 * @param key
-	 * @return
-	 */
-	private boolean insertAndBalance(Node node,int key,long pointer) {
-		if(node!=null){
-			if(node.key==key) return false;
-			else if(key<node.key) {	
-				 if(node.left==null) {
-					 node.left=creatNode(key,pointer); return true;
-				 }else return insert(node.left, key,pointer);
-				}
-			else if(key>node.key) {
-				   if(node.right==null) {node.right=creatNode(key,pointer); return true;}
-				   else return insert(node.right, key,pointer);
-				}
-			}
-		return false;
-	}
+  
+  int getBalance(Node N) {
+      if (N == null)
+          return 0;
+
+      return height(N.left) - height(N.right);
+  }
+  // A utility function to right rotate subtree rooted with y
+  // See the diagram given above.
+  Node rightRotate(Node y) {
+      Node x = y.left;
+      Node T2 = x.right;
+
+      // Perform rotation
+      x.right = y;
+      y.left = T2;
+
+      // Update heights
+      y.height = max(height(y.left), height(y.right)) + 1;
+      x.height = max(height(x.left), height(x.right)) + 1;
+
+      // Return new root
+      return x;
+  }
+
+  // A utility function to left rotate subtree rooted with x
+  // See the diagram given above.
+  Node leftRotate(Node x) {
+      Node y = x.right;
+      Node T2 = y.left;
+
+      // Perform rotation
+      y.left = x;
+      x.right = T2;
+
+      //  Update heights
+      x.height = max(height(x.left), height(x.right)) + 1;
+      y.height = max(height(y.left), height(y.right)) + 1;
+
+      // Return new root
+      return y;
+  }
 	
-	private Node leftRotate() {
-		
-		return null;
-	}
-	
-	
-	private Node rightRotate() {
-		
-		return null;
-	}
-	
+  
+  int max(int a, int b) {
+      return (a > b) ? a : b;
+  }
+  
+  
+  
 	public long search(int key) {
 		Node node=search(root, key);
-		return root==null?-1:node.dp;
+		return node!=null?node.data:-1;
 	}
 	
 	private Node search(Node node,int key) {
@@ -103,29 +128,6 @@ public class BST {
 		return node;
 	}
 	
-	/**
-	 * Tree is balanced using AVL Tree.
-	 * @param node
-	 * @param key
-	 * @return
-	 */
-	private Node deleteAndBalance(Node node, int key) {
-		  if(key<node.key) {
-			  node.left=delete(node.left, key);
-		  }else if(key>node.key) {
-			  node.right=delete(node.right, key);
-		  }else {
-			  if(node.left==null) {
-				  return node.right;
-			  }else if(node.right==null) {
-				  return node.left;
-			  }
-			  node.key=minKey(node.right);
-			  node.right=delete(node.right, node.key);
-		  }
-		return node;
-	}
-	
 	
 	private int minKey(Node node) {
 		 int minKey=node.key;
@@ -138,7 +140,7 @@ public class BST {
 	     
 	}
 	
-	private static Node creatNode(int key,long pointer) {
+	private static Node newNode(int key,long pointer) {
 		totalNodes++;
 		return new Node(key,pointer);
 	}
@@ -149,6 +151,7 @@ public class BST {
 	}
 	
 	public void traverse(Traversal mode) {
+		System.out.print("\n"+mode.getText()+":");
 		switch (mode) {
 		case PRE:
 			preOrder(root,null);
@@ -173,7 +176,8 @@ public class BST {
 	}
 	public void preOrder(Node node,DataWriter dw) {
 		if(node!=null) {
-			dw.writeInt(node.key);dw.writeInt((int) node.dp);
+			//dw.writeInt(node.key);dw.writeInt((int) node.dp);
+			System.out.print(node.key+",");
 			if(node.left!=null) preOrder(node.left,dw);
 			if(node.right!=null) preOrder(node.right,dw); 
 		 }
@@ -206,8 +210,9 @@ public class BST {
 	
 	static class Node{
 		private int key, height;
-		private long dp; //dataponter;
+		private long data;
 		private Node left,right;
+        public Node() {  }
 		public Node(int key) {
 			this.key = key;
 			this.height=1;
@@ -215,7 +220,7 @@ public class BST {
 		public Node(int key,long pointer) {
 			this.key = key;
 			this.height=1;
-			this.dp=pointer;
+			this.data=pointer;
 		}
 	}
 

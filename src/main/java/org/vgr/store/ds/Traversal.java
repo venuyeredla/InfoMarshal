@@ -1,5 +1,13 @@
 package org.vgr.store.ds;
 
 public enum Traversal {
-	PRE,IN,POST;
+	PRE("Pre"),IN("In"),POST("Post");
+	 private Traversal(String text) {
+      this.text=text;
+	 }
+	private String text;
+	public String getText() {
+		return text;
+	}
+	
 }
