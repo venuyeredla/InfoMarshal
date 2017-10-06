@@ -176,8 +176,10 @@ public class BST {
 	}
 	public void preOrder(Node node,DataWriter dw) {
 		if(node!=null) {
-			//dw.writeInt(node.key);dw.writeInt((int) node.dp);
-			System.out.print(node.key+",");
+			if(dw==null) System.out.print(node.key+",");
+			else {
+				dw.writeInt(node.key);dw.writeInt((int) node.data);	
+			 }
 			if(node.left!=null) preOrder(node.left,dw);
 			if(node.right!=null) preOrder(node.right,dw); 
 		 }
@@ -190,22 +192,24 @@ public class BST {
 		 }
 	}
 	
-	public void writeToFile(DataWriter dataWriter) {
+	public void writeToStorage(DataWriter dataWriter) {
 		dataWriter.writeString("BST#pre");
 		dataWriter.writeInt(totalNodes);
 		preOrder(root,dataWriter);
 		dataWriter.close();
 	}
 	
-	public void readFromFile(DataReader dataReader) {
+	public static BST readFromStorage(DataReader dataReader) {
+		BST bst=new BST();
 		String codec=dataReader.readString();
 		int totalNodes=dataReader.readInt();
 		for(int i=0;i<totalNodes;i++) {
 			 int key=dataReader.readInt();
 			 int pointer= dataReader.readInt();
-			insert(key,pointer);
+			 bst.insert(key,pointer);
 		}
 		dataReader.close();
+		return bst;
 	}
 	
 	static class Node{

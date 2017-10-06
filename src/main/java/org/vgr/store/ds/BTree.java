@@ -5,13 +5,15 @@ public class BTree {
 	private int t=3;
 	
      public void insert(int key,long data) {
-    	 insert(root, key, data);
+    	  root=insert(root, key, data);	 
+    	  System.out.print(" ");
      }
-    public void insert(BNode node,int key,long data) {
+    public BNode insert(BNode node,int key,long data) {
     	if(node==null) {
     		node=new BNode(true);
     		node.keys[0]=key;
     		node.keySize=1;
+    		return node;
     	}else {
     		 if(node.keySize==(2*t-1)) {
     			 BNode newParent=new BNode(false);
@@ -21,19 +23,19 @@ public class BTree {
     			 if(newParent.keys[0]<key)
     				 i++;
     			 insertNotFull(newParent.childs[i], key);
-                 node=newParent;    				 
+                 node=newParent;
+                 return node;
     		 }else {
-    			 insertNotFull(node, key);
+    			insertNotFull(node, key);
+    			return node;
     		 }
     	}
-    	
      }
      
      
      public void splitChild(BNode parent,BNode child, int index ) {
-    	 
     	 BNode child2=new BNode(child.leaf);
-    	 child.keySize=t-1;
+    	 child2.keySize=t-1;
     	 for(int j=0;j<t-1;j++) { // copying second half of keys to new child.
     		 child2.keys[j]=child.keys[j+t];
     	 }
@@ -51,9 +53,13 @@ public class BTree {
     	 parent.keys[index]=child.keys[t-1];
     	 parent.keySize++;
     	 
+    	 for(int i=t-1;i<2*t-1;i++) {
+    		 child.keys[i]=0;
+    	 }
+    	 
      }
 
-     private void insertNotFull(BNode node,int key) {
+     private BNode insertNotFull(BNode node,int key) {
     	   int i=node.keySize-1;
     	   if(node.leaf==true) {
     		   while(i>=0&& node.keys[i]>key) {
@@ -62,6 +68,7 @@ public class BTree {
     		   }
     		   node.keys[i+1]=key;
     		   node.keySize++;
+    		   return node;
     	   }else {// if this is not a leaf node.
     		while(i>=0 && node.keys[i]>key)
     			  i--;
@@ -70,24 +77,24 @@ public class BTree {
     			if(node.keys[i+1]<key)
     				i++;
     		}
-    		insertNotFull(node.childs[i+1], key);
-    		
+    		return insertNotFull(node.childs[i+1], key);
     	   }
      }
      
      public void traverse(BNode node) {
-    	 int i;
-    	 for(i=0;i<node.keySize;i++) {
-    		 if(node.leaf=false) {
-    			 traverse(node.childs[i]);
-    		 }
-    		 System.out.println(node.keys[i]+",");
+    	 if(node!=null) {
+        	 int i;
+        	 for(i=0;i<node.keySize;i++) {
+        		 if(node.leaf=false) 
+        			traverse(node.childs[i]);
+        		  System.out.print(node.keys[i]+",");
+        	 }
+        	 if(node.leaf==false)
+        		 traverse(node.childs[i]); 
     	 }
-    	 if(node.leaf==false)
-    		 traverse(node.childs[i]);
      }
      
-     public BNode  search(BNode node,int key) {
+     public BNode search(BNode node,int key) {
     	 int i=0;
     	 while(i<node.keySize && key>node.keys[i]) {
     		 i++;
@@ -120,8 +127,9 @@ class BNode{
 	 int keySize;     // Current number of keys
 	 boolean leaf; 
 	 public BNode(boolean leaf) {
-		 childs=new BNode[2*t-1];
-		 leaf=leaf;
+		 childs=new BNode[2*t];
+		 keys=new int[2*t-1];
+		 this.leaf=leaf;
 	 }
 	 
 }

@@ -2,6 +2,7 @@ package org.vgr.store.ds;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.vgr.store.io.DataReader;
 import org.vgr.store.io.DataWriter;
@@ -28,7 +29,7 @@ public class BSTTest {
 	}
 	
 	@Test
-	public void testBST(){
+	public void testInsert(){
 	//	RandomUtil randomUtil=new RandomUtil();
 	//	int[] keys= randomUtil.randomNumbers(20, 100);
 		int[] keys= {36,45,78,32,13,61,94,50,74,47,91,21,84,94,41,54,70,19,61,73};
@@ -37,18 +38,30 @@ public class BSTTest {
 			for(int i=0;i<keys.length;i++) {
 				int key=keys[i];
 				bst.insert(key,0);
-				System.out.print(key+",");
 				if(i%3==0 && counter<10) searchKeys[counter++]=key;
 			}
 			System.out.println();
-		   // bst.writeToFile(dataWriter);
 			bst.traverse(Traversal.PRE);
-			
-			int del=61;
-		    bst.delete(del);
-			bst.traverse(Traversal.PRE);
-			
-			System.out.print("\n"+del+" Exists? :"+ bst.search(del));
-
+		}
+	
+	@Test
+	@Ignore
+	public void testSerach() {
+		int del=61;
+	    bst.delete(del);
+	    System.out.print("\n After deleting");
+		bst.traverse(Traversal.PRE);
+		long val=bst.search(del);
+		boolean result=val==-1?false:true;
+		System.out.print("\n"+del+" Exists? :"+result +" --And data is : "+val );
 	}
+	
+	@Test
+	public void testWriteRead() {
+		bst.writeToStorage(dataWriter);
+		BST bst=BST.readFromStorage(dataReader);
+		System.out.println("\nRead from Storage");
+		bst.traverse(Traversal.PRE);
+	}
+	
 }

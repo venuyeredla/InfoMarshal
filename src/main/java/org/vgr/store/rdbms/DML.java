@@ -37,7 +37,7 @@ public class DML {
 
 	public void loadIndex() {
 	 this.bst=new BST();
-	  bst.readFromFile(idxReader);
+	  bst.readFromStorage(idxReader);
 	}
 	
 	public void intIndex() {
@@ -54,7 +54,7 @@ public class DML {
    }
    
     public boolean writeIndex() {
-    	bst.writeToFile(idxWriter);
+    	bst.writeToStorage(idxWriter);
     	return true;
     }
     

@@ -1,17 +1,24 @@
 package org.vgr.store.ds;
 
+import java.util.Scanner;
+
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.vgr.store.io.DataWriter;
-import org.vgr.store.io.IoUtil;
 
 public class TrieTest {
-	String search="/home/venugopal/Documents/Work/io/search/trie.idx";
+	static String search="/home/venugopal/Documents/Work/io/search/trie.idx";
+	private static Trie trie=null;
+	//private static DataWriter dataWriter=null;
+	
+	@BeforeClass
+	public static  void init() {
+		trie=new Trie();
+		//dataWriter=IoUtil.getDw(search);
+	  }
 	
 	@Test
 	public void testInsert() {
-		
-		DataWriter dataWriter=IoUtil.getDw(search);
-		Trie trie=new Trie();
 		trie.insert("venugopal");
 		trie.insert("venu");
 		trie.insert("anu");
@@ -20,13 +27,22 @@ public class TrieTest {
 		trie.insert("ananya");
 		trie.insert("job");
 		trie.delete("job");
-		trie.writeToFile(dataWriter);
-		dataWriter.close();
-		/*System.out.print("Enter your query term ?");
-		Scanner scanner=new Scanner(System.in);
-		String input=scanner.next();
-		scanner.close();
-		System.out.println("Does '"+input+"' exists? :: "+trie.search(input));*/
+	/*	trie.writeToFile(dataWriter);
+		dataWriter.close();*/
+	
 	}
+	
+	@Test
+	public void testSearch() {
+		Scanner scanner=new Scanner(System.in);
+		System.out.print("Enter your query term ?");
+		String query=scanner.next();
+		while(!query.equalsIgnoreCase("-1")) {
+			System.out.println("Does '"+query+"' exists? :: "+trie.search(query));
+			query=scanner.next();
+		}
+		scanner.close();
+	}
+	
 }
 	
