@@ -22,9 +22,8 @@ public class AppController {
  	@Inject(ref="loginService")
     private LoginService loginService=null;
 
- 	
-	 @Handler(path="/home.htm")
-	 public String indexPage(HttpRequest servletRequest,HttpResponse servletResponse) {
+	@Handler(path="/home.htm")
+    public String indexPage(HttpRequest servletRequest,HttpResponse servletResponse) {
 		 return "home";
 	 }
 	 @Handler(path="/welcome.htm")
@@ -90,7 +89,4 @@ public class AppController {
 			this.cacheManager = cacheManager;
 		}
 */
-
- 
- 
 }

@@ -6,8 +6,6 @@ public class FrontController {
 	
 	public void test() {
 		get("/",(req,res) ->{  });
-		
-		
 	}
 
 }

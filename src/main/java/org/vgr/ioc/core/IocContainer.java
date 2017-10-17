@@ -17,23 +17,8 @@ import org.vgr.ioc.web.HandlerConfig;
 	private HashMap<String, HandlerConfig>  handlers=null;
 	private static final String SINGLTON="singleton";
 	private static final String PROTOTYPE="prototype";
-	public IocContainer(){}
-	
-	public IocContainer(Set<String> classList){
-		new AnnotaionReader(this,classList);
-		this.initializeSingletons();
-	  }
-	/**
-	 * Class path text file for reading list of classes to scan for beans.
-	 * @param classPathTxt
-	 */
-	public IocContainer(String classPath){
-		new AnnotaionReader(this,classPath,false);
-		this.initializeSingletons();
-	}
-	
-	public IocContainer(String classPath,boolean isWeb){
-		new AnnotaionReader(this,classPath,isWeb);
+	public IocContainer(Set<String> classes){
+		new AnnotaionReader(this,classes);
 		this.initializeSingletons();
 	}
 	

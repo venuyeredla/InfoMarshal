@@ -11,7 +11,7 @@ public abstract class AbstractTest {
 	public static BeanFactory factory=null;
 	 @BeforeClass
     public static void beforClass() {
-		  factory=new IocContainer("classes.txt");
+		 // factory=new IocContainer("classes.txt");
 	 }
 	 
 	public String getPath(String fileName) {

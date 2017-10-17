@@ -8,7 +8,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class HttpRequest {
+	private static final Logger LOG=LoggerFactory.getLogger(HttpRequest.class);
 	private Map<String,String> headers=new HashMap<String,String>();
 	private Map<String,String> params=new HashMap<String,String>();
 	private String method;
@@ -18,21 +22,18 @@ public class HttpRequest {
 	public HttpRequest(Socket socket) {
 		try {
 			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
-			/*	bufferedReader.lines().forEach(
-						System.out::println
-						);*/
-				String line=bufferedReader.readLine();
-				socket.shutdownInput();
-			  	while(line!=null && !line.equals("")) {
-			  		if(line.startsWith("GET")) {
+			String line=bufferedReader.readLine();
+			socket.shutdownInput();
+			while(line!=null && !line.equals("")) {
+			  if(line.startsWith("GET")) {
 			  			parseRequest(line);
-			  		}else {
-			  			String[] header=line.split(":");
-			  			headers.put(header[0].trim(), header[1].trim());
-			  		}
+			  }else {
+			  		String[] header=line.split(":");
+			  		headers.put(header[0].trim(), header[1].trim());
+			  }
 			  		line=bufferedReader.readLine().trim();
-			  		}
-				System.out.println("Uri : "+getUri());	
+			 }
+			LOG.info("Request url is -- "+getUri()); 
 			
 		}catch (IOException ioe) {
 			ioe.printStackTrace();
@@ -88,12 +89,9 @@ public class HttpRequest {
 	}
 
 	public void setAttribute(String string, Object obj) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public HttpSession getSession(boolean b) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

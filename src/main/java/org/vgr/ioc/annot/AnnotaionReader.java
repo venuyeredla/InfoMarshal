@@ -1,9 +1,5 @@
 package org.vgr.ioc.annot;
 
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,24 +17,8 @@ import org.vgr.ioc.web.HandlerConfig;
 public class AnnotaionReader {
 	private static final Logger LOGGER=LoggerFactory.getLogger(AnnotaionReader.class);
 	public AnnotaionReader() {}
-	public AnnotaionReader(IocContainer iocContainer,Set<String> classesToScan) {
+	public AnnotaionReader(IocContainer iocContainer, Set<String> classesToScan){
 		this.createConfig(iocContainer, classesToScan);
-	}
-	public AnnotaionReader(IocContainer iocContainer, String fileName,boolean isWeb){
-		LOGGER.info("Web Resource?"+isWeb+"File : "+fileName);
-		try {
-		Set<String> classesToScan=null;
-		if(!isWeb) {
-			URL url=ClassLoader.getSystemResource(fileName);
-			LOGGER.info("Absolute path : "+url.getPath());
-			classesToScan = Files.lines(Paths.get(url.getFile())).filter(line -> !line.startsWith("#")).collect(Collectors.toSet());
-		 }else {
-			 classesToScan = Files.lines(Paths.get(fileName)).filter(line -> !line.startsWith("#")).collect(Collectors.toSet());
-		 }
-		this.createConfig(iocContainer, classesToScan);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 	/**
 	 * Provides  application config by reading annotation information.

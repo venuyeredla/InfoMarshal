@@ -5,16 +5,14 @@ import java.util.concurrent.Callable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vgr.app.Application;
 import org.vgr.ioc.annot.Service;
 import org.vgr.ioc.web.RequestDispatcher;
 
 @Service(id="requestProcessor")
 public class RequestProcessor implements Callable<String>{
-	private static final Logger LOG=LoggerFactory.getLogger(Application.class);
+	private static final Logger LOG=LoggerFactory.getLogger(RequestProcessor.class);
 	
 	String viewPath="/static/html/%viewname%.html";
-	
 	/*@Inject(ref="requestDispatcher")*/
 	RequestDispatcher requestDispatcher=null;
 	private Socket socket=null; 
@@ -35,7 +33,6 @@ public class RequestProcessor implements Callable<String>{
 			if(uri.startsWith("/static")) {
 				this.setMimeType(uri);
 				httpResponse.writeText(socket,uri);
-				
 			}else {
 				String nextView=requestDispatcher.doRequestProcessing(httpRequest,httpResponse);
 				if(httpResponse.getMimeType()==MimeType.JSON) {
