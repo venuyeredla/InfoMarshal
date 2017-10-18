@@ -1,19 +1,30 @@
 package org.vgr.store.io;
 
+import java.io.BufferedOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.SeekableByteChannel;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.OpenOption;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 public class DataWriter implements Closeable {
- OutputStream is=null;
+ OutputStream os=null;
  RamStorage ramStorage=null;
  boolean isRamStorage=false;
  private int bytesWritten=0;
  
+ 
 	public DataWriter(OutputStream os) {
-			this.is=os;
+		this.os=new BufferedOutputStream(os);
 	}
 	public DataWriter(RamStorage ramStorage) {
 		isRamStorage=true;
@@ -30,7 +41,7 @@ public class DataWriter implements Closeable {
 			if(isRamStorage) {
 				ramStorage.write(b);
 			}else {
-				is.write(b);
+				os.write(b);
 			}
 			bytesWritten++;
 		} catch (IOException e) {
@@ -112,12 +123,31 @@ public class DataWriter implements Closeable {
 	public int getFilePointer() {
 		return bytesWritten;
 	}
+	
+	
+	String basePath="C:\\Work\\testdata\\io\\";
+	String db=basePath+"db\\db.db";
+	public void update(byte[] bytes,int offset) {
+		 try {
+		   Path path=FileSystems.getDefault().getPath(db);
+				SeekableByteChannel sbc=Files.newByteChannel(path, StandardOpenOption.WRITE);
+				sbc.position(offset);
+				ByteBuffer byteBuffer=ByteBuffer.wrap(bytes);
+				sbc.write(byteBuffer);
+                sbc.close();				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		  
+	}
+	
 	@Override
 	public void close(){
 		try {
 			if(!isRamStorage) {
-				is.flush();
-				is.close();
+				os.flush();
+				os.close();
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

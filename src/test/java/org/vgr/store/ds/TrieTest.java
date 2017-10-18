@@ -4,13 +4,15 @@ import java.util.Scanner;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.vgr.store.io.DataWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.vgr.app.Application;
 
 public class TrieTest {
+	private static final Logger LOG=LoggerFactory.getLogger(Application.class);
 	static String search="/home/venugopal/Documents/Work/io/search/trie.idx";
 	private static Trie trie=null;
 	//private static DataWriter dataWriter=null;
-	
 	@BeforeClass
 	public static  void init() {
 		trie=new Trie();
@@ -29,7 +31,6 @@ public class TrieTest {
 		trie.delete("job");
 	/*	trie.writeToFile(dataWriter);
 		dataWriter.close();*/
-	
 	}
 	
 	@Test
@@ -42,6 +43,7 @@ public class TrieTest {
 			query=scanner.next();
 		}
 		scanner.close();
+		LOG.info("Searching exited");
 	}
 	
 }

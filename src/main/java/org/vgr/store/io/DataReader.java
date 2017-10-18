@@ -1,5 +1,6 @@
 package org.vgr.store.io;
 
+import java.io.BufferedInputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,7 +14,8 @@ public class DataReader implements Closeable{
 	boolean isRamStorage=false;
 	private long offSet;
 	public DataReader(InputStream in) {
-			this.is=in; 
+		this.is=new BufferedInputStream(in);
+		this.is.mark(0);
 	  }
 	public DataReader(RamStorage ramStorage) {
 		isRamStorage=true;
@@ -115,7 +117,13 @@ public class DataReader implements Closeable{
 	}
 	
 	public void seek(int offset) {
-		offSet=offset;
+		offSet=0;
+		try {
+			is.reset();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		byte[] bytes=new byte[offset];
 		this.readBytes(bytes, offset);
 		bytes=null;

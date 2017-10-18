@@ -14,7 +14,6 @@ import org.vgr.ioc.core.IocContainer;
 public class Application{
 	private static final Logger LOG=LoggerFactory.getLogger(Application.class);
 	public static void main(String...strings) throws InterruptedException {
-		LOG.info("Reading classes from the file :classes.txt");
 		IocContainer container = new IocContainer(new ClassesProivdeImpl().getClasses(null, null));
 		HttpServer httpServer =(HttpServer)container.getBean("httpServer");
 		httpServer.start();

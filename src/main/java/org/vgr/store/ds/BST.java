@@ -208,7 +208,6 @@ public class BST {
 			 int pointer= dataReader.readInt();
 			 bst.insert(key,pointer);
 		}
-		dataReader.close();
 		return bst;
 	}
 	

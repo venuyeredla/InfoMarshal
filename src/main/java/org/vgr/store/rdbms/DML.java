@@ -8,78 +8,64 @@ import org.vgr.store.io.DataReader;
 import org.vgr.store.io.DataWriter;
 
 public class DML {
-	DataWriter idxWriter=null;
-	DataReader idxReader=null;
-	DataWriter dw=null;
-	DataReader dr=null;
-	BST bst=null;
-	
-	public DML(DataWriter idxWriter,DataWriter dw) {
+	DataWriter writer=null;
+	DataReader reader=null;
+	BST idx=null;
+	public DML(DataWriter writer) {
 		super();
-		this.idxWriter = idxWriter;
-		this.dw = dw;
+		this.idx=new BST();
+		this.writer = writer;
+		writer.writeInt(20); //Keysize
+		writer.writeInt(0);// index location
 	}
-	
-	public DML(DataReader idxReader, DataReader dr) {
+	public DML(DataReader dataReader,int offset) {
 		super();
-		this.idxReader = idxReader;
-		this.dr = dr;
-	}
+		this.reader = dataReader;
+		loadIndex(offset);
+	 }
 	
-	
-	public DML(DataWriter idxWriter, DataReader idxReader, DataWriter dw, DataReader dr) {
-		super();
-		this.idxWriter = idxWriter;
-		this.idxReader = idxReader;
-		this.dw = dw;
-		this.dr = dr;
+	public void loadIndex(int offset){
+	 reader.seek(offset);
+	 this.idx= BST.readFromStorage(reader);
 	}
-
-	public void loadIndex() {
-	 this.bst=new BST();
-	  bst.readFromStorage(idxReader);
-	}
-	
-	public void intIndex() {
-	  this.bst=new BST();
-  	}
 	
     public boolean insert(String tableName,LinkedHashMap<String,String> data) {
 	   int id=Integer.valueOf((String)data.get("id"));
-	   long pointer=dw.getFilePointer();
-	   System.out.println("key-pointer:"+id+" - "+pointer);
+	   long pointer=writer.getFilePointer();
+	   System.out.println("k-v:"+id+" - "+pointer);
 	   this.writeData(data);
-	   bst.insert(id, pointer);
+	   idx.insert(id, pointer);
 	   return true;
    }
    
     public boolean writeIndex() {
-    	bst.writeToStorage(idxWriter);
+    	System.out.println("Index offset: "+writer.getFilePointer());
+    	idx.writeToStorage(writer);
     	return true;
     }
     
     public boolean writeData(LinkedHashMap<String,String> data) {
-    	dw.writeInt(data.keySet().size());
+    	writer.writeInt(data.keySet().size());
     	data.forEach((key,val)->{
-    		dw.writeString(val);
+    		writer.writeString(val);
     	});
-    	
     	return true;
     }
     
-    public void closeWriters() {
-    	dw.close();
-    	/*idxWriter.close();*/
+    public void closeWriter() {
+    	writer.close();
+    }
+    public void closeReader() {
+    	reader.close();
     }
    
-   
    public LinkedHashMap<String,String>  select(int key) {
-	     long pointer=bst.search(key);
+	     long pointer=idx.search(key);
 	     if(pointer!=-1) {
-	    	 System.out.println("key -pointer:"+key+":"+pointer);
-	    	 dr.seek((int) pointer);
+	    	 reader.seek((int) pointer);
 	    	 LinkedHashMap<String,String> data=new LinkedHashMap<>();
-		     List<String> list= dr.readList();
+		     List<String> list= reader.readList();
+		     data.put("pointer",  Long.toString(pointer));
 		     data.put("id", list.get(0));
 		     data.put("name", list.get(1));
 			 data.put("sub1", list.get(2));
@@ -91,11 +77,11 @@ public class DML {
 	   }
    
    
- public boolean update(String tableName) {	
+ public boolean update(int keysize) {	
 	 return true;
    }
 
- public boolean delete(String tableName) {
+ public boolean updateIndexLocation(int offset) {
 	 return true;
  }
  

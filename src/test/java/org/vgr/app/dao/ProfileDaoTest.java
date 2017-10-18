@@ -2,6 +2,8 @@ package org.vgr.app.dao;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Set;
+
 import org.vgr.app.common.AbstractTest;
 import org.vgr.app.service.FriendsService;
 import org.vgr.app.service.ProfileService;
@@ -29,4 +31,11 @@ public class ProfileDaoTest  extends AbstractTest{
          int count=profileService.isValidMail("venugopal@venu.org");
           assertEquals(1, count);
 	    }
+
+
+	@Override
+	public Set<String> getClasses() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

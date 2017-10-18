@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.vgr.app.common.AbstractTest;
 import org.vgr.app.domain.Profile;
@@ -21,7 +22,6 @@ public class DaoTestSuite  extends AbstractTest{
 	 
 	  static JDBCTemplate jdbcTemplate=null;
 	
-
 	  @AfterClass
 	  public static void afterClass() {
 	        // one-time cleanup code
@@ -101,5 +101,12 @@ public class DaoTestSuite  extends AbstractTest{
 		      System.out.println("Count from fnction : "+outMap.get(1));
 	    	
 	    }
+
+
+		@Override
+		public Set<String> getClasses() {
+			// TODO Auto-generated method stub
+			return null;
+		}
 	    
 }

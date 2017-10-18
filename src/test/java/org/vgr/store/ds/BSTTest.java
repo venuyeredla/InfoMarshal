@@ -9,7 +9,6 @@ import org.vgr.store.io.DataWriter;
 import org.vgr.store.io.RamStorage;
 
 public class BSTTest {
-	
 	private static BST bst;
 	private static RamStorage ramStorage;
 	private static DataWriter dataWriter;
@@ -27,7 +26,6 @@ public class BSTTest {
 		dataWriter.close();
 		dataReader.close();
 	}
-	
 	@Test
 	public void testInsert(){
 	//	RandomUtil randomUtil=new RandomUtil();
