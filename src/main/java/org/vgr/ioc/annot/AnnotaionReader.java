@@ -19,7 +19,7 @@ public class AnnotaionReader {
 	public AnnotaionReader() {}
 	public AnnotaionReader(IocContainer iocContainer, Set<String> classesToScan){
 		this.createConfig(iocContainer, classesToScan);
-	}
+	 }
 	/**
 	 * Provides  application config by reading annotation information.
 	 */
@@ -85,7 +85,6 @@ public class AnnotaionReader {
 				e.printStackTrace();
 			}
 		  });
-		    
 		    iocContainer.setBeanContainer(beansConfigMap);
 		    iocContainer.setHandlers(handlers);
 			LOGGER.info("Handlers :{ "+handlers.keySet().stream().collect(Collectors.joining(","))+" }");

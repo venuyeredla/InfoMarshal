@@ -2,7 +2,6 @@ package org.vgr.app.search;
 
 import org.vgr.ioc.annot.Service;
 
-
 @Service(id="englishIndexer")
 public class EnglishIndexer {/*
 	

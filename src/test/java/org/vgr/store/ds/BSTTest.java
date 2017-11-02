@@ -9,14 +9,14 @@ import org.vgr.store.io.DataWriter;
 import org.vgr.store.io.RamStorage;
 
 public class BSTTest {
-	private static BST bst;
+	private static Bst bst;
 	private static RamStorage ramStorage;
 	private static DataWriter dataWriter;
 	private static DataReader dataReader;
 	
 	@BeforeClass
 	public static  void init() {
-		bst=new BST();
+		bst=new Bst();
 		ramStorage=new RamStorage();
 		dataWriter=new DataWriter(ramStorage);
 		dataReader=new DataReader(ramStorage);
@@ -57,7 +57,7 @@ public class BSTTest {
 	@Test
 	public void testWriteRead() {
 		bst.writeToStorage(dataWriter);
-		BST bst=BST.readFromStorage(dataReader);
+		Bst bst=Bst.readFromStorage(dataReader);
 		System.out.println("\nRead from Storage");
 		bst.traverse(Traversal.PRE);
 	}

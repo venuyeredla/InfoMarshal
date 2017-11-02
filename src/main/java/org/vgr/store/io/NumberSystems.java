@@ -4,7 +4,7 @@ public class NumberSystems {
 	
 	public static String dectToBinary(int i) {
 		StringBuilder sb=new StringBuilder();
-		while(i>2) {
+		while(i>=2) {
 			sb.append(i%2);
 			i=i/2;
 		}

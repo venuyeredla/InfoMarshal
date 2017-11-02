@@ -19,7 +19,6 @@ import sun.misc.BASE64Encoder;
  * Utility class to encrypt using RSA Public Key and decrypt using RSA private key
  */
 public class RSAUtils {
-
     private static final String ALGORITHM = "RSA";
 
     /**

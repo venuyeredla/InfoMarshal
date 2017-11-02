@@ -3,17 +3,17 @@ package org.vgr.store.rdbms;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import org.vgr.store.ds.BST;
+import org.vgr.store.ds.Bst;
 import org.vgr.store.io.DataReader;
 import org.vgr.store.io.DataWriter;
 
 public class DML {
 	DataWriter writer=null;
 	DataReader reader=null;
-	BST idx=null;
+	Bst idx=null;
 	public DML(DataWriter writer) {
 		super();
-		this.idx=new BST();
+		this.idx=new Bst();
 		this.writer = writer;
 		writer.writeInt(20); //Keysize
 		writer.writeInt(0);// index location
@@ -26,7 +26,7 @@ public class DML {
 	
 	public void loadIndex(int offset){
 	 reader.seek(offset);
-	 this.idx= BST.readFromStorage(reader);
+	 this.idx= Bst.readFromStorage(reader);
 	}
 	
     public boolean insert(String tableName,LinkedHashMap<String,String> data) {

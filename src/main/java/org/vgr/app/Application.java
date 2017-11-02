@@ -14,6 +14,7 @@ import org.vgr.ioc.core.IocContainer;
 public class Application{
 	private static final Logger LOG=LoggerFactory.getLogger(Application.class);
 	public static void main(String...strings) throws InterruptedException {
+		LOG.info("Application is gonna started...");
 		IocContainer container = new IocContainer(new ClassesProivdeImpl().getClasses(null, null));
 		HttpServer httpServer =(HttpServer)container.getBean("httpServer");
 		httpServer.start();
@@ -45,5 +46,4 @@ class ClassesProivdeImpl implements ClassesProvider{
 		classes.add("org.vgr.ioc.web.RequestDispatcher");
 		return classes;
 	}
-	
 }

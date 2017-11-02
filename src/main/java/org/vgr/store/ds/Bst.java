@@ -4,14 +4,14 @@ import org.vgr.store.io.DataReader;
 import org.vgr.store.io.DataWriter;
 
 /**
- * BST balanced using AVL Tree concept
+ * BST balanced using AVL Tree concept.
  * @author venugopal
  *
  */
-public class BST {
+public class Bst {
 	private Node root;
 	private static int totalNodes=0;
-	public BST() {	}
+	public Bst() {	}
 	public void insert(int key,long pointer) {
 	    root=insert(root,key, pointer);
 	  }
@@ -199,9 +199,9 @@ public class BST {
 		dataWriter.close();
 	}
 	
-	public static BST readFromStorage(DataReader dataReader) {
-		BST bst=new BST();
-		String codec=dataReader.readString();
+	public static Bst readFromStorage(DataReader dataReader) {
+		Bst bst=new Bst();
+		//String codec=dataReader.readString();
 		int totalNodes=dataReader.readInt();
 		for(int i=0;i<totalNodes;i++) {
 			 int key=dataReader.readInt();

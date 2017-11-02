@@ -10,7 +10,6 @@ import java.security.NoSuchAlgorithmException;
 /**
  * Utility to generate hashes using various algorithms
  *
- * User: rameshb
  */
 public class HashUtils {
 

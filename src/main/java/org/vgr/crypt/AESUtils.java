@@ -18,7 +18,6 @@ import java.security.spec.KeySpec;
 /**
  * Utility class to perform AES encryption and decryption.
  *
- * @author : rameshb
  */
 public class AESUtils {
 
@@ -35,7 +34,6 @@ public class AESUtils {
 
     private static char[] password;
     private static byte[] salt;
-
     static {
         try {
             //Generate key for encryption mechanism
@@ -53,7 +51,7 @@ public class AESUtils {
             password = new String(pwdBytes, ENCODING).toCharArray();
             //use salt and password to generate the secret key
             SecretKeyFactory factory = SecretKeyFactory.getInstance(KEY_TYPE);
-            KeySpec spec = new PBEKeySpec(password, salt, 65536, 256);
+            KeySpec spec = new PBEKeySpec(password, salt, 65536, 128);
             SecretKey tmp = factory.generateSecret(spec);
             secret = new SecretKeySpec(tmp.getEncoded(), ENCRYPTION);
             //initialize a cipher in encryption mode
