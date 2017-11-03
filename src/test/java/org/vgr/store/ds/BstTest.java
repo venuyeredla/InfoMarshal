@@ -23,6 +23,7 @@ public class BstTest {
 			keySet.add(keys[i]);
 		   }
 		Bst bst =new Bst();
+		LOG.info("No of keys :"+keySet.size());
 		keySet.forEach(key->bst.insert(key, key));
 		System.out.println();
 		bst.traverse(Traversal.PRE);
