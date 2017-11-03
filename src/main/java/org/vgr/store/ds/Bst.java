@@ -1,5 +1,6 @@
 package org.vgr.store.ds;
 
+import org.vgr.store.io.Block;
 import org.vgr.store.io.DataReader;
 import org.vgr.store.io.DataWriter;
 
@@ -163,6 +164,7 @@ public class Bst {
 			inOrder(root);
 			break;
 		default:
+			
 			break;
 		}
 	}
@@ -174,16 +176,18 @@ public class Bst {
 			if(node.right!=null) inOrder(node.right); 
 		 }
 	}
-	public void preOrder(Node node,DataWriter dw) {
+	public void preOrder(Node node,Block bytes) {
 		if(node!=null) {
-			if(dw==null) System.out.print(node.key+",");
-			else {
-				dw.writeInt(node.key);dw.writeInt((int) node.data);	
+			    if(bytes==null) {
+			    	System.out.print(node.key+", ");	
+			    }else {
+			    	 bytes.write(node.key);bytes.write((int) node.data);
+			    }
+				if(node.left!=null) preOrder(node.left,bytes);
+				if(node.right!=null) preOrder(node.right,bytes); 
 			 }
-			if(node.left!=null) preOrder(node.left,dw);
-			if(node.right!=null) preOrder(node.right,dw); 
-		 }
 	}
+	
 	public void postOrder(Node node) {
 		if(node!=null) {
 			if(node.left!=null) postOrder(node.left);
@@ -191,21 +195,28 @@ public class Bst {
 			System.out.print(node.key+",");
 		 }
 	}
+	public byte[] getBytes() {
+		Block bytes=new Block();
+		bytes.write("BST#pre");
+		bytes.writeVInt(totalNodes);
+		preOrder(root,bytes);
+		return bytes.getBytes();
+	}
 	
 	public void writeToStorage(DataWriter dataWriter) {
-		dataWriter.writeString("BST#pre");
-		dataWriter.writeInt(totalNodes);
-		preOrder(root,dataWriter);
+		dataWriter.writeBytes(this.getBytes());
 		dataWriter.close();
 	}
 	
-	public static Bst readFromStorage(DataReader dataReader) {
+	public static Bst readFromStorage(DataReader reader) {
+		Block block=reader.readBlock();
 		Bst bst=new Bst();
-		//String codec=dataReader.readString();
-		int totalNodes=dataReader.readInt();
+		String codec=block.readString();
+		System.out.println("BST index prefix: "+codec);
+		int totalNodes=block.readVInt();
 		for(int i=0;i<totalNodes;i++) {
-			 int key=dataReader.readInt();
-			 int pointer= dataReader.readInt();
+			 int key=block.readInt();
+			 int pointer= block.readInt();
 			 bst.insert(key,pointer);
 		}
 		return bst;

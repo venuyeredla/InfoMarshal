@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.vgr.store.ds.Bst;
+import org.vgr.store.io.Block;
 import org.vgr.store.io.DataReader;
 import org.vgr.store.io.DataWriter;
 
@@ -15,9 +16,9 @@ public class DML {
 		super();
 		this.idx=new Bst();
 		this.writer = writer;
-		writer.writeInt(20); //Keysize
+		/*writer.write(20); //Keysize
 		writer.writeInt(0);// index location
-	}
+*/	}
 	public DML(DataReader dataReader,int offset) {
 		super();
 		this.reader = dataReader;
@@ -45,9 +46,10 @@ public class DML {
     }
     
     public boolean writeData(LinkedHashMap<String,String> data) {
-    	writer.writeInt(data.keySet().size());
+    	Block block=new Block();
+    	block.writeVInt(data.keySet().size());
     	data.forEach((key,val)->{
-    		writer.writeString(val);
+    		block.write(val);
     	});
     	return true;
     }
@@ -64,7 +66,8 @@ public class DML {
 	     if(pointer!=-1) {
 	    	 reader.seek((int) pointer);
 	    	 LinkedHashMap<String,String> data=new LinkedHashMap<>();
-		     List<String> list= reader.readList();
+	    	 Block block=reader.readBlock();
+		     List<String> list= block.readList();
 		     data.put("pointer",  Long.toString(pointer));
 		     data.put("id", list.get(0));
 		     data.put("name", list.get(1));

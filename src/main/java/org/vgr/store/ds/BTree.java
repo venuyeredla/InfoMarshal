@@ -1,9 +1,6 @@
 package org.vgr.store.ds;
 
-import java.nio.ByteBuffer;
-
-import org.vgr.store.io.ByteUtil;
-import org.vgr.store.io.Bytes;
+import org.vgr.store.io.Block;
 
 /**
 	 * B-Tree implementation 
@@ -64,7 +61,7 @@ public class BTree {
 				return insertNotFull(page.getChild(i + 1), key);
 			}
 		}catch (Exception e) {
-			System.out.println("Exception in inserting key : "+key +" Page Number : "+page.pageNum);
+			System.out.println("Exception in inserting key : "+key +" Page Number : "+page.getPageNum());
 		}
 		return page;
 	
@@ -88,7 +85,6 @@ public class BTree {
 		newChild.setHalfFill();
 		child.setHalfFill();
 	}
-
 	
 	public void traverse(Page page) {
 		if (page != null) {
@@ -131,9 +127,22 @@ public class BTree {
 	}
 
 	public void writePage(Page page) {
-		Bytes bytes=new Bytes();
-		ByteUtil bu=new ByteUtil();
-		bytes.add(bu.getBytes(page.pageNum));
-		bytes.add(bu.getBytes(page.getPageNum()));
+		Block bytes=new Block();
+		bytes.write(page.getPageNum());//Page Number
+		bytes.write(page.getParent().getPageNum());//Parent Page Number
+		bytes.write(page.getKeySize());//
+		for(int i=0;i<page.getKeySize();i++) {
+			bytes.write(page.getKey(i));
+		}
+		bytes.write(page.getKeySize());//ChildPages
+		for(int i=0;i<=page.getKeySize();i++) {
+			bytes.write(page.getPageNum());
+		}
 	}
+	
+	public Page readPage() {
+		Block bytes=null;
+		return null;
+	}
+	
 }

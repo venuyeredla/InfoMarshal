@@ -42,7 +42,7 @@ public class BTreeTest {
             	if(i%4==0) System.out.println();
             	Page result=bTree.search(bTree.rootPage, key);
 				if(result!=null) {
-					System.out.print("Key:"+key +" Page:"+result.pageNumber+"\t");
+					System.out.print("Key:"+key +" Page:"+result.getPageNum()+"\t");
 				}else {
 					System.out.print("Does not found key");
 				}

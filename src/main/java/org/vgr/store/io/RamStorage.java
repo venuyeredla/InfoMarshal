@@ -1,5 +1,4 @@
 package org.vgr.store.io;
-
 public class RamStorage{
 	 private int initSize=1000;
 	 private int maxSize=100000;

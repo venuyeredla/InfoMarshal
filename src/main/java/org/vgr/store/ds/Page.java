@@ -12,7 +12,8 @@ package org.vgr.store.ds;
 	 public static int degree=50;      // Minimum degree (defines the range for number of keys) 
 	 private static int noofPages=0;
 	 
-	 int pageNum;
+	 private int pageNum;
+	 private int parentPageNum;
 	 int noOfBytesinPage;
 	 int[] keys;  // An array of keys
 	 int[] values; // Used in case of B-Tree not used in case of B+ tree.
@@ -78,6 +79,14 @@ package org.vgr.store.ds;
 		 childPages[pos]=null;
 		 return temp;
 	 }
+	 
+	 public String getKeys() {
+			StringBuilder keyString=new StringBuilder("");
+			for(int i=0;i<keySize;i++) 
+				keyString.append(keys[i]+", ");
+	        return new String(keyString);		 
+	  }
+	 
 	 /**
 	  * Used when a child is split into two parts.
 	  */
@@ -109,12 +118,6 @@ package org.vgr.store.ds;
 	public boolean isFull() {
 		return keySize== (2 * degree - 1)? true:false;
 	}
-	public String getKeys() {
-		StringBuilder keyString=new StringBuilder("");
-		for(int i=0;i<keySize;i++) 
-			keyString.append(keys[i]+", ");
-        return new String(keyString);		 
-	}
 
 	public boolean isLeaf() {
 		return leaf;
@@ -122,6 +125,14 @@ package org.vgr.store.ds;
 
 	public void setLeaf(boolean leaf) {
 		this.leaf = leaf;
+	}
+
+	public Page getParent() {
+		return parent;
+	}
+
+	public void setParent(Page parent) {
+		this.parent = parent;
 	}
 	
 	

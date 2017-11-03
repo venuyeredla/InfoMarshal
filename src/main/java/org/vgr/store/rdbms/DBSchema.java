@@ -16,16 +16,16 @@ public class DBSchema {
 	}
 	
 	public boolean createTable(TableOrView table) {
-	     dataWriter.writeString(table.getTableName());
+	  /*   dataWriter.writeString(table.getTableName());
 	     dataWriter.writeMap(table.getColumns());
-		 dataWriter.close();
+		 dataWriter.close();*/
 		 return true;
 	}
 	
 	public TableOrView getTable() {
 		TableOrView table=new TableOrView();
-		table.setTableName(dataReader.readString());
-		table.setColumns(dataReader.readMap());
+		/*table.setTableName(dataReader.readString());
+		table.setColumns(dataReader.readMap());*/
 		return table;
 	}
 	

@@ -7,16 +7,15 @@ import org.junit.Test;
 import org.vgr.app.util.RandomUtil;
 import org.vgr.store.io.DataReader;
 import org.vgr.store.io.DataWriter;
-import org.vgr.store.io.IoUtil;
+import org.vgr.store.io.FileUtil;
 
 public class DMLTest {
-	String basePath="C:\\Work\\testdata\\io\\";
-	String db=basePath+"db\\db.db";
+	String dbFile=FileUtil.getPath("db.db");
 	@Test
 	@Ignore
 	public void testInsert() {
 		int[] keys= new RandomUtil().randomNumbers(50, 100);
-		 DML dml=new DML(IoUtil.getDw(db));
+		 DML dml=new DML(new DataWriter(dbFile));
 		 LinkedHashMap<String,String> map=null;
 		 for(int i=0;i<keys.length;i++) {
 		 map=new LinkedHashMap<String,String>();
@@ -41,7 +40,7 @@ public class DMLTest {
 		//int[] keys= {36,45,78,32,13,61,94,50,74,47,91,21,84,94,41,54,70,19,61,73};
 		int[] keys= {31,95,12,90,79,5,45};
 		LinkedHashMap<String,String> map=null;
-		DML dml=new DML(IoUtil.getDr(db),1113);
+		DML dml=new DML(new DataReader(dbFile),1113);
 		//dml.loadIndex(42503);
 		System.out.println("Pointer\tId\tName\tSub1\tSub2\tSub3");
 		for(int i=0;i<keys.length;i++) {
@@ -60,12 +59,9 @@ public class DMLTest {
 	 
 	 @Test
 	 public void readTest() {
-		 DataReader reader=IoUtil.getDr(db);
-		 DataWriter writer=IoUtil.getDw(db);
+		 DataReader reader=new DataReader(dbFile);
+		 DataWriter writer=new DataWriter(dbFile);
 		 Integer integer=new Integer(25);
-		 
-		 System.out.println("keysize:"+reader.readInt());
-		 System.out.println("indexlocation:"+reader.readInt());
 		 reader.close();
 	 }
 
