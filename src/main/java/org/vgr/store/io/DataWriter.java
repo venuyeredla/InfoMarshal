@@ -39,12 +39,28 @@ public class DataWriter implements Closeable {
 		isRamStorage=true;
 		this.ramStorage=ramStorage;
 	}
-	
-	public void writeBlock(Block block) {
+
+	public void writeByte(int b) {
 		try {
-			bytesWritten=block.getBytes().length;
-			byte[] b=block.getBytes();
-			this.os.write(b);
+			if(isRamStorage) {
+				ramStorage.write(b);
+			}else {
+				os.write(b);
+			}
+			bytesWritten++;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void writeBlock(int offset,Block block) {
+		try {
+			Path path=FileSystems.getDefault().getPath(fileName);
+			SeekableByteChannel sbc=Files.newByteChannel(path, StandardOpenOption.WRITE);
+			sbc.position(offset);
+			ByteBuffer byteBuffer=ByteBuffer.wrap(block.getBytes());
+			sbc.write(byteBuffer);
+            sbc.close();	
 		  } catch (IOException e) {
 			e.printStackTrace();
 		  }
@@ -59,37 +75,32 @@ public class DataWriter implements Closeable {
 		  }
 	}
 	
-	public void writeByte(int b) {
-		try {
-			if(isRamStorage) {
-				ramStorage.write(b);
-			}else {
-				os.write(b);
-			}
-			bytesWritten++;
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
 	public int getFilePointer() {
 		return bytesWritten;
 	}
 	
-	String basePath="C:\\Work\\testdata\\io\\";
-	String db=basePath+"db\\db.db";
-	public void update(byte[] bytes,int offset) {
+	public void update(int offset,byte[] bytes) {
 		 try {
-		   Path path=FileSystems.getDefault().getPath(db);
+		        Path path=FileSystems.getDefault().getPath(fileName);
 				SeekableByteChannel sbc=Files.newByteChannel(path, StandardOpenOption.WRITE);
 				sbc.position(offset);
 				ByteBuffer byteBuffer=ByteBuffer.wrap(bytes);
 				sbc.write(byteBuffer);
                 sbc.close();				
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 	}
+	
+	public void flush() {
+		try {
+			os.flush();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	
 	@Override
 	public void close(){

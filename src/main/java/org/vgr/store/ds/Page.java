@@ -11,37 +11,38 @@ package org.vgr.store.ds;
   public class Page {
 	 public static int degree=50;      // Minimum degree (defines the range for number of keys) 
 	 private static int noofPages=0;
+	 private int id;
+	 private int parentId;
+	 int[] childIds;
 	 
-	 private int pageNum;
-	 private int parentPageNum;
 	 int noOfBytesinPage;
 	 int[] keys;  // An array of keys
 	 int[] values; // Used in case of B-Tree not used in case of B+ tree.
 	 private int keySize;   // No of keys stored.
 	 Page parent;
 	 Page[] childPages; // An array of child pointers
-	 int[] childOffsets;
 	  // Current number of keys
 	 private boolean leaf; 
 
 	 public Page(boolean leaf) {
 		 keys=new int[2*degree-1];
 		 childPages=new Page[2*degree];
-		 childOffsets=new int[2*degree];
+		 childIds=new int[2*degree];
 		 this.leaf=leaf;
 		 noofPages++;
-		 pageNum=noofPages;
+		 this.id=noofPages;
 	 }
    
-	 public Page(boolean leaf,int key) {
+
+	public Page(boolean leaf,int key) {
 		 keys=new int[2*degree-1];
 		 childPages=new Page[2*degree];
-		 childOffsets=new int[2*degree];
+		 childIds=new int[2*degree];
 		 this.leaf=leaf;
 		 keys[0]=key;
 		 keySize++;
 		 noofPages++;
-		 pageNum=noofPages;
+		 this.id=noofPages;
 	 }
 	 //Adds new key at end of the array
 	 public void addKey(int key) {
@@ -51,6 +52,10 @@ package org.vgr.store.ds;
 		 int temp=keys[pos];
 		 keys[pos]=0;
 		 return temp;
+	 }
+	 
+	 public void setChildId(int pos,int childId) {
+		 this.childIds[pos]=childId;
 	 }
 	 
 	 public void setKey(int pos,int key) {
@@ -100,12 +105,15 @@ package org.vgr.store.ds;
 	 public void updateKey(int pos,int key) {
 		 
 	 }
-	public int getPageNum() {
-		return pageNum;
+	
+	public int getId() {
+		return id;
 	}
-	public void setPageNum(int pageNumber) {
-		this.pageNum = pageNumber;
+
+	public void setId(int id) {
+		this.id = id;
 	}
+
 	public int getKeySize() {
 		return keySize;
 	}
@@ -134,6 +142,19 @@ package org.vgr.store.ds;
 	public void setParent(Page parent) {
 		this.parent = parent;
 	}
+
+	public int getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(int parentId) {
+		this.parentId = parentId;
+	}
+
+	 @Override
+		public String toString() {
+			return "Page [id=" + id + ", parentId=" + parentId + ", keySize=" + keySize + ", leaf=" + leaf + "]";
+		}	
 	
 	
 }

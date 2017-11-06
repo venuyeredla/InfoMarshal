@@ -2,18 +2,38 @@ package org.vgr.store.ds;
 
 import java.util.HashSet;
 
-import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.vgr.app.util.RandomUtil;
+import org.vgr.store.io.DataReader;
+import org.vgr.store.io.DataWriter;
+import org.vgr.store.io.FileUtil;
 
 public class BTreeTest {
-
 	private static BTree bTree=null;
-	@BeforeClass
+	static String index=FileUtil.getPath("btree.data");
+	/*@BeforeClass
 	public static void init() {
-		bTree=new BTree();
+		bTree=new BTree(new DataWriter(btree),new DataReader(btree));
+	}*/
+
+	@Test
+	@Ignore
+	public void testWriteMeta() {
+		bTree=new BTree(new DataWriter(index));
+		bTree.writeMeta();
+		bTree.closeWriter();
 	}
 	@Test
+	public void testRead() {
+		bTree=new BTree(new DataReader(index));
+		bTree.readMeta();
+		bTree.closeReader();
+	}
+	
+	
+	@Test
+	@Ignore
 	public void testInsert() {
 		 	RandomUtil randomUtil=new RandomUtil();
 			int[] keys= randomUtil.randomNumbers(1000, 10000);
@@ -42,7 +62,7 @@ public class BTreeTest {
             	if(i%4==0) System.out.println();
             	Page result=bTree.search(bTree.rootPage, key);
 				if(result!=null) {
-					System.out.print("Key:"+key +" Page:"+result.getPageNum()+"\t");
+					System.out.print("Key:"+key +" Page:"+result.getId()+"\t");
 				}else {
 					System.out.print("Does not found key");
 				}

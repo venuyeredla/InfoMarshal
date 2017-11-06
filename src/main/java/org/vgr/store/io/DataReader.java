@@ -54,9 +54,9 @@ public class DataReader implements Closeable{
 		return null;
 	}
 	
-	public Block readBlock() {
+	public Block readBlock(int offset,int blocksize) {
 		try {
-			byte[] bytes=new byte[512];
+			byte[] bytes=new byte[blocksize];
 			int count=this.is.read(bytes);
 			System.out.println("No of bytes read :"+count);
 			return new Block(bytes);
@@ -65,9 +65,6 @@ public class DataReader implements Closeable{
 		 }
 		return null;
 	}
-	
-
-	
 	
 /*	public byte[] readBlock(int blockNum ) {
 		try {

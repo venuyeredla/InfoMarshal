@@ -34,18 +34,14 @@ public class IOTest {
 		
 	}
 	
-	@After
-	public void readTest() {
+@After
+public void readTest() {
 		DataReader reader=new DataReader(file);
-		Block block=reader.readBlock();
+		Block block=reader.readBlock(0,512);
 		System.out.println("Integer:"+block.readInt());
 		System.out.println("String :"+block.readString());
 		System.out.println("byte:"+block.readByte());
 		block.readMap().forEach((k,v)-> {System.out.println(k+" - "+v);});
 		reader.close();
-	   }
-	
-	
-	
-	
+   }
 }
