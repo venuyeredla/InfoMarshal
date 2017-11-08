@@ -12,12 +12,17 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.vgr.store.ds.BstTest;
 /**
  * Used to write data in terms of blocks
  * @author vyeredla
  *
  */
 public class DataWriter implements Closeable {
+	private static final Logger LOG=LoggerFactory.getLogger(DataWriter.class);
  OutputStream os=null;
  String fileName;
  RamStorage ramStorage=null;
@@ -61,6 +66,7 @@ public class DataWriter implements Closeable {
 			ByteBuffer byteBuffer=ByteBuffer.wrap(block.getBytes());
 			sbc.write(byteBuffer);
             sbc.close();	
+            LOG.info("No of bytes written : "+block.getBytes().length);
 		  } catch (IOException e) {
 			e.printStackTrace();
 		  }

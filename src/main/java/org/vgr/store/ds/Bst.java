@@ -195,21 +195,18 @@ public class Bst {
 			System.out.print(node.key+",");
 		 }
 	}
-	public byte[] getBytes() {
-		Block bytes=new Block();
-		bytes.write("BST#pre");
-		bytes.writeVInt(totalNodes);
-		preOrder(root,bytes);
-		return bytes.getBytes();
-	}
-	
+
 	public void writeToStorage(DataWriter dataWriter) {
-		dataWriter.writeBytes(this.getBytes());
+		Block block=new Block(4096);
+		block.write("BST#pre");
+		block.writeVInt(totalNodes);
+		preOrder(root,block);
+		dataWriter.writeBlock(0, block);
 		dataWriter.close();
 	}
 	
 	public static Bst readFromStorage(DataReader reader) {
-		Block block=reader.readBlock(0, 512);
+		Block block=reader.readBlock(0, 4096);
 		Bst bst=new Bst();
 		String codec=block.readString();
 		System.out.println("BST index prefix: "+codec);

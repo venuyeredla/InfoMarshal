@@ -33,7 +33,6 @@ public class BTreeTest {
 	
 	
 	@Test
-	@Ignore
 	public void testInsert() {
 		 	RandomUtil randomUtil=new RandomUtil();
 			int[] keys= randomUtil.randomNumbers(1000, 10000);

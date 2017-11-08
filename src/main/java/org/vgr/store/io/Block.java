@@ -6,6 +6,7 @@ import java.util.List;
 
 /**
  * Wraps byte array and default size is 512 bytes equivalent to HDD block size.
+ * 
  */
 public class Block {
 	private byte[] bytes;
@@ -22,54 +23,75 @@ public class Block {
 	}
 	public Block(byte[] b) {
 		bytes=new byte[b.length];
-		for(int i=0;i<b.length;i++) {
+		for(int i=0;i<b.length;i++) 
 			bytes[wPos++]=b[i];
-		}
 		wPos=b.length;
 		rPos=-1;
 	  }
 	
-	public void write(byte b) {
+	public void writeaaa(byte b) {
 		bytes[wPos++]=b;
 	}
+	private void writeByte(byte b) {
+		bytes[wPos++]=b;
+	}
+	
+	
+	 /**
+	 * returns signed byte.
+	 * @return
+	 */
 	public byte readByte() {
 		 try {
 		   if(++rPos>=wPos) throw new OutOfRangException("There are no bytes at postion:"+rPos);
-		   return bytes[rPos];
+			 return bytes[rPos];
 		} catch (OutOfRangException e) {
+			e.printStackTrace();
+			System.exit(1);
+		  }
+       return -1;
+	   }
+	
+	/**
+	 * Reads one byte and returns as short. other wise last bit considered as negative number.
+	 * @return
+	 */
+	private short read() {
+		 try {
+		   if(++rPos>=wPos) throw new OutOfRangException("There are no bytes at postion:"+rPos);{
+			   byte b=bytes[rPos];
+			   return (b&0x80)==0x80?(short)(b & 0xff):b;
+		   }
+		 } catch (OutOfRangException e) {
 			e.printStackTrace();
 			System.exit(1);
 		  }
         return -1;
 	   }
 	
-	/**
-	 * writes lower order 8-bits(1 byte).Used internal purpose only
-	 * @param i
-	 */
-	private void writeInt(int i) {
-		bytes[wPos++]=(byte)i;
-	}
-	
 	public void write(short s) {
-		writeInt(s >> 8); write(s);
+		writeByte((byte)(s >> 8)); 
+		writeByte((byte)s);
 	}
 	public short readShort() {
-		return (short) ((readByte() << 8)|(readByte()));
+		return  (short)((read() << 8)|(read()));
 	 }
 	
 	public void write(int i) {
-		writeInt(i >> 24);	writeInt(i >> 16); writeInt(i >> 8); writeInt(i);
+		writeByte((byte)(i >> 24));	
+		writeByte((byte)(i >> 16));
+		writeByte((byte)(i >> 8));
+		writeByte((byte)(i));
 	 }
 	public int readInt() {
-		return (readByte() << 24) | (readByte() << 16) |(readByte() << 8)|(readByte());
+		return (read() << 24) | (read() << 16) |(read() << 8)|(read());
 	 }
 	public void writeVInt(int i) {
 		while((i & ~0x7F) !=0 ) {
-			writeInt((i&0x7F) | 0x80);
+			writeByte((byte)((i&0x7F) | 0x80));
 			i>>=7;
 		}
-		write((byte)i);
+		writeByte((byte)i);
 	}
 	
 	public int readVInt() {
@@ -93,12 +115,12 @@ public class Block {
 	}
 	
 	public void writeLong(long l) {
-		writeInt((int)l >> 56);	writeInt((int)l >> 48);	writeInt((int)l >> 40); writeInt((int)l >> 32);
-		writeInt((int)l >> 24);	writeInt((int)l >> 16);	writeInt((int)l >> 8); writeInt((int)l);
+		writeByte((byte)(l >> 56));	writeByte((byte)(l >> 48));	writeByte((byte)(l >> 40)); writeByte((byte)(l >> 32));
+		writeByte((byte)(l >> 24));	writeByte((byte)(l >> 16));	writeByte((byte)(l >> 8)); writeByte((byte)(l));
 	  }
 	public long readLong() {
-		 return (readByte() << 56) | (readByte() << 48) |(readByte() << 40)|(readByte() << 32)|
-				(readByte() << 24) | (readByte() << 16) |(readByte() << 8)|(readByte());
+		 return (read() << 56) | (read() << 48) |(read() << 40)|(read() << 32)|
+				(read() << 24) | (read() << 16) |(read() << 8)|(read());
 	}
 	
 	public void write(byte[] b) {
@@ -107,7 +129,7 @@ public class Block {
 		}
 	  }
 	
-	public byte[] readBytes(int len) {
+   public byte[] readBytes(int len) {
 		 byte[] b=new byte[len];
 		for (int i = 0; i < len; i++) {
 			b[i]=readByte();
@@ -157,7 +179,7 @@ public class Block {
 	}
 	
 	public void writeList(List<String> strings) {
-		writeInt(strings.size());
+		write(strings.size());
 		strings.forEach(str -> write(str));
 	}
 }

@@ -6,7 +6,7 @@ public class NumbersTest {
 	
 	@Test
 	public void testDecToBinary() {
-		int dec=128;
+		int dec=4104;
 		String binary=NumberSystems.dectToBinary(dec);
 		byte b=(byte)dec;
 		System.out.println("Dec to bin :"+dec+ " - "+binary);
