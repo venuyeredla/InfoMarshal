@@ -29,7 +29,7 @@ public class Block {
 		rPos=-1;
 	  }
 	
-	public void writeaaa(byte b) {
+	public void write(byte b) {
 		bytes[wPos++]=b;
 	}
 	private void writeByte(byte b) {

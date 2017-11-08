@@ -54,6 +54,7 @@ public class BlockTest {
 			 System.out.println("After Vint :"+block.readVInt());
 		}
 		@Test
+		@Ignore
 		public void testString() {
 			 String str="Block test string"; 
 			 System.out.println("Before Vint:"+str);
@@ -61,7 +62,6 @@ public class BlockTest {
 			 System.out.println("After Vint :"+block.readString());
 		}
 		@Test
-		@Ignore
 		public void writeTest() {
 			block=new Block(100);
 			block.write(575);
