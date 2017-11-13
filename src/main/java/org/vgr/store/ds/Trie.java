@@ -70,7 +70,7 @@ public class Trie {
 						 b=b|0X80;
 					 }
 					 System.out.print(c+",");
-					 dw.writeByte(b);
+					// dw.writeByte(b);
 					 writeNode(child, dw);
 				 }
 			 }
@@ -85,7 +85,7 @@ public class Trie {
 	}
 	
 	public boolean readNode(DataReader dr) {
-		 int b=dr.readByte();
+		 int b=0;//dr.readByte();
 		 boolean isLeaf=(b&0x80) == 0x80;
 		 if(isLeaf) {
 			 return true;

@@ -66,7 +66,7 @@ public class DML {
 	     if(pointer!=-1) {
 	    	 reader.seek((int) pointer);
 	    	 LinkedHashMap<String,String> data=new LinkedHashMap<>();
-	    	 Block block=reader.readBlock(0, 512);
+	    	 Block block=reader.readBlock(0);
 		     List<String> list= block.readList();
 		     data.put("pointer",  Long.toString(pointer));
 		     data.put("id", list.get(0));

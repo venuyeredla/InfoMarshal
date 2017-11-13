@@ -15,7 +15,7 @@ public class DMLTest {
 	@Ignore
 	public void testInsert() {
 		int[] keys= new RandomUtil().randomNumbers(50, 100);
-		 DML dml=new DML(new DataWriter(dbFile));
+		 DML dml=new DML(new DataWriter(dbFile,false));
 		 LinkedHashMap<String,String> map=null;
 		 for(int i=0;i<keys.length;i++) {
 		 map=new LinkedHashMap<String,String>();
@@ -60,7 +60,7 @@ public class DMLTest {
 	 @Test
 	 public void readTest() {
 		 DataReader reader=new DataReader(dbFile);
-		 DataWriter writer=new DataWriter(dbFile);
+		 DataWriter writer=new DataWriter(dbFile,false);
 		 Integer integer=new Integer(25);
 		 reader.close();
 	 }

@@ -206,7 +206,7 @@ public class Bst {
 	}
 	
 	public static Bst readFromStorage(DataReader reader) {
-		Block block=reader.readBlock(0, 4096);
+		Block block=reader.readBlock(0);
 		Bst bst=new Bst();
 		String codec=block.readString();
 		System.out.println("BST index prefix: "+codec);

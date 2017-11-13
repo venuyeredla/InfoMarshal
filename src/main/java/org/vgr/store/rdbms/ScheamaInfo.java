@@ -5,10 +5,19 @@ public class ScheamaInfo {
 	private String schemaName;
 	private String userName;
 	private String passWord;
-	private int totalPages;
+	private int noOfPages;
 	private boolean hasIndex;
 	private int rootPage;
 	
+	public ScheamaInfo() {
+	}
+	
+	public ScheamaInfo(String schemaName, String userName, String passWord) {
+		super();
+		this.schemaName = schemaName;
+		this.userName = userName;
+		this.passWord = passWord;
+	}
 	public int getPageId() {
 		return pageId;
 	}
@@ -33,13 +42,13 @@ public class ScheamaInfo {
 	public void setPassWord(String passWord) {
 		this.passWord = passWord;
 	}
-	public int getTotalPages() {
-		return totalPages;
+
+	public int getNoOfPages() {
+		return noOfPages;
 	}
-	public void setTotalPages(int totalPages) {
-		this.totalPages = totalPages;
+	public void setNoOfPages(int noOfPages) {
+		this.noOfPages = noOfPages;
 	}
-	
 	public boolean isHasIndex() {
 		return hasIndex;
 	}
@@ -52,10 +61,15 @@ public class ScheamaInfo {
 	public void setRootPage(int rootPage) {
 		this.rootPage = rootPage;
 	}
+	
+	public int nextPageId() {
+	   	return ++noOfPages;
+	}
 	@Override
 	public String toString() {
 		return "ScheamaInfo [pageId=" + pageId + ", schemaName=" + schemaName + ", userName=" + userName + ", passWord="
-				+ passWord + ", totalPages=" + totalPages + "]";
+				+ passWord + ", noOfPages=" + noOfPages + ", hasIndex=" + hasIndex + ", rootPage=" + rootPage + "]";
 	}
-   
+	
+
 }

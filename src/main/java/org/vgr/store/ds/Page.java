@@ -9,12 +9,10 @@ package org.vgr.store.ds;
  *
  */
   public class Page {
-	 public static int degree=50;      // Minimum degree (defines the range for number of keys) 
-	 private static int noofPages=0;
+	 public static int degree=25;      // Minimum degree (defines the range for number of keys) 
 	 private int id;
 	 private int parentId;
 	 int[] childIds;
-	 
 	 int noOfBytesinPage;
 	 int[] keys;  // An array of keys
 	 int[] values; // Used in case of B-Tree not used in case of B+ tree.
@@ -24,25 +22,23 @@ package org.vgr.store.ds;
 	  // Current number of keys
 	 private boolean leaf; 
 
-	 public Page(boolean leaf) {
+	 public Page(int pageid,boolean leaf) {
 		 keys=new int[2*degree-1];
 		 childPages=new Page[2*degree];
 		 childIds=new int[2*degree];
 		 this.leaf=leaf;
-		 noofPages++;
-		 this.id=noofPages;
+		 this.id=pageid;
 	 }
    
 
-	public Page(boolean leaf,int key) {
+	public Page(int pageid,boolean leaf,int key) {
 		 keys=new int[2*degree-1];
 		 childPages=new Page[2*degree];
 		 childIds=new int[2*degree];
 		 this.leaf=leaf;
 		 keys[0]=key;
 		 keySize++;
-		 noofPages++;
-		 this.id=noofPages;
+		 this.id=pageid;
 	 }
 	 //Adds new key at end of the array
 	 public void addKey(int key) {

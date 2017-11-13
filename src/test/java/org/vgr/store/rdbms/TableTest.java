@@ -20,7 +20,7 @@ public class TableTest {
 		map.put("sub2", "Integer");
 		map.put("sub3", "Integer");
 		table.setColumns(map);
-		DataWriter writer=new DataWriter(dbFile);
+		DataWriter writer=new DataWriter(dbFile,false);
 		DataReader reader=new DataReader(dbFile);		
 		DBSchema schema=new DBSchema(writer,reader);
 		schema.createTable(table);

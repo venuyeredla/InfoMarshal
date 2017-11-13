@@ -35,10 +35,9 @@ public class BlockTest {
 		 }
 		
 		@Test
-		@Ignore
 		public void testInt() {
 			  // -2,147,483,648  ---2,147,483,647
-			 int integer=-2147483647; 
+			 int integer=200; 
 			 System.out.println("Before int:"+integer);
 			 block.write(integer);
 			 System.out.println("After int :"+block.readInt());
@@ -62,6 +61,7 @@ public class BlockTest {
 			 System.out.println("After Vint :"+block.readString());
 		}
 		@Test
+		@Ignore
 		public void writeTest() {
 			block=new Block(100);
 			block.write(575);
@@ -79,6 +79,4 @@ public class BlockTest {
 			System.out.println("byte:"+block.readByte());
 			block.readMap().forEach((k,v)-> {System.out.println(k+" - "+v);});
 		}
-		
-		
 }

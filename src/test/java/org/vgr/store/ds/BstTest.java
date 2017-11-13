@@ -9,6 +9,7 @@ import org.vgr.app.util.RandomUtil;
 import org.vgr.store.io.DataReader;
 import org.vgr.store.io.DataWriter;
 import org.vgr.store.io.FileUtil;
+
 public class BstTest {
 	private static final Logger LOG=LoggerFactory.getLogger(BstTest.class);
 	String indexFile=FileUtil.getPath("bst.idx");
@@ -25,11 +26,12 @@ public class BstTest {
 		LOG.info("No of keys :"+keySet.size());
 		keySet.forEach(key->bst.insert(key, key));
 		bst.traverse(Traversal.PRE);
-		DataWriter	writer=new DataWriter(indexFile);
+		DataWriter	writer=new DataWriter(indexFile,false);
 		bst.writeToStorage(writer);
 		writer.close();
 		LOG.info("Index saved to :"+indexFile);
 	 }
+	
 	@Test
 	public void testSerach() {
 	 DataReader reader=new DataReader(indexFile);
@@ -37,14 +39,14 @@ public class BstTest {
 	 bst.traverse(Traversal.PRE);
      RandomUtil randomUtil=new RandomUtil();
 	 int[] searchKeys= randomUtil.randomNumbers(20, 10000);
+	// String str= Arrays.asList(searchKeys).stream().map(i-> i.toString()).collect(Collectors.joining(","));
+	// System.out.println("\nSearc keys : "+str);
+	 System.out.println("Found : ");
 	 for(int i=0;i<searchKeys.length;i++) {
 	 	int key=searchKeys[i];
 	    long value= bst.search(key);
-	    System.out.println();
-	    if(value==-1) {
-	    	System.out.print("Key:"+key+ " No");
-	    }else {
-	    	System.out.print("Key :"+key+" --> "+value );
+	    if(!(value==-1)) {
+	    	System.out.print("Key :"+key+" --> "+value +"\t	");
 	    }
 		}
 	/*	

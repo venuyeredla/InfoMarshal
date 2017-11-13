@@ -6,65 +6,66 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.vgr.app.util.RandomUtil;
 import org.vgr.store.io.DataReader;
-import org.vgr.store.io.DataWriter;
 import org.vgr.store.io.FileUtil;
 
 public class BTreeTest {
 	private static BTree bTree=null;
-	static String index=FileUtil.getPath("btree.data");
-	/*@BeforeClass
-	public static void init() {
-		bTree=new BTree(new DataWriter(btree),new DataReader(btree));
-	}*/
+	static String index=FileUtil.getPath("btree.idx");
 
 	@Test
 	@Ignore
 	public void testWriteMeta() {
-		bTree=new BTree(new DataWriter(index));
-		bTree.writeMeta();
+		bTree=new BTree(index);
+		/*bTree.writeMeta();*/
 		bTree.closeWriter();
 	}
 	@Test
+	@Ignore
 	public void testRead() {
-		bTree=new BTree(new DataReader(index));
+		bTree=new BTree(index);
 		bTree.readMeta();
 		bTree.closeReader();
 	}
-	
-	
 	@Test
+	@Ignore
 	public void testInsert() {
-		 	RandomUtil randomUtil=new RandomUtil();
-			int[] keys= randomUtil.randomNumbers(1000, 10000);
-			HashSet<Integer> keySet=new HashSet<>(); 
-		   // int[] keys= {36,45,78,32,13,94,50,74,47,91,21,84,41,54,70,19,61,73,5,11,22,65,3,48,37,53}; //22
-//			System.out.println("Total keys: "+keys.length);
-			int ssize=20;
-			int[] searchKeys=new int[ssize];
-			int c=0;
-			for(int i=0;i<keys.length;i++) {
-				 keySet.add(keys[i]);
-				 if(c<ssize&&i%50==2) {
-					 searchKeys[c]=keys[i];
-					 c++;
-				 }
-				//bTree.insert(keys[i],0);
-			}
-			
+		    bTree=new BTree(index);
+			HashSet<Integer> keySet=RandomUtil.randomNumsSet(1000, 10000);
 		    for (Integer integer : keySet) {
 				      bTree.insert(integer,0);
 			   }
-		    System.out.println("Total keys: "+keySet.size());
+		    System.out.println("Total keys inserted : "+keySet.size());
 		    bTree.traverse(bTree.rootPage);
-            for (int i = 0; i < searchKeys.length; i++) {
-            	int key=searchKeys[i];
-            	if(i%4==0) System.out.println();
-            	Page result=bTree.search(bTree.rootPage, key);
-				if(result!=null) {
-					System.out.print("Key:"+key +" Page:"+result.getId()+"\t");
-				}else {
-					System.out.print("Does not found key");
-				}
-			   }
-			}
+		    bTree.close();
+		  }
+	
+	@Test
+	@Ignore
+	public void testSerach() {
+	 DataReader reader=new DataReader(index);
+	 Bst bst=Bst.readFromStorage(reader);
+	 bst.traverse(Traversal.PRE);
+	 int[] searchKeys= RandomUtil.randomNumbers(20, 10000);
+	// String str= Arrays.asList(searchKeys).stream().map(i-> i.toString()).collect(Collectors.joining(","));
+	// System.out.println("\nSearc keys : "+str);
+	 System.out.println("Found : ");
+	 for(int i=0;i<searchKeys.length;i++) {
+	 	int key=searchKeys[i];
+	    long value= bst.search(key);
+	    if(!(value==-1)) {
+	    	System.out.print("Key :"+key+" --> "+value +"\t	");
+	    }
+		}
+	/*	
+	    bst.delete(del);
+	    System.out.print("\n After deleting");
+		bst.traverse(Traversal.PRE);*/
+	}
+	@Test
+	public void testReadPage() {
+		 bTree=new BTree(index);
+		Page page= bTree.readPage(49);
+		System.out.println("No of keys in page: "+page.getKeySize());
+	}
+	
 }

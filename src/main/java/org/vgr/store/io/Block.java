@@ -9,16 +9,18 @@ import java.util.List;
  * 
  */
 public class Block {
+	public static int BLOCK_SIZE=512;
 	private byte[] bytes;
 	private int wPos;
 	private int rPos;
 	public Block() {
-		bytes=new byte[512];
+		bytes=new byte[BLOCK_SIZE];
 		wPos=0;//points to the next position to be inserted.
 		rPos=-1;
 	}
 	public Block(int size) {
-		bytes=new byte[size];
+		BLOCK_SIZE=size;
+		bytes=new byte[BLOCK_SIZE];
 		rPos=-1;
 	}
 	public Block(byte[] b) {
@@ -33,9 +35,11 @@ public class Block {
 		bytes[wPos++]=b;
 	}
 	private void writeByte(byte b) {
+		if(wPos+1>=BLOCK_SIZE) {
+			System.out.println("Block is full: Block size:"+bytes.length+ " Position to write : "+wPos+1);
+		}
 		bytes[wPos++]=b;
 	}
-	
 	
 	 /**
 	 * returns signed byte.
@@ -182,6 +186,11 @@ public class Block {
 		write(strings.size());
 		strings.forEach(str -> write(str));
 	}
+	
+	public static int getBlockSize() {
+		return BLOCK_SIZE;
+	}
+	
 }
 
 class OutOfRangException extends Exception{

@@ -15,7 +15,6 @@ import java.nio.file.StandardOpenOption;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vgr.store.ds.BstTest;
 /**
  * Used to write data in terms of blocks
  * @author vyeredla
@@ -29,10 +28,10 @@ public class DataWriter implements Closeable {
  boolean isRamStorage=false;
  private int bytesWritten=0;
  
- public DataWriter(String fileName) {
+ public DataWriter(String fileName,boolean append) {
 		try {
 			this.fileName=fileName;
-			this.os=new BufferedOutputStream(new FileOutputStream(fileName));
+			this.os=new BufferedOutputStream(new FileOutputStream(fileName,append));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -44,20 +43,6 @@ public class DataWriter implements Closeable {
 		isRamStorage=true;
 		this.ramStorage=ramStorage;
 	}
-
-	public void writeByte(int b) {
-		try {
-			if(isRamStorage) {
-				ramStorage.write(b);
-			}else {
-				os.write(b);
-			}
-			bytesWritten++;
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
 	public void writeBlock(int offset,Block block) {
 		try {
 			Path path=FileSystems.getDefault().getPath(fileName);

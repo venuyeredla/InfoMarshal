@@ -6,12 +6,25 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.SeekableByteChannel;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 
 public class DataReader implements Closeable{
 	InputStream is=null;
-	String fileName;
+	private String fileName;
+	public String getFileName() {
+		return fileName;
+	}
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
 	RamStorage ramStorage=null;
 	boolean isRamStorage=false;
+	
     public DataReader(String fileName) {
 			try {
 				this.fileName=fileName;
@@ -28,20 +41,6 @@ public class DataReader implements Closeable{
 		isRamStorage=true;
 		this.ramStorage=ramStorage; 
      }
-	
-	public int readByte() {
-		try {
-		   if(isRamStorage) {
-			return ramStorage.read();
-			}
-			int b=is.read();
-			return b;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return -1;
-		}
-	}
-	
 	public Block readBytes(int size) {
 		try {
 			byte[] bytes=new byte[size];
@@ -54,9 +53,9 @@ public class DataReader implements Closeable{
 		return null;
 	}
 	
-	public Block readBlock(int offset,int blocksize) {
+	public Block readBlockOld(int offset) {
 		try {
-			byte[] bytes=new byte[blocksize];
+			byte[] bytes=new byte[Block.BLOCK_SIZE];
 			int count=this.is.read(bytes);
 			System.out.println("No of bytes read :"+count);
 			return new Block(bytes);
@@ -66,21 +65,31 @@ public class DataReader implements Closeable{
 		return null;
 	}
 	
-/*	public byte[] readBlock(int blockNum ) {
+	
+	public Block readBlock(int offset) {
 		try {
-			byte[] bytes=new byte[512];
-			this.is.read(bytes);
+		    Path path=FileSystems.getDefault().getPath(fileName);
+			SeekableByteChannel sbc=Files.newByteChannel(path, StandardOpenOption.READ);
+			sbc.position(offset);
+		    ByteBuffer byteBuffer=ByteBuffer.allocate(Block.BLOCK_SIZE);
+		    int  noOfbytes=sbc.read(byteBuffer);
+			byte[] bytes= byteBuffer.array();
+			System.out.println("Read BufferSize : "+noOfbytes);
+		    sbc.close();	
+			return new Block(bytes);
 		 } catch (IOException e) {
 			e.printStackTrace();
 		 }
 		return null;
-	}*/
+	}
 	
 	public void seek(int offset) {
 		try {
 			is.reset();
+			
+			
+			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -94,4 +103,12 @@ public class DataReader implements Closeable{
 			e.printStackTrace();
 		}
 	}
+	public InputStream getIs() {
+		return is;
+	}
+	public void setIs(InputStream is) {
+		this.is = is;
+	}
+	
+	
 }

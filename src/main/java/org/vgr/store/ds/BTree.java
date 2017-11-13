@@ -1,53 +1,49 @@
 package org.vgr.store.ds;
 
+import java.io.Closeable;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.vgr.store.io.Block;
 import org.vgr.store.io.DataReader;
 import org.vgr.store.io.DataWriter;
 import org.vgr.store.rdbms.ScheamaInfo;
 
-/**
+     /**
 	 * B-Tree implementation 
 	 * @author vyeredla
 	 *
 	 */
-public class BTree {
+ public class BTree implements Closeable {
 	public Page rootPage;
 	private int degree = Page.degree;
 	private DataWriter writer;
 	private DataReader reader;
-	private int blockSize=512; //for ubuntu
-	private ScheamaInfo scheamaInfo=null;
-	
-	public BTree(DataWriter writer,DataReader reader) {
-		this.writer=writer;
-		this.reader=reader;
-	}
-	public BTree(DataWriter writer) {
-		this.writer=writer;
-	}
-	public BTree(DataReader reader) {
-		this.reader=reader;
+	private ScheamaInfo schemaInfo=null;
+	private List<Page> unsavedPages=null;
+	public BTree(String dbFile) {
+		boolean exists=new File(dbFile).exists();
+		this.writer=new DataWriter(dbFile,exists);
+		this.reader=new DataReader(dbFile);
+		this.init(exists);
+		unsavedPages=new ArrayList<>();
 	}
 
-	/**
-	 * Inserting key.
-	 * @param key
-	 * @param data
-	 */
-	
-	
-	
 	public void insert(int key, long data) {
+		rootPage=getPage(schemaInfo.getRootPage());
 		rootPage = insert(rootPage, key, data);
+		schemaInfo.setRootPage(rootPage.getId());
 	}
-
 	public Page insert(Page page, int key, long data) {
 		if (page == null) {
-			page = new Page(true,key);
+			page = new Page(nextPageId(),true,key);
+			unsavedPages.add(page);
 			return page;
 		} else {
 			if (page.isFull()) { // && page.isLeaf()
-				Page newParent = new Page(false);
+				Page newParent = new Page(nextPageId(),false);
+				unsavedPages.add(newParent);
 				newParent.setChild(0, page);
 				splitChild(newParent, page, 0);
 				int i = 0;
@@ -90,7 +86,8 @@ public class BTree {
 	}
 	public void splitChild(Page parent, Page child, int index) {
 		parent.setLeaf(false);
-		Page newChild = new Page(child.isLeaf());
+		Page newChild = new Page(nextPageId(),child.isLeaf());
+		unsavedPages.add(newChild);
 		for (int k=0; k < degree - 1; k++) { // copying second half of keys and childs to new child.
 			newChild.addKey(child.deleteKey(k+degree));
 			newChild.setChild(k, child.deleteChild(k + degree));
@@ -149,11 +146,15 @@ public class BTree {
 	}
 
 	public void writePage(Page page) {
-		Block block=new Block(blockSize);
+		Block block=new Block();
 		int pageType= page.isLeaf()?2:1;
 		block.write(page.getId());//Page Number
 		block.write((byte)pageType);
-		block.write(page.getParent().getId());//Parent Page Number
+		if(page.getParent()!=null) {
+			block.write(page.getParent().getId());//Parent Page Number
+		}else {
+			block.write(-1);//Parent Page Number
+		}
 		block.write(page.getKeySize());//
 		for(int i=0;i<page.getKeySize();i++) {
 			block.write(page.getKey(i));
@@ -162,17 +163,28 @@ public class BTree {
 		for(int i=0;i<=page.getKeySize();i++) {
 			block.write(page.getId());
 		}
-		writer.writeBlock(0,block);
+		int offset=getPageOffset(page.getId());
+		System.out.println("Writing page "+page.getId()+" at :"+offset);
+		writer.writeBlock(offset,block);
 		writer.flush();
 	}
 	
+	
+	public Page getPage(int pageid) {
+		if(pageid<=schemaInfo.getNoOfPages()) {
+			return readPage(pageid);
+		}else {
+			throw new IllegalArgumentException();
+		}
+	}
+	
 	public Page readPage(int pageId) {
-		 int offset=pageId*blockSize+1;
-		 Block block=reader.readBlock(offset, blockSize);
+		 int offset=pageId*Block.BLOCK_SIZE;
+		 Block block=reader.readBlock(offset);
 		 int pageNum=block.readInt();
 		 byte b=block.readByte();
 		 boolean isLeaf=b==2?true:false;
-		 Page page=new Page(isLeaf);
+		 Page page=new Page(pageNum,isLeaf);
 		 page.setId(pageNum);
 		 page.setParentId(block.readInt());
 		 int keySize=block.readInt();
@@ -184,53 +196,83 @@ public class BTree {
 			 page.setChildId(i,block.readInt());
 		 }
 		return page;
+    }
+	
+	public int getPageOffset(int pageNum) {
+		int offset=pageNum*Block.BLOCK_SIZE;
+		return offset==-1?0:offset;
 	}
 	
-	 public void metaData() {
-			scheamaInfo=new ScheamaInfo();
-			scheamaInfo.setPageId(1);
-			scheamaInfo.setSchemaName("venudb");
-	        scheamaInfo.setUserName("venugopal");
-	        scheamaInfo.setPassWord("venugopal");
-		    scheamaInfo.setTotalPages(1);
-		    scheamaInfo.setHasIndex(false);
-		    scheamaInfo.setRootPage(0);
+	public int nextPageId() {
+	   	return schemaInfo.nextPageId();
+	}
+
+	  public boolean init(boolean exists) {
+		  try {
+			  if(exists) {
+				  readMeta(); 
+			   }else {
+				  initialize();
+				  writeMeta();
+			  }
+			  return true;
+		  }catch (Exception e) {
+			 e.printStackTrace();
+			  return false;
+		   }
+	  }
+	
+	 private void initialize() {
+		schemaInfo=new ScheamaInfo("venudb", "venugopal", "venugopal");
+		schemaInfo.setPageId(0);
+	    schemaInfo.setNoOfPages(0);
+	    schemaInfo.setHasIndex(false);
+	    schemaInfo.setRootPage(-1);
 	   }
 	
+	public void readMeta() {
+		Block block=reader.readBlock(0);
+		schemaInfo=new ScheamaInfo();
+		schemaInfo.setPageId(block.readInt());
+		schemaInfo.setSchemaName(block.readString());
+		schemaInfo.setUserName(block.readString());
+		schemaInfo.setPassWord(block.readString());
+		schemaInfo.setNoOfPages(block.readInt());
+	    int val=block.readByte();
+	    boolean hasIndex=val==0?false:true;
+	    schemaInfo.setHasIndex(hasIndex);
+	    schemaInfo.setRootPage(block.readInt());
+	}
+	 
 	public void writeMeta() {
-		Block block=new Block(blockSize);
-	    block.write(scheamaInfo.getPageId());
-	    block.write(scheamaInfo.getSchemaName());
-	    block.write(scheamaInfo.getUserName());
-	    block.write(scheamaInfo.getPassWord());
-	    block.write(scheamaInfo.getTotalPages());
-	    int b=scheamaInfo.isHasIndex()?1:0;
+		Block block=new Block();
+	    block.write(schemaInfo.getPageId());
+	    block.write(schemaInfo.getSchemaName());
+	    block.write(schemaInfo.getUserName());
+	    block.write(schemaInfo.getPassWord());
+	    System.out.println("Total numuber of pages  : "+schemaInfo.getNoOfPages());
+	    block.write(schemaInfo.getNoOfPages());
+	    int b=schemaInfo.isHasIndex()?1:0;
 	    block.write((byte)b);
-	    block.write(scheamaInfo.getRootPage());
+	    block.write(schemaInfo.getRootPage());
 	    writer.writeBlock(0,block);
 		writer.flush();
 	}
-	public void readMeta() {
-		Block block=reader.readBlock(0, this.blockSize);
-		ScheamaInfo scheamaInfo=new ScheamaInfo();
-		scheamaInfo.setPageId(block.readInt());
-		scheamaInfo.setSchemaName(block.readString());
-        scheamaInfo.setUserName(block.readString());
-        scheamaInfo.setPassWord(block.readString());
-	    scheamaInfo.setTotalPages(block.readInt());
-	    int val=block.readByte();
-	    boolean hasIndex=val==0?false:true;
-	    scheamaInfo.setHasIndex(hasIndex);
-	    scheamaInfo.setRootPage(block.readInt());
-	}
-	
+
 	public void closeWriter() {
 		this.writer.close();
-		
 	}
 	public void closeReader() {
 		this.reader.close();
-		
 	}
-	
+	@Override
+	public void close(){
+		unsavedPages.forEach(page->{
+            System.out.println("Writing page : "+page.getId());
+			this.writePage(page);
+		});
+		this.writeMeta();
+		this.writer.close();
+		this.reader.close();
+	  }
 }
