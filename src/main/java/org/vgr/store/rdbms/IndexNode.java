@@ -1,39 +1,27 @@
-package org.vgr.store.ds;
+package org.vgr.store.rdbms;
 
-/**
- * Page is a BTree node is equivalent to block in Secondary storage.
- * The page size should be equivalent to storage block size.
- * Current tradeoff between IO is 512 bytes
- * This can be used for both B-Tree and B+Tree 
- * @author vyeredla
- *
- */
-  public class Page {
+public class IndexNode extends Node {
 	 public static int degree=25;      // Minimum degree (defines the range for number of keys) 
-	 private int id;
-	 private int parentId;
-	 public int[] childIds;
-	 public int noOfBytesinPage;
-	 public  int[] keys;  // An array of keys
-	 int[] values; // Used in case of B-Tree not used in case of B+ tree.
+	 private int[] keys;  // An array of keys
 	 private int keySize;   // No of keys stored.
+	 private int[] childIds;
 	 private int childSize;
-	 Page parent;
-	 Page[] childPages; // An array of child pointers
+	 IndexNode parent;
+	 IndexNode[] childPages; // An array of child pointers
 	  // Current number of keys
 	 private boolean leaf; 
 
-	 public Page(int pageid,boolean leaf) {
+	 public IndexNode(int pageid,boolean leaf) {
 		 keys=new int[2*degree-1];
-		 childPages=new Page[2*degree];
-		 childIds=new int[2*degree];
+		 childPages=new IndexNode[2*degree];
+		 childIds=new int[2*degree];	
 		 this.leaf=leaf;
 		 this.id=pageid;
 		 childSize=0;
 	 }
-	public Page(int pageid,boolean leaf,int key) {
+	public IndexNode(int pageid,boolean leaf,int key) {
 		 keys=new int[2*degree-1];
-		 childPages=new Page[2*degree];
+		 childPages=new IndexNode[2*degree];
 		 childIds=new int[2*degree];
 		 this.leaf=leaf;
 		 keys[0]=key;
@@ -73,7 +61,7 @@ package org.vgr.store.ds;
 	 }
 	 
 	 
-	 public void setChild(int pos,Page childPage) {
+	 public void setChild(int pos,IndexNode childPage) {
 		     childPages[pos]=childPage;
 			 this.childIds[pos]=childPage.getId();
 			 childSize++;
@@ -89,8 +77,8 @@ package org.vgr.store.ds;
 		 return this.childIds[pos];
 	 }
 	 
-	 public Page deleteChild(int pos) {
-		 Page temp=childPages[pos];
+	 public IndexNode deleteChild(int pos) {
+		 IndexNode temp=childPages[pos];
 		 if(temp!=null) {
 			 childPages[pos]=null;
 			 childSize--;
@@ -112,7 +100,7 @@ package org.vgr.store.ds;
 		 this.keySize=degree-1;
 	 }
 	 
-	 public Page getChild(int pos) {
+	 public IndexNode getChild(int pos) {
 		return childPages[pos];
 	  }
 	 public void updateKey(int pos,int key) {
@@ -157,24 +145,18 @@ package org.vgr.store.ds;
 		this.leaf = leaf;
 	}
 
-	public Page getParent() {
+	public IndexNode getParent() {
 		return parent;
 	}
 
-	public void setParent(Page parent) {
+	public void setParent(IndexNode parent) {
 		this.parent = parent;
 	}
 
-	public int getParentId() {
-		return parentId;
+	@Override
+	public String toString() {
+		return "DbPage [id=" + id + ", parentId=" + parentId + ", keySize=" + keySize + ", childSize=" + childSize
+				+ ", leaf=" + leaf + "]";
 	}
 
-	public void setParentId(int parentId) {
-		this.parentId = parentId;
-	}
-
-    @Override
-		public String toString() {
-			return "Page [id=" + id + ", parentId=" + parentId + ", keySize=" + keySize + ", leaf=" + leaf + "]";
-		}	
 }

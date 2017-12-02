@@ -15,74 +15,79 @@ import java.nio.file.StandardOpenOption;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 /**
  * Used to write data in terms of blocks
+ * 
  * @author vyeredla
  *
  */
 public class DataWriter implements Closeable {
-	private static final Logger LOG=LoggerFactory.getLogger(DataWriter.class);
- OutputStream os=null;
- String fileName;
- RamStorage ramStorage=null;
- boolean isRamStorage=false;
- private int bytesWritten=0;
- 
- public DataWriter(String fileName,boolean append) {
+	private static final Logger LOG = LoggerFactory.getLogger(DataWriter.class);
+	OutputStream os = null;
+	String fileName;
+	RamStorage ramStorage = null;
+	boolean isRamStorage = false;
+	private int bytesWritten = 0;
+
+	public DataWriter(String fileName, boolean append) {
 		try {
-			this.fileName=fileName;
-			this.os=new BufferedOutputStream(new FileOutputStream(fileName,append));
+			this.fileName = fileName;
+			this.os = new BufferedOutputStream(new FileOutputStream(fileName, append));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-  }
-  public DataWriter(OutputStream os) {
-		this.os=new BufferedOutputStream(os);
-  }
-	public DataWriter(RamStorage ramStorage) {
-		isRamStorage=true;
-		this.ramStorage=ramStorage;
 	}
-	public void writeBlock(int offset,Block block) {
+
+	public DataWriter(OutputStream os) {
+		this.os = new BufferedOutputStream(os);
+	}
+
+	public DataWriter(RamStorage ramStorage) {
+		isRamStorage = true;
+		this.ramStorage = ramStorage;
+	}
+
+	public void writeBlock(int offset, Block block) {
 		try {
-			Path path=FileSystems.getDefault().getPath(fileName);
-			SeekableByteChannel sbc=Files.newByteChannel(path, StandardOpenOption.WRITE);
+			Path path = FileSystems.getDefault().getPath(fileName);
+			SeekableByteChannel sbc = Files.newByteChannel(path, StandardOpenOption.WRITE);
 			sbc.position(offset);
-			ByteBuffer byteBuffer=ByteBuffer.wrap(block.getBytes());
+			ByteBuffer byteBuffer = ByteBuffer.wrap(block.getBytes());
 			sbc.write(byteBuffer);
-            sbc.close();	
-            LOG.info("No of bytes written : "+block.getBytes().length);
-		  } catch (IOException e) {
+			sbc.close();
+			// LOG.info("No of bytes written : "+block.getBytes().length);
+		} catch (IOException e) {
 			e.printStackTrace();
-		  }
-	 }
-	
+		}
+	}
+
 	public void writeBytes(byte[] bytes) {
 		try {
-			bytesWritten=bytes.length;
+			bytesWritten = bytes.length;
 			this.os.write(bytes);
-		  } catch (IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
-		  }
+		}
 	}
-	
+
 	public int getFilePointer() {
 		return bytesWritten;
 	}
-	
-	public void update(int offset,byte[] bytes) {
-		 try {
-		        Path path=FileSystems.getDefault().getPath(fileName);
-				SeekableByteChannel sbc=Files.newByteChannel(path, StandardOpenOption.WRITE);
-				sbc.position(offset);
-				ByteBuffer byteBuffer=ByteBuffer.wrap(bytes);
-				sbc.write(byteBuffer);
-                sbc.close();				
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+
+	public void update(int offset, byte[] bytes) {
+		try {
+			Path path = FileSystems.getDefault().getPath(fileName);
+			SeekableByteChannel sbc = Files.newByteChannel(path, StandardOpenOption.WRITE);
+			sbc.position(offset);
+			ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
+			sbc.write(byteBuffer);
+			sbc.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
-	
+
 	public void flush() {
 		try {
 			os.flush();
@@ -91,12 +96,11 @@ public class DataWriter implements Closeable {
 			e.printStackTrace();
 		}
 	}
-	
-	
+
 	@Override
-	public void close(){
+	public void close() {
 		try {
-			if(!isRamStorage) {
+			if (!isRamStorage) {
 				os.flush();
 				os.close();
 			}
@@ -104,5 +108,5 @@ public class DataWriter implements Closeable {
 			e.printStackTrace();
 		}
 	}
-	
+
 }

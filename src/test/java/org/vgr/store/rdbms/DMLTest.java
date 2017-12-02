@@ -56,7 +56,6 @@ public class DMLTest {
 		dml.closeReader();
   }
 	 
-	 
 	 @Test
 	 public void readTest() {
 		 DataReader reader=new DataReader(dbFile);

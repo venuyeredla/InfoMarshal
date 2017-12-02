@@ -74,7 +74,7 @@ public class DataReader implements Closeable{
 		    ByteBuffer byteBuffer=ByteBuffer.allocate(Block.BLOCK_SIZE);
 		    int  noOfbytes=sbc.read(byteBuffer);
 			byte[] bytes= byteBuffer.array();
-			System.out.println("Read BufferSize : "+noOfbytes);
+			//System.out.println("Read BufferSize : "+noOfbytes);
 		    sbc.close();	
 			return new Block(bytes);
 		 } catch (IOException e) {

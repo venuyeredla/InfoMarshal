@@ -1,6 +1,7 @@
 package org.vgr.store.rdbms;
 
 import java.util.LinkedHashMap;
+
 public class TableOrView {
 	private String tableName;
 	private LinkedHashMap<String,String> columns;
@@ -17,6 +18,4 @@ public class TableOrView {
 	public void setColumns(LinkedHashMap<String, String> columns) {
 		this.columns = columns;
 	}
-	  
-
 }
