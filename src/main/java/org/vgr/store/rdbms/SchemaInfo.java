@@ -1,5 +1,7 @@
 package org.vgr.store.rdbms;
 
+import java.util.Map;
+
 import org.vgr.store.io.Block;
 
 public class SchemaInfo {
@@ -8,13 +10,14 @@ public class SchemaInfo {
 	private String schemaName;
 	private String userName;
 	private String passWord;
+	private Map<String,Integer> tables;
 	private int noOfPages;
 	private boolean hasIndex;
 	private int rootPage;
-	
+
 	public SchemaInfo() {
+
 	}
-	
 	public SchemaInfo(String schemaName, String userName, String passWord) {
 		super();
 		this.schemaName = schemaName;
@@ -42,7 +45,6 @@ public class SchemaInfo {
 		persist();
 	  }
 
-	  
 	  public void persist() {
 		Block block = new Block();
 		block.write(this.getPageId());
@@ -116,6 +118,13 @@ public class SchemaInfo {
 	
 	public int nextPageId() {
 	   	return ++noOfPages;
+	}
+	
+	public Map<String, Integer> getTables() {
+		return tables;
+	}
+	public void setTables(Map<String, Integer> tables) {
+		this.tables = tables;
 	}
 	@Override
 	public String toString() {

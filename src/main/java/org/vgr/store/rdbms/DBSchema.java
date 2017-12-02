@@ -15,23 +15,23 @@ public class DBSchema {
           this.dataReader=dr;
 	}
 	
-	public boolean createTable(TableOrView table) {
+	public boolean createTable(Table table) {
 	  /*   dataWriter.writeString(table.getTableName());
 	     dataWriter.writeMap(table.getColumns());
 		 dataWriter.close();*/
 		 return true;
 	}
 	
-	public TableOrView getTable() {
-		TableOrView table=new TableOrView();
+	public Table getTable() {
+		//Table table=new Table();
 		/*table.setTableName(dataReader.readString());
 		table.setColumns(dataReader.readMap());*/
-		return table;
+		return null;
 	}
 	
 	
-	public List<TableOrView> getTables() {
-		List<TableOrView> tables=new ArrayList<>();
+	public List<Table> getTables() {
+		List<Table> tables=new ArrayList<>();
 		
 		
 		return tables;
