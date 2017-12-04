@@ -6,7 +6,7 @@ public enum Types {
 		this.val=num;
 	}
 	private int val;
-	private int getValue() {
+	public int getValue() {
 		return this.val;
 	}
  }

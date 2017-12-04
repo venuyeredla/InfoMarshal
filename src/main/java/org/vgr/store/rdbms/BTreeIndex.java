@@ -16,7 +16,6 @@ import org.vgr.store.ds.Page;
 public class BTreeIndex {
 	private static final Logger LOG = LoggerFactory.getLogger(BTree.class);
 	private FileStore fileStore=null;
-
 	public IndexNode root;
 	private int degree = Page.degree;
 	private SchemaInfo schemaInfo = null;

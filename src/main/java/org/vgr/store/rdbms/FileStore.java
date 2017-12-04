@@ -12,8 +12,7 @@ public class FileStore {
 	private DataWriter writer;
 	private DataReader reader;
 	private boolean existed;
-	
-	
+
 	public FileStore() {
 		boolean exists = new File(dbFile).exists();
 		this.existed=exists;
@@ -23,9 +22,8 @@ public class FileStore {
 
 	public FileStore(String dbFile) {
 		this.dbFile=dbFile;
-		boolean exists = new File(dbFile).exists();
-		this.existed=exists;
-		this.writer = new DataWriter(dbFile, exists);
+		this.existed = new File(dbFile).exists();
+		this.writer = new DataWriter(dbFile, this.existed);
 		this.reader = new DataReader(dbFile);
 	}
 

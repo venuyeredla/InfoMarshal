@@ -1,22 +1,23 @@
 package org.vgr.store.rdbms;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.vgr.store.io.Block;
 
 public class SchemaInfo {
+	
     private FileStore fileStore=null;
 	private int pageId;
 	private String schemaName;
 	private String userName;
 	private String passWord;
-	private Map<String,Integer> tables;
 	private int noOfPages;
 	private boolean hasIndex;
 	private int rootPage;
-
+	private boolean hasTables;
+	private Map<String,Integer> tables;
 	public SchemaInfo() {
-
 	}
 	public SchemaInfo(String schemaName, String userName, String passWord) {
 		super();
@@ -42,6 +43,7 @@ public class SchemaInfo {
 		this.setNoOfPages(0);
 		this.setHasIndex(false);
 		this.setRootPage(-1);
+		this.setHasTables(false);
 		persist();
 	  }
 
@@ -53,9 +55,18 @@ public class SchemaInfo {
 		block.write(this.getPassWord());
 		System.out.println("Total numuber of pages  : " + this.getNoOfPages());
 		block.write(this.getNoOfPages());
-		int b = this.isHasIndex() ? 1 : 0;
-		block.write((byte) b);
+		byte b = (byte) (this.isHasIndex() ? 1 : 0);
+		block.write(b);
 		block.write(this.getRootPage());
+		byte hasTables=(byte) (this.isHasTables() ? 1 : 0);
+		block.write(hasTables);
+		if(this.hasTables) {
+			block.write((byte)tables.size());
+			this.tables.forEach((k,v)->{
+				block.write(k);
+				block.write(v);
+			});
+		}
 		fileStore.writeBlock(0, block);
 		}
 	  
@@ -70,6 +81,15 @@ public class SchemaInfo {
 		boolean hasIndex = val == 0 ? false : true;
 		this.setHasIndex(hasIndex);
 		this.setRootPage(block.readInt());
+		int tablesExist = block.readByte();
+		boolean hasTables = tablesExist == 0 ? false : true;
+		if(hasTables) {
+			byte tablesSize=block.readByte();
+			tables=new HashMap<>();
+			for(int i=0;i<tablesSize;i++) {
+				tables.put(block.readString(), block.readInt());	
+			}
+		}
 	}
 
 	public int getPageId() {
@@ -96,7 +116,6 @@ public class SchemaInfo {
 	public void setPassWord(String passWord) {
 		this.passWord = passWord;
 	}
-
 	public int getNoOfPages() {
 		return noOfPages;
 	}
@@ -115,11 +134,15 @@ public class SchemaInfo {
 	public void setRootPage(int rootPage) {
 		this.rootPage = rootPage;
 	}
-	
 	public int nextPageId() {
 	   	return ++noOfPages;
 	}
-	
+	public boolean isHasTables() {
+		return hasTables;
+	}
+	public void setHasTables(boolean hasTables) {
+		this.hasTables = hasTables;
+	}
 	public Map<String, Integer> getTables() {
 		return tables;
 	}
