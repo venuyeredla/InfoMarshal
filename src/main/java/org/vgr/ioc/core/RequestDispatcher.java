@@ -1,4 +1,4 @@
-package org.vgr.ioc.web;
+package org.vgr.ioc.core;
 
 import java.lang.reflect.Method;
 
@@ -7,15 +7,11 @@ import org.slf4j.LoggerFactory;
 import org.vgr.http.server.HttpRequest;
 import org.vgr.http.server.HttpResponse;
 import org.vgr.ioc.annot.Service;
-import org.vgr.ioc.core.ContainerAware;
-import org.vgr.ioc.core.IocContainer;
 
 @Service(id="requestDispatcher")
 public class RequestDispatcher implements ContainerAware {
 	private static final Logger LOGGER=LoggerFactory.getLogger(RequestDispatcher.class);
-	 
 	IocContainer iocContainer=null;
-
     public void init(){
     	LOGGER.info("RequestDispatcher initilized");
 			iocContainer=null;

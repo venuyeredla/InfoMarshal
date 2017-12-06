@@ -1,4 +1,4 @@
-package org.vgr.ioc.web;
+package org.vgr.ioc.core;
 
 import org.vgr.http.server.HttpResponse;
 

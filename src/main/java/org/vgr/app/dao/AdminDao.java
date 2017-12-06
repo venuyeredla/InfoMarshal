@@ -7,7 +7,7 @@ import java.util.List;
 import org.vgr.app.domain.Profile;
 import org.vgr.ioc.annot.Dao;
 import org.vgr.ioc.annot.Inject;
-import org.vgr.ioc.jdbc.JDBCTemplate;
+import org.vgr.ioc.core.JDBCTemplate;
 
 @Dao(id="adminDao")
 public class AdminDao {

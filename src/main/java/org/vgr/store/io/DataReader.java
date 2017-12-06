@@ -65,7 +65,6 @@ public class DataReader implements Closeable{
 		return null;
 	}
 	
-	
 	public Block readBlock(int offset) {
 		try {
 		    Path path=FileSystems.getDefault().getPath(fileName);

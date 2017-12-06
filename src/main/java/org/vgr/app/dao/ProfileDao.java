@@ -9,7 +9,7 @@ import org.vgr.app.domain.Image;
 import org.vgr.app.domain.Profile;
 import org.vgr.ioc.annot.Dao;
 import org.vgr.ioc.annot.Inject;
-import org.vgr.ioc.jdbc.JDBCTemplate;
+import org.vgr.ioc.core.JDBCTemplate;
 
 @Dao(id="profileDao")
 public class ProfileDao {

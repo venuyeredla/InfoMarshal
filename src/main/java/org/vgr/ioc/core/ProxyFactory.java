@@ -1,4 +1,4 @@
-package org.vgr.ioc.aop;
+package org.vgr.ioc.core;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;

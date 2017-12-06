@@ -1,4 +1,4 @@
-package org.vgr.ioc.aop;
+package org.vgr.ioc.core;
 
 public class Car implements IVehicle{
 	private String name;

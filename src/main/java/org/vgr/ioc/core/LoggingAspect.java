@@ -1,4 +1,4 @@
-package org.vgr.ioc.aop;
+package org.vgr.ioc.core;
 
 import java.util.HashMap;
 

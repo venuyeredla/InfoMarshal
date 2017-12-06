@@ -13,7 +13,7 @@ import org.vgr.http.server.HttpSession;
 import org.vgr.ioc.annot.Controller;
 import org.vgr.ioc.annot.Handler;
 import org.vgr.ioc.annot.Inject;
-import org.vgr.ioc.web.FormReader;
+import org.vgr.ioc.core.FormReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -12,10 +12,10 @@ import java.util.Stack;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.vgr.app.search.Request;
-import org.vgr.app.search.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vgr.store.search.Request;
+import org.vgr.store.search.Response;
 
 public class Server implements Runnable {
 	 private boolean flag=true;

@@ -1,4 +1,4 @@
-package org.vgr.ioc.jdbc;
+package org.vgr.ioc.core;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

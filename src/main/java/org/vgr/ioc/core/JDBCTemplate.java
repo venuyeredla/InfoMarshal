@@ -1,4 +1,4 @@
-package org.vgr.ioc.jdbc;
+package org.vgr.ioc.core;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;

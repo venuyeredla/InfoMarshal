@@ -9,9 +9,8 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vgr.ioc.annot.AnnotaionReader;
-import org.vgr.ioc.web.HandlerConfig;
-
-    public class IocContainer implements BeanFactory {
+   
+public class IocContainer implements BeanFactory {
 	private static final Logger LOGGER=LoggerFactory.getLogger(IocContainer.class);
 	private HashMap<String,BeanDefinition> beanContainer=null;
 	private HashMap<String, HandlerConfig>  handlers=null;

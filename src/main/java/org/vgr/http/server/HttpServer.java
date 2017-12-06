@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vgr.ioc.annot.Inject;
 import org.vgr.ioc.annot.Service;
-import org.vgr.ioc.web.RequestDispatcher;
+import org.vgr.ioc.core.RequestDispatcher;
 
 @Service(id="httpServer")
 public class HttpServer implements Runnable{

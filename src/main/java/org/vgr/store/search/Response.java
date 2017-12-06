@@ -1,4 +1,4 @@
-package org.vgr.app.search;
+package org.vgr.store.search;
 
 import java.io.Serializable;
 

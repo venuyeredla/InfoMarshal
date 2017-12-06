@@ -2,10 +2,10 @@ package org.vgr.ioc.test;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.vgr.ioc.aop.Car;
-import org.vgr.ioc.aop.IVehicle;
-import org.vgr.ioc.aop.LoggingAspect;
-import org.vgr.ioc.aop.ProxyFactory;
+import org.vgr.ioc.core.Car;
+import org.vgr.ioc.core.IVehicle;
+import org.vgr.ioc.core.LoggingAspect;
+import org.vgr.ioc.core.ProxyFactory;
 
 
 public class AopTest {

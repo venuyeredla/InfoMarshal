@@ -11,8 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vgr.ioc.core.BeanDefinition;
 import org.vgr.ioc.core.BeanProperty;
+import org.vgr.ioc.core.HandlerConfig;
 import org.vgr.ioc.core.IocContainer;
-import org.vgr.ioc.web.HandlerConfig;
 
 public class AnnotaionReader {
 	private static final Logger LOGGER=LoggerFactory.getLogger(AnnotaionReader.class);
