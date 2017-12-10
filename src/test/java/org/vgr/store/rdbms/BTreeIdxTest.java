@@ -27,24 +27,25 @@ public class BTreeIdxTest {
 	public void testInsert() {
 		   HashSet<Integer> keySet=RandomUtil.randomNumsSet(10, 20);
 		   int i=1;
-		  /* int arr[]= {13,47,9,31,6,9,11,13,30,31,16,29,47,14,16,18,23,29,10,39,42,47};
+		   int arr[]= {6,9,16,17,19,12};
 		   for(int k=0;k<arr.length;k++) {
 			   bTree.insert(arr[k],i++);
-		   }*/
+			   bTree.traverse();
+		   }
 		   
 	/*	   for (Integer integer : keySet) {
 			   System.out.print("("+integer+", "+(i++)+")");
 			   bTree.insert(arr[k],i++);
 		    }*/
-		   StringBuffer stringBuffer=new StringBuffer();
+/*		   StringBuffer stringBuffer=new StringBuffer();
 	       for (Integer integer : keySet) {
 	    	      int val=i++;
 	    	      stringBuffer.append("("+integer+","+val+")");
 	    	      bTree.insert(integer,val);
-			}
-            bTree.traverse();
-		    System.out.println("\nTotal keys inserted : "+keySet.size());
-		    System.out.println(stringBuffer);
+	    	      bTree.traverse();
+			}*/
+	/*	    System.out.println("\nTotal keys inserted : "+keySet.size());
+		    System.out.println(stringBuffer);*/
 		    
 		  }
 	@Test
@@ -62,7 +63,7 @@ public class BTreeIdxTest {
 		for (Integer integer : keySet) {
 			  IndexNode result=bTree.search(bTree.root, integer);
 			  if(result!=null) {
-				  System.out.print("Key : "+ integer +" Page : "+result.getId() +" -> Keys : "+result.getKeys()+"\n");
+				  System.out.print("Key : "+ integer +" Page : "+result.getId() +" -> Keys : "+result.keys()+"\n");
 			  }
 			  
 		   }

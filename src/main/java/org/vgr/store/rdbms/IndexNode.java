@@ -1,19 +1,20 @@
 package org.vgr.store.rdbms;
 
+import java.util.Arrays;
+
 public class IndexNode extends Node {
 	 public static int degree=DBConstatnts.DEGREE;      // Minimum degree (defines the range for number of keys) 
 	 private int[] keys;  // An array of keys
 	 private int keySize;   // No of keys stored.
 	 private int[] childs;
-	 private int childSize;
 	 private boolean leaf; 
+	 private boolean hasLastChild=false;
 
 	 public IndexNode(int pageid,boolean leaf) {
 		 keys=new int[2*degree];
 		 childs=new int[2*degree+1];	
 		 this.leaf=leaf;
 		 this.id=pageid;
-		 childSize=0;
 		 parentId=-1;
 	 }
 	public IndexNode(int pageid,boolean leaf,int key) {
@@ -23,7 +24,6 @@ public class IndexNode extends Node {
 		 keys[0]=key;
 		 keySize++;
 		 this.id=pageid;
-		 childSize=0;
 	 }
 	
 	/**
@@ -59,6 +59,16 @@ public class IndexNode extends Node {
 		 childs[pos]=childid;
 		 
 	 }
+	 public void setChild(int pos,int childid) {
+		 childs[pos]=childid;
+	 }
+	 public int deletChild(int pos) {
+		 int temp=childs[pos];
+		 childs[pos]=0;
+		 return temp;
+	 }
+	 
+	 
 	 
 	 public void add(int key,int childid) {
 		 keys[keySize]=key;
@@ -79,10 +89,6 @@ public class IndexNode extends Node {
 		 return temp;
 	 }
 	 
-	 public void setChildId(int pos,int childId) {
-		 this.childs[pos]=childId;
-		 childSize++;
-	 }
 	 
 	 public void setKey(int pos,int key) {
 		 keys[pos]=key;
@@ -104,12 +110,20 @@ public class IndexNode extends Node {
 		 return this.childs[pos];
 	 }
 	 
-	 public String getKeys() {
-			StringBuilder keyString=new StringBuilder("Leaf  : "+this.isLeaf()+" "+this.id+" : ");
+	 public String keys() {
+			StringBuilder keyString=new StringBuilder("(Page,Leaf)->("+this.id+","+ this.isLeaf()+") --Keys: " );
 			for(int i=0;i<keySize;i++) 
-				keyString.append("("+keys[i]+", "+childs[i]+"),");
+				keyString.append(keys[i]+",");
 	        return new String(keyString);		 
 	  }
+	 
+	 public String childs() {
+			StringBuilder childsString=new StringBuilder();
+			for(int i=0;i<keySize+1;i++) 
+				childsString.append(childs[i]+",");
+	        return new String(childsString);		 
+	  }
+	 
 	 
 	public int getId() {
 		return id;
@@ -121,14 +135,6 @@ public class IndexNode extends Node {
 
 	public int getKeySize() {
 		return keySize;
-	}
-	
-	public int getChildSize() {
-		return childSize;
-	}
-
-	public void setChildSize(int childSize) {
-		this.childSize = childSize;
 	}
 
 	public void setKeySize(int keySize) {
@@ -149,11 +155,16 @@ public class IndexNode extends Node {
 		this.leaf = leaf;
 	}
 	
-	
+	public boolean isHasLastChild() {
+		return hasLastChild;
+	}
+	public void setHasLastChild(boolean hasLastChild) {
+		this.hasLastChild = hasLastChild;
+	}
 	@Override
 	public String toString() {
-		return "DbPage [id=" + id + ", parentId=" + parentId + ", keySize=" + keySize + ", childSize=" + childSize
-				+ ", leaf=" + leaf + "]";
+		return "IndexNode [keys=" + Arrays.toString(keys) + ", keySize=" + keySize + ", childs="
+				+ Arrays.toString(childs) + ", leaf=" + leaf + ", hasLastChild=" + hasLastChild + "]";
 	}
 
 }
