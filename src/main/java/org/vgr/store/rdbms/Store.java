@@ -9,5 +9,6 @@ public interface Store {
 	public void writeIdxNode(IndexNode node);
 	public IndexNode readIdxNode(int nodeId);
 	public void addToBuffer(int key,IndexNode node);
+	public String getPageList();
 
 }

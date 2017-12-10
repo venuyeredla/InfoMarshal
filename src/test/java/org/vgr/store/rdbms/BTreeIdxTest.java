@@ -7,10 +7,13 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vgr.app.util.RandomUtil;
 import org.vgr.store.io.FileUtil;
 
 public class BTreeIdxTest {
+	private static final Logger LOG = LoggerFactory.getLogger(BTreeIdxTest.class);
 	private static BTreeIndex bTree=null;
 	static String index=FileUtil.getPath("btree.idx");
 	@BeforeClass
@@ -22,7 +25,7 @@ public class BTreeIdxTest {
 	
 	@Test
 	public void testInsert() {
-		   HashSet<Integer> keySet=RandomUtil.randomNumsSet(20, 50);
+		   HashSet<Integer> keySet=RandomUtil.randomNumsSet(10, 20);
 		   int i=1;
 		  /* int arr[]= {13,47,9,31,6,9,11,13,30,31,16,29,47,14,16,18,23,29,10,39,42,47};
 		   for(int k=0;k<arr.length;k++) {
@@ -33,14 +36,16 @@ public class BTreeIdxTest {
 			   System.out.print("("+integer+", "+(i++)+")");
 			   bTree.insert(arr[k],i++);
 		    }*/
+		   StringBuffer stringBuffer=new StringBuffer();
 	       for (Integer integer : keySet) {
-	    	 bTree.insert(integer,i++);
+	    	      int val=i++;
+	    	      stringBuffer.append("("+integer+","+val+")");
+	    	      bTree.insert(integer,val);
 			}
-           bTree.traverse();
-			 // bTree.insert(2080);
-		      System.out.println("\nTotal keys inserted : "+keySet.size());
-		   //   bTree.traverse(bTree.rootPage);
-		   
+            bTree.traverse();
+		    System.out.println("\nTotal keys inserted : "+keySet.size());
+		    System.out.println(stringBuffer);
+		    
 		  }
 	@Test
 	@Ignore

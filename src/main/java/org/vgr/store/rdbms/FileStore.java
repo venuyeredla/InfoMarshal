@@ -89,4 +89,10 @@ public class FileStore  implements Store{
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public String getPageList() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

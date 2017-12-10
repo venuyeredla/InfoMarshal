@@ -3,9 +3,12 @@ package org.vgr.store.rdbms;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vgr.store.io.Bytes;
 
 public class MapStore implements Store{
+	private static final Logger LOG = LoggerFactory.getLogger(MapStore.class);
 	 Map<Integer,Bytes> mapStore=null;
 	 Map<Integer,IndexNode> bufferPages=null;
 	 
@@ -44,22 +47,35 @@ public class MapStore implements Store{
 		}
 		
 		public IndexNode readIdxNode(int nodeId) {
-			 if(bufferPages.containsKey(nodeId)) {
-				 return bufferPages.get(nodeId);
-			 }else {
-				 Bytes block = mapStore.get(nodeId);
-					int pageNum = block.readInt();
-					byte b = block.readByte();
-					boolean isLeaf = b == 2 ? true : false;
-					IndexNode node = new IndexNode(pageNum, isLeaf);
-					node.setId(pageNum);
-					node.setParentId(block.readInt());
-					int keySize = block.readInt();
-					for (int i = 0; i < keySize; i++) {
-						node.add(block.readInt(),block.readInt());
-					}
-					return node;
-			 }
+			 try {
+				 if(bufferPages.containsKey(nodeId)) {
+					 return bufferPages.get(nodeId);
+				 }else {
+					    Bytes block = mapStore.get(nodeId);
+						int pageNum = block.readInt();
+						byte b = block.readByte();
+						boolean isLeaf = b == 2 ? true : false;
+						IndexNode node = new IndexNode(pageNum, isLeaf);
+						node.setId(pageNum);
+						node.setParentId(block.readInt());
+						int keySize = block.readInt();
+						for (int i = 0; i < keySize; i++) {
+							node.add(block.readInt(),block.readInt());
+						}
+						return node;
+				 }
+			 }catch (Exception e) {
+				LOG.info("Error in getting page : " + nodeId);
+			}
+			return null;
+		}
+		
+		public String getPageList() {
+			StringBuffer stringBuffer=new StringBuffer();
+			bufferPages.keySet().forEach(key->{
+				stringBuffer.append(key+" , ");
+			});
+			return new String(stringBuffer);
 		}
 		
 		public int getNodeOffset(int pageNum) {

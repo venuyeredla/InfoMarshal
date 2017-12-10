@@ -105,7 +105,7 @@ public class IndexNode extends Node {
 	 }
 	 
 	 public String getKeys() {
-			StringBuilder keyString=new StringBuilder(""+this.id+" : ");
+			StringBuilder keyString=new StringBuilder("Leaf  : "+this.isLeaf()+" "+this.id+" : ");
 			for(int i=0;i<keySize;i++) 
 				keyString.append("("+keys[i]+", "+childs[i]+"),");
 	        return new String(keyString);		 
