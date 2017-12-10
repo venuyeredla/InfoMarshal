@@ -1,4 +1,4 @@
-package org.vgr.crypt;
+package org.vgr.security;
 
 import java.security.GeneralSecurityException;
 

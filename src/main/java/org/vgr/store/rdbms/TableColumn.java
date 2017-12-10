@@ -1,13 +1,13 @@
 package org.vgr.store.rdbms;
 
-public class Column {
+public class TableColumn {
 	private String name;
-	private int pos;
+	private byte pos;
 	private Types type;
 
-	public Column(String name, int i, Types type) {
+	public TableColumn(String name, int pos, Types type) {
 		this.name = name;
-		this.pos = i;
+		this.pos = (byte)pos;
 		this.type = type;
 	}
 	public String getName() {
@@ -16,7 +16,7 @@ public class Column {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public int getPos() {
+	public byte getPos() {
 		return pos;
 	}
 	public void setPos(byte pos) {
@@ -28,5 +28,8 @@ public class Column {
 	public void setType(Types type) {
 		this.type = type;
 	}
-   
+	@Override
+	public String toString() {
+		return "TableColumn [name=" + name + ", pos=" + pos + ", type=" + type + "]";
+	}
 }

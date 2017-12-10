@@ -13,9 +13,9 @@ public class BlockTest2 {
 		DataWriter writer=new DataWriter(blockFile,false);
 		
 		for(int i=0;i<10;i++) {
-			Block block=new Block();
+			Bytes block=new Bytes();
 			block.write("Block and venu "+i);
-			int offset=i*Block.BLOCK_SIZE;
+			int offset=i*Bytes.BLOCK_SIZE;
 			writer.writeBlock(offset, block);
 		 }
 		writer.close();
@@ -30,8 +30,8 @@ public class BlockTest2 {
    public void readTest() {
 	   DataReader reader=new DataReader(blockFile);
 	   for(int i=0;i<10;i++) {
-		    int offset=i*Block.BLOCK_SIZE;
-		    Block block=reader.readBlock(offset);
+		    int offset=i*Bytes.BLOCK_SIZE;
+		    Bytes block=reader.readBlock(offset);
 		    System.out.println("Block num:"+i+" and value is:"+block.readString());
 		 }
 	   reader.close();

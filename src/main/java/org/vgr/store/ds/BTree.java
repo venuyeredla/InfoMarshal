@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vgr.store.io.Block;
+import org.vgr.store.io.Bytes;
 import org.vgr.store.io.DataReader;
 import org.vgr.store.io.DataWriter;
 import org.vgr.store.rdbms.SchemaInfo;
@@ -31,14 +31,14 @@ public class BTree implements Closeable {
 		boolean exists = new File(dbFile).exists();
 		this.writer = new DataWriter(dbFile, exists);
 		this.reader = new DataReader(dbFile);
-		this.init(exists);
+		//this.init(exists);
 		unsavedPages = new ArrayList<>();
-		rootPage = getPage(schemaInfo.getRootPage());
+		//rootPage = getPage(schemaInfo.getRootPage());
 	}
 
 	public void insert(int key, long data) {
 		rootPage = insert(rootPage, key, data);
-		schemaInfo.setRootPage(rootPage.getId());
+		//schemaInfo.setRootPage(rootPage.getId());
 	}
 
 	public Page insert(Page page, int key, long data) {
@@ -164,7 +164,7 @@ public class BTree implements Closeable {
 	}
 
 	public void writePage(Page page) {
-		Block block = new Block();
+		Bytes block = new Bytes();
 		int pageType = page.isLeaf() ? 2 : 1;
 		block.write(page.getId());// Page Number
 		block.write((byte) pageType);
@@ -198,7 +198,7 @@ public class BTree implements Closeable {
 	public Page getPageTravarse(int pageid) {
 		if (pageid == -1) {
 			return null;
-		} else if (pageid <= schemaInfo.getNoOfPages()) {
+		} else if (pageid <= schemaInfo.getPages()) {
 			Page rpage=readPage(pageid);
 			unsavedPages.add(rpage);
 			return rpage;
@@ -216,7 +216,7 @@ public class BTree implements Closeable {
 		}
 		if (pageid == -1) {
 			return null;
-		} else if (pageid <= schemaInfo.getNoOfPages()) {
+		} else if (pageid <= schemaInfo.getPages()) {
 			Page rpage=readPage(pageid);
 			unsavedPages.add(rpage);
 			return rpage;
@@ -226,8 +226,8 @@ public class BTree implements Closeable {
 	}
 
 	public Page readPage(int pageId) {
-		int offset = pageId * Block.BLOCK_SIZE;
-		Block block = reader.readBlock(offset);
+		int offset = pageId * Bytes.BLOCK_SIZE;
+		Bytes block = reader.readBlock(offset);
 		int pageNum = block.readInt();
 		byte b = block.readByte();
 		boolean isLeaf = b == 2 ? true : false;
@@ -246,15 +246,15 @@ public class BTree implements Closeable {
 	}
 
 	public int getPageOffset(int pageNum) {
-		int offset = pageNum * Block.BLOCK_SIZE;
+		int offset = pageNum * Bytes.BLOCK_SIZE;
 		return offset == -1 ? 0 : offset;
 	}
 
 	public int nextPageId() {
-		return schemaInfo.nextPageId();
+		return schemaInfo.nextPage();
 	}
 
-	public boolean init(boolean exists) {
+/*	public boolean init(boolean exists) {
 		try {
 			if (exists) {
 				readMeta();
@@ -267,44 +267,37 @@ public class BTree implements Closeable {
 			e.printStackTrace();
 			return false;
 		}
-	}
+	}*/
 
 	private void initialize() {
 		schemaInfo = new SchemaInfo("venudb", "venugopal", "venugopal");
-		schemaInfo.setPageId(0);
-		schemaInfo.setNoOfPages(0);
-		schemaInfo.setHasIndex(false);
-		schemaInfo.setRootPage(-1);
+	//	schemaInfo.setPageId(0);
+		//schemaInfo.setNoOfPages(0);
+		//schemaInfo.setRootPage(-1);
 	}
-
+/*
 	public void readMeta() {
-		Block block = reader.readBlock(0);
-		schemaInfo = new SchemaInfo();
+		Bytes block = reader.readBlock(0);
+	//	schemaInfo = new SchemaInfo(block);
 		schemaInfo.setPageId(block.readInt());
 		schemaInfo.setSchemaName(block.readString());
 		schemaInfo.setUserName(block.readString());
 		schemaInfo.setPassWord(block.readString());
 		schemaInfo.setNoOfPages(block.readInt());
 		int val = block.readByte();
-		boolean hasIndex = val == 0 ? false : true;
-		schemaInfo.setHasIndex(hasIndex);
-		schemaInfo.setRootPage(block.readInt());
 	}
-
-	public void writeMeta() {
-		Block block = new Block();
+*/
+/*	public void writeMeta() {
+		Bytes block = new Bytes();
 		block.write(schemaInfo.getPageId());
 		block.write(schemaInfo.getSchemaName());
 		block.write(schemaInfo.getUserName());
 		block.write(schemaInfo.getPassWord());
 		System.out.println("Total numuber of pages  : " + schemaInfo.getNoOfPages());
 		block.write(schemaInfo.getNoOfPages());
-		int b = schemaInfo.isHasIndex() ? 1 : 0;
-		block.write((byte) b);
-		block.write(schemaInfo.getRootPage());
 		writer.writeBlock(0, block);
 		writer.flush();
-	}
+	}*/
 
 	public void closeWriter() {
 		this.writer.close();
@@ -319,7 +312,7 @@ public class BTree implements Closeable {
 		unsavedPages.forEach(page -> {
 			this.writePage(page);
 		});
-		this.writeMeta();
+		//this.writeMeta();
 		/*
 		 * this.writer.close(); this.reader.close();
 		 */

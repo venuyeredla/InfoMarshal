@@ -14,7 +14,7 @@ public class DMLTest {
 	@Test
 	@Ignore
 	public void testInsert() {
-		int[] keys= new RandomUtil().randomNumbers(50, 100);
+		int[] keys=RandomUtil.randomNumbers(50, 100);
 		 DML dml=new DML(new DataWriter(dbFile,false));
 		 LinkedHashMap<String,String> map=null;
 		 for(int i=0;i<keys.length;i++) {

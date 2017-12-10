@@ -1,46 +1,86 @@
 package org.vgr.store.rdbms;
 
 public class IndexNode extends Node {
-	 public static int degree=25;      // Minimum degree (defines the range for number of keys) 
+	 public static int degree=DBConstatnts.DEGREE;      // Minimum degree (defines the range for number of keys) 
 	 private int[] keys;  // An array of keys
 	 private int keySize;   // No of keys stored.
-	 private int[] childIds;
+	 private int[] childs;
 	 private int childSize;
-	 IndexNode parent;
-	 IndexNode[] childPages; // An array of child pointers
-	  // Current number of keys
 	 private boolean leaf; 
 
 	 public IndexNode(int pageid,boolean leaf) {
-		 keys=new int[2*degree-1];
-		 childPages=new IndexNode[2*degree];
-		 childIds=new int[2*degree];	
+		 keys=new int[2*degree];
+		 childs=new int[2*degree+1];	
 		 this.leaf=leaf;
 		 this.id=pageid;
 		 childSize=0;
+		 parentId=-1;
 	 }
 	public IndexNode(int pageid,boolean leaf,int key) {
-		 keys=new int[2*degree-1];
-		 childPages=new IndexNode[2*degree];
-		 childIds=new int[2*degree];
+		 keys=new int[2*degree];
+		 childs=new int[2*degree+1];
 		 this.leaf=leaf;
 		 keys[0]=key;
 		 keySize++;
 		 this.id=pageid;
 		 childSize=0;
 	 }
-	 //Adds new key at end of the array
-	 public void addKey(int key) {
-		 keys[keySize++]=key;
+	
+	/**
+	 * Adds key and child and returns maxKey in Node.
+	 * @param key
+	 * @param child
+	 */
+	 public int insert(int key,int childid) {
+		 int j = this.keySize - 1;
+		 int maxKey=key,nextPos=-1;
+		 if(j==-1) {
+			 nextPos=j+1;
+		 }else {
+			 while(j>=0 && keys[j]>key) {
+				 keys[j+1]=keys[j];
+				 childs[j+1]=childs[j];
+				 if(maxKey<keys[j]) {
+					 maxKey=keys[j];
+				 }
+				 j--;
+			 }
+			 nextPos=j+1;
+		 }
+		 keys[nextPos]=key;
+		 childs[nextPos]=childid;
+		 keySize++;
+         return maxKey;
 	 }
+	 
+	 public void insert(int pos,int key,int childid) {
+		 if(pos>=keySize)  keySize++;
+		 keys[pos]=key;
+		 childs[pos]=childid;
+		 
+	 }
+	 
+	 public void add(int key,int childid) {
+		 keys[keySize]=key;
+		 childs[keySize]=childid;
+		 keySize++;
+	 }
+	 
 	 public int deleteKey(int pos) {
 		 int temp=keys[pos];
 		 keys[pos]=0;
+		 keySize--;
+		 return temp;
+	 }
+	 
+	 public int deleteChild(int pos) {
+		 int temp=childs[pos];
+		 childs[pos]=0;
 		 return temp;
 	 }
 	 
 	 public void setChildId(int pos,int childId) {
-		 this.childIds[pos]=childId;
+		 this.childs[pos]=childId;
 		 childSize++;
 	 }
 	 
@@ -57,56 +97,20 @@ public class IndexNode extends Node {
 			 j--;
 		 }
          keys[j+1]=key;		 
-         this.increseKeySize();
+         this.increaseKeySize();
 	 }
-	 
-	 
-	 public void setChild(int pos,IndexNode childPage) {
-		     childPages[pos]=childPage;
-			 this.childIds[pos]=childPage.getId();
-			 childSize++;
-	 }
-	 
-	 public void moveChild(int from,int to) {
-		 childPages[to]=childPages[from];
-	     childIds[to]=childIds[from];
-       }
-	 
 	 
 	 public int getChildId(int pos) {
-		 return this.childIds[pos];
-	 }
-	 
-	 public IndexNode deleteChild(int pos) {
-		 IndexNode temp=childPages[pos];
-		 if(temp!=null) {
-			 childPages[pos]=null;
-			 childSize--;
-		 }
-		 return temp;
+		 return this.childs[pos];
 	 }
 	 
 	 public String getKeys() {
-			StringBuilder keyString=new StringBuilder("");
+			StringBuilder keyString=new StringBuilder(""+this.id+" : ");
 			for(int i=0;i<keySize;i++) 
-				keyString.append(keys[i]+", ");
+				keyString.append("("+keys[i]+", "+childs[i]+"),");
 	        return new String(keyString);		 
 	  }
 	 
-	 /**
-	  * Used when a child is split into two parts.
-	  */
-	 public void setHalfFill() {
-		 this.keySize=degree-1;
-	 }
-	 
-	 public IndexNode getChild(int pos) {
-		return childPages[pos];
-	  }
-	 public void updateKey(int pos,int key) {
-		 
-	 }
-	
 	public int getId() {
 		return id;
 	}
@@ -130,11 +134,11 @@ public class IndexNode extends Node {
 	public void setKeySize(int keySize) {
 		this.keySize = keySize;
 	}
-	public void increseKeySize() {
+	public void increaseKeySize() {
 		keySize++;
 	}
 	public boolean isFull() {
-		return keySize== (2 * degree - 1)? true:false;
+		return keySize== (2 * degree)? true:false;
 	}
 
 	public boolean isLeaf() {
@@ -144,15 +148,8 @@ public class IndexNode extends Node {
 	public void setLeaf(boolean leaf) {
 		this.leaf = leaf;
 	}
-
-	public IndexNode getParent() {
-		return parent;
-	}
-
-	public void setParent(IndexNode parent) {
-		this.parent = parent;
-	}
-
+	
+	
 	@Override
 	public String toString() {
 		return "DbPage [id=" + id + ", parentId=" + parentId + ", keySize=" + keySize + ", childSize=" + childSize

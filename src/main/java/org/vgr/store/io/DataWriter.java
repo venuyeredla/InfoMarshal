@@ -24,12 +24,14 @@ import org.slf4j.LoggerFactory;
  */
 public class DataWriter implements Closeable {
 	private static final Logger LOG = LoggerFactory.getLogger(DataWriter.class);
-	OutputStream os = null;
-	String fileName;
-	RamStorage ramStorage = null;
-	boolean isRamStorage = false;
+	private OutputStream os = null;
+	private String fileName;
 	private int bytesWritten = 0;
 
+	/**
+	 * @param fileName
+	 * @param append  -- if false creates new file.
+	 */
 	public DataWriter(String fileName, boolean append) {
 		try {
 			this.fileName = fileName;
@@ -43,12 +45,7 @@ public class DataWriter implements Closeable {
 		this.os = new BufferedOutputStream(os);
 	}
 
-	public DataWriter(RamStorage ramStorage) {
-		isRamStorage = true;
-		this.ramStorage = ramStorage;
-	}
-
-	public void writeBlock(int offset, Block block) {
+	public void writeBlock(int offset, Bytes block) {
 		try {
 			Path path = FileSystems.getDefault().getPath(fileName);
 			SeekableByteChannel sbc = Files.newByteChannel(path, StandardOpenOption.WRITE);
@@ -100,10 +97,8 @@ public class DataWriter implements Closeable {
 	@Override
 	public void close() {
 		try {
-			if (!isRamStorage) {
 				os.flush();
 				os.close();
-			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

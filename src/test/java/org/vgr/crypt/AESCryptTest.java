@@ -15,9 +15,11 @@ import javax.crypto.NoSuchPaddingException;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import org.vgr.crypt.HashUtils.HashAlgorithm;
-import org.vgr.crypt.HashUtils.HashEncoding;
-import org.vgr.crypt.KeyUtils.KeyPairAlgorithm;
+import org.vgr.security.AESUtils;
+import org.vgr.security.HashUtils;
+import org.vgr.security.HashUtils.HashAlgorithm;
+import org.vgr.security.HashUtils.HashEncoding;
+import org.vgr.security.KeyUtils.KeyPairAlgorithm;
 
 public class AESCryptTest {
 

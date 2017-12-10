@@ -13,9 +13,13 @@ public class FileUtil {
 	public static String getOs() {
 		Map<String, String> sysEnv=System.getenv();  //.forEach((k,v)->System.out.println(k+":"+v));
 		String os=sysEnv.get("OS");
-		if(os!=null && os.startsWith("windows")) {
-			return WIN_DIR;
-		}if(os==null) {
+		if(os!=null) {
+			os=os.toLowerCase();
+			if(os.startsWith("windows")) {
+				return WIN_DIR;
+			}
+		}
+	   if(os==null) {
 			return MAC_DIR;
 		}
 		return LINUX_DIR;

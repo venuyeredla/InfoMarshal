@@ -1,4 +1,4 @@
-package org.vgr.crypt;
+package org.vgr.security;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;

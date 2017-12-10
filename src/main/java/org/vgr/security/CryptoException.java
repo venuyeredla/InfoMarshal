@@ -1,4 +1,4 @@
-package org.vgr.crypt;
+package org.vgr.security;
 
 /**
  * Generic Exception for all crypto related failures

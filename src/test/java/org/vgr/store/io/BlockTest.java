@@ -7,11 +7,11 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 public class BlockTest {
-	  Block block=null;
+	  Bytes block=null;
 
 	  @Before
 	  public void beore() {
-		  block=new Block(50);
+		  block=new Bytes(50);
 	  }
 	
 	  @Test
@@ -63,7 +63,7 @@ public class BlockTest {
 		@Test
 		@Ignore
 		public void writeTest() {
-			block=new Block(100);
+			block=new Bytes(100);
 			block.write(575);
 			block.write("venugopal Reddy");
 			byte b=(byte)127;

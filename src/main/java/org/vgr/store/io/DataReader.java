@@ -13,18 +13,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
+/**
+ * Every Read and write is done only in terms of block. Each Memory Block is considered as page.
+ * @author vyeredla
+ *
+ */
 public class DataReader implements Closeable{
-	InputStream is=null;
+	private InputStream is=null;
 	private String fileName;
-	public String getFileName() {
-		return fileName;
-	}
-	public void setFileName(String fileName) {
-		this.fileName = fileName;
-	}
-	RamStorage ramStorage=null;
-	boolean isRamStorage=false;
-	
+
     public DataReader(String fileName) {
 			try {
 				this.fileName=fileName;
@@ -32,50 +29,48 @@ public class DataReader implements Closeable{
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
-	  }
+	   }
 	public DataReader(InputStream in) {
 		this.is=new BufferedInputStream(in);
 		this.is.mark(0);
 	  }
-	public DataReader(RamStorage ramStorage) {
-		isRamStorage=true;
-		this.ramStorage=ramStorage; 
-     }
-	public Block readBytes(int size) {
+
+	public Bytes readBytes(int size) {
 		try {
 			byte[] bytes=new byte[size];
 			int count=this.is.read(bytes);
 			System.out.println("No of bytes read :"+count);
-			return new Block(bytes);
+			return new Bytes(bytes);
 		 } catch (IOException e) {
 			e.printStackTrace();
 		 }
 		return null;
 	}
 	
-	public Block readBlockOld(int offset) {
+	
+	public Bytes readBlockOld(int offset) {
 		try {
-			byte[] bytes=new byte[Block.BLOCK_SIZE];
+			byte[] bytes=new byte[Bytes.BLOCK_SIZE];
 			int count=this.is.read(bytes);
 			System.out.println("No of bytes read :"+count);
-			return new Block(bytes);
+			return new Bytes(bytes);
 		 } catch (IOException e) {
 			e.printStackTrace();
 		 }
 		return null;
 	}
 	
-	public Block readBlock(int offset) {
+	public Bytes readBlock(int offset) {
 		try {
 		    Path path=FileSystems.getDefault().getPath(fileName);
 			SeekableByteChannel sbc=Files.newByteChannel(path, StandardOpenOption.READ);
 			sbc.position(offset);
-		    ByteBuffer byteBuffer=ByteBuffer.allocate(Block.BLOCK_SIZE);
+		    ByteBuffer byteBuffer=ByteBuffer.allocate(Bytes.BLOCK_SIZE);
 		    int  noOfbytes=sbc.read(byteBuffer);
 			byte[] bytes= byteBuffer.array();
 			//System.out.println("Read BufferSize : "+noOfbytes);
 		    sbc.close();	
-			return new Block(bytes);
+			return new Bytes(bytes);
 		 } catch (IOException e) {
 			e.printStackTrace();
 		 }
@@ -95,13 +90,16 @@ public class DataReader implements Closeable{
 	@Override
 	public void close() {
 		try {
-			if(!isRamStorage) {
 				is.close();
-			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
+	
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
+	
 	public InputStream getIs() {
 		return is;
 	}

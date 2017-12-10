@@ -4,26 +4,27 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-/**
+ /**
  * Wraps byte array and default size is 512 bytes equivalent to HDD block size.
  * 
  */
-public class Block {
+public class Bytes{
 	public static int BLOCK_SIZE=512;
 	private byte[] bytes;
 	private int wPos;
 	private int rPos;
-	public Block() {
+	
+	public Bytes() {
 		bytes=new byte[BLOCK_SIZE];
 		wPos=0;//points to the next position to be inserted.
 		rPos=-1;
 	}
-	public Block(int size) {
+	public Bytes(int size) {
 		BLOCK_SIZE=size;
 		bytes=new byte[BLOCK_SIZE];
 		rPos=-1;
 	}
-	public Block(byte[] b) {
+	public Bytes(byte[] b) {
 		bytes=new byte[b.length];
 		for(int i=0;i<b.length;i++) 
 			bytes[wPos++]=b[i];
@@ -31,16 +32,22 @@ public class Block {
 		rPos=-1;
 	  }
 	
-	public void write(byte b) {
-		bytes[wPos++]=b;
-	}
-	private void writeByte(byte b) {
+	private Bytes writeByte(byte b) {
 		if(wPos+1>=BLOCK_SIZE) {
 			System.out.println("Block is full: Block size:"+bytes.length+ " Position to write : "+wPos+1);
 		}
 		bytes[wPos++]=b;
+		return this;
 	}
-	
+	/**
+	 * Writes lower order 8 bits;
+	 * @param b
+	 * @return
+	 */
+	public Bytes writeByte(int b) {
+		this.writeByte((byte)b);
+		return this;
+	  }
 	 /**
 	 * returns signed byte.
 	 * @return
@@ -55,7 +62,7 @@ public class Block {
 		  }
        return -1;
 	   }
-	
+
 	/**
 	 * Reads one byte and returns as short. other wise last bit considered as negative number.
 	 * @return
@@ -73,29 +80,32 @@ public class Block {
         return -1;
 	   }
 	
-	public void write(short s) {
-		writeByte((byte)(s >> 8)); 
-		writeByte((byte)s);
+	public Bytes write(short s) {
+		writeByte(s >> 8); 
+		writeByte(s);
+		return this;
 	}
 	public short readShort() {
 		return  (short)((read() << 8)|(read()));
 	 }
 	
-	public void write(int i) {
-		writeByte((byte)(i >> 24));	
-		writeByte((byte)(i >> 16));
-		writeByte((byte)(i >> 8));
-		writeByte((byte)(i));
+	public Bytes write(int i) {
+		writeByte(i >> 24);	
+		writeByte(i >> 16);
+		writeByte(i >> 8);
+		writeByte(i);
+		return this;
 	 }
 	public int readInt() {
 		return (read() << 24) | (read() << 16) |(read() << 8)|(read());
 	 }
-	public void writeVInt(int i) {
+	public Bytes writeVInt(int i) {
 		while((i & ~0x7F) !=0 ) {
-			writeByte((byte)((i&0x7F) | 0x80));
+			writeByte(((i&0x7F) | 0x80));
 			i>>=7;
 		}
-		writeByte((byte)i);
+		writeByte(i);
+		return this;
 	}
 	
 	public int readVInt() {
@@ -118,19 +128,21 @@ public class Block {
 		return 0;
 	}
 	
-	public void writeLong(long l) {
-		writeByte((byte)(l >> 56));	writeByte((byte)(l >> 48));	writeByte((byte)(l >> 40)); writeByte((byte)(l >> 32));
+	public Bytes writeLong(long l) {
+		writeByte((byte)l >> 56);	writeByte((byte)(l >> 48));	writeByte((byte)(l >> 40)); writeByte((byte)(l >> 32));
 		writeByte((byte)(l >> 24));	writeByte((byte)(l >> 16));	writeByte((byte)(l >> 8)); writeByte((byte)(l));
+		return this;
 	  }
 	public long readLong() {
 		 return (read() << 56) | (read() << 48) |(read() << 40)|(read() << 32)|
 				(read() << 24) | (read() << 16) |(read() << 8)|(read());
 	}
 	
-	public void write(byte[] b) {
+	public Bytes write(byte[] b) {
 		for(int i=0;i<b.length;i++) {
 			bytes[wPos++]=b[i];
 		}
+		return this;
 	  }
 	
    public byte[] readBytes(int len) {
@@ -149,48 +161,57 @@ public class Block {
 	 * Adds the string bytes length as Vint and string bytes
 	 * @param str
 	 */
-	public void write(String str) {
+	public Bytes write(String str) {
 		writeVInt(str.getBytes().length);
 		this.write(str.getBytes());
+		return this;
 	}
 	
 	public String readString() {
 		 return new String(readBytes(readVInt()));
 	}
 	
-	public void write(LinkedHashMap<String,String> map) {
+	public Bytes write(boolean b) {
+		if(b) {
+			writeByte(1);
+		}else {
+			writeByte(0);
+		}
+		return this;
+	}
+	
+	public boolean readBoolean() {
+		  byte b=this.readByte();
+		  return b==1?true:false;
+	}
+	
+	public Bytes write(LinkedHashMap<String,String> map) {
 		writeVInt(map.keySet().size());
-		map.forEach((key,value)-> {
-			write(key);
-			write(value);
-		});
+		map.forEach((key,value)-> {	write(key);	write(value);});
+		return this;
 	}
 	public LinkedHashMap<String,String> readMap(){
 		LinkedHashMap<String,String> map=new LinkedHashMap<>();
-		int size=readVInt();
-		for (int i = 0; i < size; i++) {
-		map.put(readString(), readString());
+		for (int i = 0; i < readVInt(); i++) {
+		   map.put(readString(), readString());
 		}
 		return map;
 	}
 	public List<String> readList() {
 		List<String> list=new ArrayList<>();
-		int size=readInt();
-		for(int i=0;i<size;i++) {
+		for(int i=0;i<readInt();i++) {
 			list.add(readString());
 		}
 		return list;
 	}
-	
-	public void writeList(List<String> strings) {
+	public Bytes writeList(List<String> strings) {
 		write(strings.size());
 		strings.forEach(str -> write(str));
+		return this;
 	}
-	
-	public static int getBlockSize() {
+    public static int getBlockSize() {
 		return BLOCK_SIZE;
 	}
-	
 }
 
 class OutOfRangException extends Exception{
@@ -199,5 +220,3 @@ class OutOfRangException extends Exception{
 		super(message);
 	}
 }
-
-
