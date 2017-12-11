@@ -2,30 +2,37 @@ package org.vgr.store.rdbms;
 
 import java.util.Arrays;
 
-public class IndexNode extends Node {
+public class BtreeNode{
 	 public static int degree=DBConstatnts.DEGREE;      // Minimum degree (defines the range for number of keys) 
-	 private int[] keys;  // An array of keys
-	 private int keySize;   // No of keys stored.
-	 private int[] childs;
+	 private int id;
+	 private int parentId;
+	 private int[] keys; //Array of keys 
+	 private int keySize;// No of keys stored.
+	 private int[] childs;//Array of childs;
 	 private boolean leaf; 
 	 private boolean hasLastChild=false;
-
-	 public IndexNode(int pageid,boolean leaf) {
+	 
+	 public BtreeNode(int pageid,boolean leaf) {
 		 keys=new int[2*degree];
 		 childs=new int[2*degree+1];	
 		 this.leaf=leaf;
 		 this.id=pageid;
-		 parentId=-1;
+		 this.parentId=-1;
 	 }
-	public IndexNode(int pageid,boolean leaf,int key) {
+	public BtreeNode(int pageid,boolean leaf,int key) {
 		 keys=new int[2*degree];
 		 childs=new int[2*degree+1];
 		 this.leaf=leaf;
-		 keys[0]=key;
-		 keySize++;
+		 keys[keySize++]=key;
 		 this.id=pageid;
 	 }
 	
+	public int getParentId() {
+		return parentId;
+	}
+	public void setParentId(int parentId) {
+		this.parentId = parentId;
+	}
 	/**
 	 * Adds key and child and returns maxKey in Node.
 	 * @param key
@@ -33,16 +40,14 @@ public class IndexNode extends Node {
 	 */
 	 public int insert(int key,int childid) {
 		 int j = this.keySize - 1;
-		 int maxKey=key,nextPos=-1;
+		 int nextPos=-1;
 		 if(j==-1) {
 			 nextPos=j+1;
 		 }else {
+			 childs[j+2]=childs[j+1];
 			 while(j>=0 && keys[j]>key) {
 				 keys[j+1]=keys[j];
 				 childs[j+1]=childs[j];
-				 if(maxKey<keys[j]) {
-					 maxKey=keys[j];
-				 }
 				 j--;
 			 }
 			 nextPos=j+1;
@@ -50,15 +55,18 @@ public class IndexNode extends Node {
 		 keys[nextPos]=key;
 		 childs[nextPos]=childid;
 		 keySize++;
-         return maxKey;
+         return this.maxKey();
 	 }
 	 
 	 public void insert(int pos,int key,int childid) {
-		 if(pos>=keySize)  keySize++;
 		 keys[pos]=key;
 		 childs[pos]=childid;
+		 if(keySize==0) {
+			 keySize++;
+		 }
 		 
 	 }
+	 
 	 public void setChild(int pos,int childid) {
 		 childs[pos]=childid;
 	 }
@@ -67,9 +75,6 @@ public class IndexNode extends Node {
 		 childs[pos]=0;
 		 return temp;
 	 }
-	 
-	 
-	 
 	 public void add(int key,int childid) {
 		 keys[keySize]=key;
 		 childs[keySize]=childid;
@@ -88,39 +93,41 @@ public class IndexNode extends Node {
 		 childs[pos]=0;
 		 return temp;
 	 }
-	 
-	 
 	 public void setKey(int pos,int key) {
 		 keys[pos]=key;
 	 }
 	 public int getKey(int pos) {
 		 return keys[pos];
 	 }
-	 public void insertKey(int key) {
-		 int j = this.keySize - 1;
-		 while(j>=0 && keys[j]>key) {
-			 keys[j+1]=keys[j];
-			 j--;
-		 }
-         keys[j+1]=key;		 
-         this.increaseKeySize();
-	 }
+	 
+	  public int maxKey() {
+	 	  return keys[keySize-1];
+	   }
+	 
 	 
 	 public int getChildId(int pos) {
 		 return this.childs[pos];
 	 }
 	 
 	 public String keys() {
-			StringBuilder keyString=new StringBuilder("(Page,Leaf)->("+this.id+","+ this.isLeaf()+") --Keys: " );
-			for(int i=0;i<keySize;i++) 
-				keyString.append(keys[i]+",");
+			StringBuilder keyString=new StringBuilder("Id="+this.id+" Leaf="+this.isLeaf()+" Keys=(" );
+			for(int i=0;i<keySize;i++) {
+			 try {
+					keyString.append(keys[i]+",");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+				
+			keyString.append(")");
 	        return new String(keyString);		 
 	  }
 	 
 	 public String childs() {
-			StringBuilder childsString=new StringBuilder();
+			StringBuilder childsString=new StringBuilder("Childs=(");
 			for(int i=0;i<keySize+1;i++) 
 				childsString.append(childs[i]+",");
+			childsString.append(")");
 	        return new String(childsString);		 
 	  }
 	 
@@ -137,12 +144,6 @@ public class IndexNode extends Node {
 		return keySize;
 	}
 
-	public void setKeySize(int keySize) {
-		this.keySize = keySize;
-	}
-	public void increaseKeySize() {
-		keySize++;
-	}
 	public boolean isFull() {
 		return keySize== (2 * degree)? true:false;
 	}

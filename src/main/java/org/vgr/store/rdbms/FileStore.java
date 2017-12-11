@@ -38,7 +38,7 @@ public class FileStore  implements Store{
 		return block;
 	}
 	
-	public void writeIdxNode(IndexNode node) {
+	public void writeIdxNode(BtreeNode node) {
 		Bytes block = new Bytes();
 		int pageType = node.isLeaf() ? 2 : 1;
 		block.write(node.getId());// Page Number
@@ -55,13 +55,13 @@ public class FileStore  implements Store{
 		writer.flush();
 	}
 	
-	public IndexNode readIdxNode(int nodeId) {
+	public BtreeNode readIdxNode(int nodeId) {
 		int offset = nodeId * Bytes.BLOCK_SIZE;
 		Bytes block = reader.readBlock(offset);
 		int pageNum = block.readInt();
 		byte b = block.readByte();
 		boolean isLeaf = b == 2 ? true : false;
-		IndexNode node = new IndexNode(pageNum, isLeaf);
+		BtreeNode node = new BtreeNode(pageNum, isLeaf);
 		node.setId(pageNum);
 		node.setParentId(block.readInt());
 		int keySize = block.readInt();
@@ -85,7 +85,7 @@ public class FileStore  implements Store{
 	}
 
 	@Override
-	public void addToBuffer(int key, IndexNode node) {
+	public void addToBuffer(int key, BtreeNode node) {
 		// TODO Auto-generated method stub
 		
 	}

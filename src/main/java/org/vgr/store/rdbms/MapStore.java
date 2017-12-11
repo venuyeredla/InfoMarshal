@@ -10,7 +10,7 @@ import org.vgr.store.io.Bytes;
 public class MapStore implements Store{
 	private static final Logger LOG = LoggerFactory.getLogger(MapStore.class);
 	 Map<Integer,Bytes> mapStore=null;
-	 Map<Integer,IndexNode> bufferPages=null;
+	 Map<Integer,BtreeNode> bufferPages=null;
 	 
 	   public MapStore() {
 	    mapStore=new HashMap<>();
@@ -27,11 +27,11 @@ public class MapStore implements Store{
 	   }
 	   
 	   
-	   public void addToBuffer(int key,IndexNode node) {
+	   public void addToBuffer(int key,BtreeNode node) {
 		   bufferPages.put(key, node);
 	   }
 		
-		public void writeIdxNode(IndexNode node) {
+		public void writeIdxNode(BtreeNode node) {
 			Bytes block = new Bytes();
 			int pageType = node.isLeaf() ? 2 : 1;
 			block.write(node.getId());// Page Number
@@ -46,7 +46,7 @@ public class MapStore implements Store{
 			mapStore.put(node.getId(), block);
 		}
 		
-		public IndexNode readIdxNode(int nodeId) {
+		public BtreeNode readIdxNode(int nodeId) {
 			 try {
 				 if(bufferPages.containsKey(nodeId)) {
 					 return bufferPages.get(nodeId);
@@ -55,7 +55,7 @@ public class MapStore implements Store{
 						int pageNum = block.readInt();
 						byte b = block.readByte();
 						boolean isLeaf = b == 2 ? true : false;
-						IndexNode node = new IndexNode(pageNum, isLeaf);
+						BtreeNode node = new BtreeNode(pageNum, isLeaf);
 						node.setId(pageNum);
 						node.setParentId(block.readInt());
 						int keySize = block.readInt();
@@ -65,7 +65,7 @@ public class MapStore implements Store{
 						return node;
 				 }
 			 }catch (Exception e) {
-				LOG.info("Error in getting page : " + nodeId);
+				//LOG.info("Node doesn't exist : " + nodeId);
 			}
 			return null;
 		}

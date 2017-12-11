@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 public class BTreeIndex {
 	private static final Logger LOG = LoggerFactory.getLogger(BTreeIndex.class);
 	private Store store=null;
-	public IndexNode root;
+	public BtreeNode root;
 	private int degree=DBConstatnts.DEGREE;
 	private SchemaInfo schemaInfo = null;
 	private int pageCount=0;
@@ -25,9 +25,9 @@ public class BTreeIndex {
 
 	public void insert(int key,int pageid) {
 		if(root.isLeaf() && root.isFull()) {
-			  IndexNode newParent = newNode(false); 
-			  LOG.info("Root is full : "+ root.getId());
+			  BtreeNode newParent = newNode(false); 
 			  splitChild(newParent, root, 0,key,pageid);
+			  // LOG.info("New root : "+ root.getId());
               this.root=newParent;
 		  }else {
 			 insertNotFull(root,-1 ,key,pageid);
@@ -37,126 +37,100 @@ public class BTreeIndex {
 	/**
 	 * Key is inserted in node or page which is not full.
 	 * 
-	 * @param page
+	 * @param node
 	 * @param key
 	 * @return
 	 */
-	private IndexNode insertNotFull(IndexNode page, int nodePosition, int key,int pageid) {
+	private BtreeNode insertNotFull(BtreeNode node, int nodePosition, int key,int nodeid) {
 		try {
-			if (page.isLeaf() == true) {
-				int maxKey=page.insert(key, pageid);
-				LOG.info("Inserting (key,child,pageNum): ("+key+","+pageid+","+page.getId()+")");
+			if (node.isLeaf() == true) {
+				int maxKey=node.insert(key, nodeid);
+				LOG.info("Insert (key, in pageNum): ("+key+","+node.getId()+") -- Keys : "+node.keys());
 				if(nodePosition!=-1 &&key>=maxKey) {
-					IndexNode parent=store.readIdxNode(page.getParentId());
+					BtreeNode parent=store.readIdxNode(node.getParentId());
 					if(nodePosition<parent.getKeySize()) {
 						  parent.setKey(nodePosition, maxKey);
-						  LOG.info("Updating parent (key,child,pageNum): ("+key+","+pageid+","+page.getId()+")");
+						  LOG.info("Updating parent (key,child,pageNum): ("+key+","+nodeid+","+node.getId()+")");
 					}
-				
 				}
-				return page;
+				return node;
 			} else {
-				int i =page.getKeySize() - 1;
-				if(key>page.getKey(i) && !page.isHasLastChild()){
-					IndexNode lastChild=newNode(true);
-					lastChild.insert(key, pageid);
-					lastChild.setParentId(page.getId());
-					page.setHasLastChild(true);
-					page.setChild(i+1, lastChild.getId());
-					return page;
-				}else {
-					while (i >=0 && key < page.getKey(i))
+					int i =node.getKeySize() - 1;
+					while (i >=0 && key < node.getKey(i))
 						i--;
-					int childPageId = page.getChildId(i+1);
-					LOG.info("Key to be inserted(key,index,page) : ("+key +"," +(i+1)+","+childPageId+") --:  "+page.keys());
-					IndexNode requiredChild =store.readIdxNode(childPageId);
-					if (requiredChild.isFull()) {
-						splitChild(page, requiredChild, i+1,key,pageid);
-						return page;
-					 }else {
-						return insertNotFull(requiredChild,i+1, key,pageid);
+					LOG.info("Insert (key,index)  : ("+key +"," +(i+1)+") --:  "+node.keys());
+					 if(key==356) {
+						 System.out.println("Hi");
 					 }
-				}
+					BtreeNode requiredChild = this.getChild(node, i+1);
+					if(requiredChild==null) {
+						BtreeNode lastChild=newNode(true);
+						lastChild.insert(key, nodeid);
+						lastChild.setParentId(node.getId());
+						node.setHasLastChild(true);
+						node.setChild(i+1, lastChild.getId());
+						LOG.info("Adding last child to : "+node.getId());
+						return node;
+					  }else {
+							if (requiredChild.isFull()) {
+								splitChild(node, requiredChild, i+1,key,nodeid);
+								return node;
+							 }else {
+								return insertNotFull(requiredChild,i+1, key,nodeid);
+							 }
+					  }
+				 }
+			} catch (Exception e) {
+				LOG.info("Exception in inserting (key, in page)=("+key+"," + node.getId()+") - Keys"+node.keys());
+				e.printStackTrace();
 			}
-		} catch (Exception e) {
-			LOG.info(page.keys());
-			LOG.info("Exception in inserting key : " + key + " Page Number : " + page.getId());
-			e.printStackTrace();
-		}
-		
-		return page;
+			
+		return node;
 	}
 
-	public void splitChild(IndexNode parent, IndexNode child, int index,int key,int pageid) {
+	public void splitChild(BtreeNode parent, BtreeNode child, int index,int key,int pageid) {
 		//LOG.info(child.getKeys());
-		IndexNode childNew = newNode(child.isLeaf()); 
-		int firstMax=child.getKey(degree-1);
-		int secondMax=child.getKey(2*degree-1);
-		int secondMin=child.getKey(degree);
-		int k=0;
-		for (k = 0; k <degree; k++) { //Copying keys to second child
+		 BtreeNode childNew = newNode(child.isLeaf()); 
+		 int k=0;
+		 int secondMin=child.getKey(degree);
+		 for (k = 0; k <degree; k++) { //Copying keys to second child
 			 childNew.insert(child.deleteKey(k + degree),child.deleteChild(k + degree));
 		 }
 		 childNew.setChild(k, child.deletChild(k+degree));
 		 if(key<secondMin) {
-			 firstMax=child.insert(key, pageid);
+			 child.insert(key, pageid);
 		 }else {
-			 secondMax=childNew.insert(key, pageid);
+			 childNew.insert(key, pageid);
 		 }
 		 child.setParentId(parent.getId());
 		 childNew.setParentId(parent.getId());
-		 //LOG.info(parent.getKeys());
-		 parent.insert(index, firstMax,child.getId());
-		 // this.insertInParent(parent,index+1,secondMax, childNew.getId());
+		 if(child.maxKey()==356 || key==356) {
+			 System.out.println("Hi");
+		 }
+	/*	 if(index==2*degree) {
+			 BtreeNode pp=this.getParent(parent);
+			 splitChild(pp, parent, index, key, pageid);
+		 }*/
+
+		 parent.insert(index, child.maxKey(),child.getId());
 		 if(!parent.isFull()) {
-			 parent.insert(secondMax, childNew.getId());
+			 parent.insert(childNew.maxKey(), childNew.getId());
+			 if(childNew.isHasLastChild()) {
+				 parent.setChild(index+2, childNew.deletChild(2));	 
+				 childNew.setHasLastChild(false);
+			  }
 		 }else {
 			 if(parent.getParentId()==-1)
 			  {
-				  IndexNode newParent = newNode(false); 
-				  splitChild(newParent, parent, 0,secondMax,childNew.getId());
+				  BtreeNode newParent = newNode(false); 
+				  splitChild(newParent, parent, 0,childNew.maxKey(),childNew.getId());
 	              this.root=newParent;
-	            //LOG.info("New root : "+ root.getId());
+	              LOG.info("New root : "+ root.getId()+ " -- "+root.keys());
 			  }else {
-				  IndexNode parentParent=this.getParent(parent); 
+				  BtreeNode parentParent=this.getParent(parent); 
 				  splitChild(parentParent, parent, 0,key,childNew.getId());
 			  }
 		 }
-	/*	 LOG.info("Splitting child : "+ child.getId() +" into new child : " + childNew.getId());
-		 LOG.info(child.keys()+"Childs : "+child.childs());
-		 LOG.info(childNew.keys()+"Childs : "+childNew.childs());
-		 LOG.info(parent.keys()+"Childs : "+parent.childs());*/
-	}
-	
-	
-	public void insertInParent(IndexNode node,int index, int key,int childid) {
-		try {
-			 if(!node.isFull())
-			 {
-				/*int  i=node.getKeySize()-1;
-				 while(i>=index ) {
-					 node
-				 }*/
-				 node.insert(key, childid);
-			 }else {
-				  if(node.getParentId()==-1)
-				  {
-					  IndexNode newParent = newNode(false); 
-					  splitChild(newParent, root, 0,key,childid);
-		              this.root=newParent;
-		              LOG.info("New root : "+ root.getId());
-				  }else {
-					  IndexNode parent=this.getParent(node); 
-					  splitChild(parent, node, 0,key,childid);
-				  }
-			 }
-		}catch (Exception e) {
-			LOG.info("Error in inserting key in  parent(Page,key) -- ("+node.id+","+key+")");
-			LOG.info(node.keys());
-			e.printStackTrace();
-		}
-		
-		
 	}
 	
 	public void traverse() {
@@ -164,22 +138,20 @@ public class BTreeIndex {
 		this.traverse(root);
 	}
 	
-	private void traverse(IndexNode page) {
+	private void traverse(BtreeNode page) {
 		if (page != null) {
-			//if(!page.isLeaf())
-			LOG.info("Keys : "+page.keys()+ "Childs  : "+page.childs());
+			//LOG.info(page.keys()+ "Childs   : "+page.childs());
+			System.out.println(page.keys()+ "  "+page.childs());
 			int i;
 			try {
 				if (page.isLeaf() == false) {
 					for (i = 0; i < page.getKeySize(); i++) {
-							IndexNode child=getChild(page, i);
+							BtreeNode child=getChild(page, i);
 							traverse(child);
 						 }
-					if(page.isHasLastChild()) {
-						IndexNode lastChild=getChild(page, i);
+						BtreeNode lastChild=getChild(page, i);
+						if(lastChild!=null)
 						traverse(lastChild);
-					}
-					
 					}
 			}catch (Exception e) {
 				e.getSuppressed();
@@ -189,17 +161,17 @@ public class BTreeIndex {
 	
 	
 	
-   private IndexNode getParent(IndexNode node) {
+   private BtreeNode getParent(BtreeNode node) {
 	   return store.readIdxNode(node.getParentId());
    }
 	
-   private IndexNode getChild(IndexNode node,int pos) {
+   private BtreeNode getChild(BtreeNode node,int pos) {
 	    int childPage=node.getChildId(pos);
 	   return store.readIdxNode(childPage);
    }
 	
 
-	public IndexNode search(IndexNode page, int key) {
+	public BtreeNode search(BtreeNode page, int key) {
 		int position = 0;
 		try {
 			int i = 0;
@@ -213,7 +185,7 @@ public class BTreeIndex {
 			if (page.isLeaf() == true) {
 				return null;
 			}
-			IndexNode childePage=store.readIdxNode(page.getChildId(i));
+			BtreeNode childePage=store.readIdxNode(page.getChildId(i));
 			return search(childePage, key);
 
 		} catch (Exception e) {
@@ -226,9 +198,9 @@ public class BTreeIndex {
 
 	}
 
-	public IndexNode newNode(boolean isLeaf ) {
+	public BtreeNode newNode(boolean isLeaf ) {
 		int pageNum=++pageCount;
-		IndexNode node = new IndexNode(pageNum, isLeaf);
+		BtreeNode node = new BtreeNode(pageNum, isLeaf);
 		store.addToBuffer(node.getId(), node);
 		return node;
 	}

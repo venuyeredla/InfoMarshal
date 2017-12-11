@@ -1,5 +1,5 @@
 package org.vgr.store.rdbms;
 
-public class DataNode extends Node {
-
+public class DataNode{
+	private int id;
 }
