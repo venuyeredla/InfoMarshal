@@ -11,7 +11,7 @@ public class BtreeNode{
 	 private int[] childs;//Array of childs;
 	 private boolean leaf; 
 	 private boolean hasLastChild=false;
-	 
+
 	 public BtreeNode(int pageid,boolean leaf) {
 		 keys=new int[2*degree];
 		 childs=new int[2*degree+1];	
@@ -110,7 +110,7 @@ public class BtreeNode{
 	 }
 	 
 	 public String keys() {
-			StringBuilder keyString=new StringBuilder("Id="+this.id+" Leaf="+this.isLeaf()+" Keys=(" );
+			StringBuilder keyString=new StringBuilder("Node="+this.id+" Leaf="+this.isLeaf()+" Keys=(" );
 			for(int i=0;i<keySize;i++) {
 			 try {
 					keyString.append(keys[i]+",");

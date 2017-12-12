@@ -65,7 +65,7 @@ public class MapStore implements Store{
 						return node;
 				 }
 			 }catch (Exception e) {
-				//LOG.info("Node doesn't exist : " + nodeId);
+				LOG.info("Node doesn't exist : " + nodeId);
 			}
 			return null;
 		}
