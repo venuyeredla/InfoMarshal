@@ -1,6 +1,6 @@
 package org.vgr.store.rdbms;
 
 public class DBConstatnts {
-	public static int DEGREE=5;
+	public static int DEGREE=1;
 
 }

@@ -11,6 +11,7 @@ public class BtreeNode{
 	 private int[] childs;//Array of childs;
 	 private boolean leaf; 
 	 private boolean hasLastChild=false;
+	 private boolean isRoot;
 
 	 public BtreeNode(int pageid,boolean leaf) {
 		 keys=new int[2*degree];
@@ -96,7 +97,7 @@ public class BtreeNode{
 	 public void setKey(int pos,int key) {
 		 keys[pos]=key;
 	 }
-	 public int getKey(int pos) {
+	 public int keyAt(int pos) {
 		 return keys[pos];
 	 }
 	 
@@ -110,7 +111,7 @@ public class BtreeNode{
 	 }
 	 
 	 public String keys() {
-			StringBuilder keyString=new StringBuilder("Node="+this.id+" Leaf="+this.isLeaf()+" Keys=(" );
+			StringBuilder keyString=new StringBuilder("(Node,Leaf)=("+this.id+","+this.isLeaf()+")  Keys=(" );
 			for(int i=0;i<keySize;i++) {
 			 try {
 					keyString.append(keys[i]+",");
@@ -167,5 +168,13 @@ public class BtreeNode{
 		return "IndexNode [keys=" + Arrays.toString(keys) + ", keySize=" + keySize + ", childs="
 				+ Arrays.toString(childs) + ", leaf=" + leaf + ", hasLastChild=" + hasLastChild + "]";
 	}
+	public boolean isRoot() {
+		return isRoot;
+	}
+	public void setRoot(boolean isRoot) {
+		this.isRoot = isRoot;
+	}
 
+	
+	
 }

@@ -39,7 +39,7 @@ public class MapStore implements Store{
 			block.write(node.getParentId());
 			block.write(node.getKeySize());//
 			for (int i = 0; i < node.getKeySize(); i++) {
-				block.write(node.getKey(i));
+				block.write(node.keyAt(i));
 				block.write(node.getChildId(i));
 			}
 			//System.out.println("Writing page " + page.getId() + " at :" + offset);
