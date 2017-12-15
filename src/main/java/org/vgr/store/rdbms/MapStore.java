@@ -55,7 +55,7 @@ public class MapStore implements Store{
 						int pageNum = block.readInt();
 						byte b = block.readByte();
 						boolean isLeaf = b == 2 ? true : false;
-						BtreeNode node = new BtreeNode(pageNum, isLeaf);
+						BtreeNode node = new BtreeNode(pageNum,isLeaf);
 						node.setId(pageNum);
 						node.setParentId(block.readInt());
 						int keySize = block.readInt();

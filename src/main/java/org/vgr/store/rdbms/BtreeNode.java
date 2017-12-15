@@ -10,7 +10,6 @@ public class BtreeNode{
 	 private int keySize;// No of keys stored.
 	 private int[] childs;//Array of childs;
 	 private boolean leaf; 
-	 private boolean hasLastChild=false;
 	 private boolean isRoot;
 
 	 public BtreeNode(int pageid,boolean leaf) {
@@ -20,20 +19,6 @@ public class BtreeNode{
 		 this.id=pageid;
 		 this.parentId=-1;
 	 }
-	public BtreeNode(int pageid,boolean leaf,int key) {
-		 keys=new int[2*degree];
-		 childs=new int[2*degree+1];
-		 this.leaf=leaf;
-		 keys[keySize++]=key;
-		 this.id=pageid;
-	 }
-	
-	public int getParentId() {
-		return parentId;
-	}
-	public void setParentId(int parentId) {
-		this.parentId = parentId;
-	}
 	/**
 	 * Adds key and child and returns maxKey in Node.
 	 * @param key
@@ -67,6 +52,19 @@ public class BtreeNode{
 		 }
 		 
 	 }
+	 
+	  public int getChildPos(int childid) {
+		   int i=-1;
+	       for(i=0;i<keySize;i++) {
+	    	   if(childs[i]==childid) {
+	    		  return i; 
+	    	   }
+	         }
+	       if(this.isRoot && childs[i]==childid) {
+	    	   return i;
+	       }
+	       return -1;
+	  }
 	 
 	 public void setChild(int pos,int childid) {
 		 childs[pos]=childid;
@@ -105,33 +103,41 @@ public class BtreeNode{
 	 	  return keys[keySize-1];
 	   }
 	 
-	 
+	  
+	  
+	  
+		 public String keys() {
+				StringBuilder keyString=new StringBuilder("Node :(id,parent,Leaf)=("+this.id+","+this.parentId+","+this.isLeaf()+")  Keys=(" );
+				for(int i=0;i<keySize;i++) {
+				 try {
+						keyString.append(keys[i]+",");
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+					
+				keyString.append(")");
+		        return new String(keyString);		 
+		  }
+		 
+		 public String childs() {
+				StringBuilder childsString=new StringBuilder("Childs=(");
+				for(int i=0;i<keySize+1;i++) 
+					childsString.append(childs[i]+",");
+				childsString.append(")");
+		        return new String(childsString);		 
+		  }
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
 	 public int getChildId(int pos) {
 		 return this.childs[pos];
 	 }
-	 
-	 public String keys() {
-			StringBuilder keyString=new StringBuilder("(Node,Leaf)=("+this.id+","+this.isLeaf()+")  Keys=(" );
-			for(int i=0;i<keySize;i++) {
-			 try {
-					keyString.append(keys[i]+",");
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-				
-			keyString.append(")");
-	        return new String(keyString);		 
-	  }
-	 
-	 public String childs() {
-			StringBuilder childsString=new StringBuilder("Childs=(");
-			for(int i=0;i<keySize+1;i++) 
-				childsString.append(childs[i]+",");
-			childsString.append(")");
-	        return new String(childsString);		 
-	  }
-	 
 	 
 	public int getId() {
 		return id;
@@ -139,6 +145,12 @@ public class BtreeNode{
 
 	public void setId(int id) {
 		this.id = id;
+	}
+	public int getParentId() {
+		return parentId;
+	}
+	public void setParentId(int parentId) {
+		this.parentId = parentId;
 	}
 
 	public int getKeySize() {
@@ -148,7 +160,14 @@ public class BtreeNode{
 	public boolean isFull() {
 		return keySize== (2 * degree)? true:false;
 	}
-
+	public boolean isNotFull() {
+		return keySize< (2 * degree)? true:false;
+	}
+	
+	public boolean hasParent() {
+		return parentId>-1?true:false;
+	}
+	
 	public boolean isLeaf() {
 		return leaf;
 	}
@@ -156,25 +175,17 @@ public class BtreeNode{
 	public void setLeaf(boolean leaf) {
 		this.leaf = leaf;
 	}
-	
-	public boolean isHasLastChild() {
-		return hasLastChild;
-	}
-	public void setHasLastChild(boolean hasLastChild) {
-		this.hasLastChild = hasLastChild;
-	}
-	@Override
-	public String toString() {
-		return "IndexNode [keys=" + Arrays.toString(keys) + ", keySize=" + keySize + ", childs="
-				+ Arrays.toString(childs) + ", leaf=" + leaf + ", hasLastChild=" + hasLastChild + "]";
-	}
 	public boolean isRoot() {
 		return isRoot;
 	}
 	public void setRoot(boolean isRoot) {
 		this.isRoot = isRoot;
 	}
-
+	@Override
+	public String toString() {
+		return "BtreeNode [id=" + id + ", parentId=" + parentId + ", keys=" + Arrays.toString(keys) + ", keySize="
+				+ keySize + ", childs=" + Arrays.toString(childs) + ", leaf=" + leaf + "]";
+	}
 	
 	
 }
