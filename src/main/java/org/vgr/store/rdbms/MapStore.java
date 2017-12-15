@@ -48,22 +48,10 @@ public class MapStore implements Store{
 		
 		public BtreeNode readIdxNode(int nodeId) {
 			 try {
-				 if(bufferPages.containsKey(nodeId)) {
+				 if(bufferPages.containsKey(nodeId)) 
 					 return bufferPages.get(nodeId);
-				 }else {
-					    Bytes block = mapStore.get(nodeId);
-						int pageNum = block.readInt();
-						byte b = block.readByte();
-						boolean isLeaf = b == 2 ? true : false;
-						BtreeNode node = new BtreeNode(pageNum,isLeaf);
-						node.setId(pageNum);
-						node.setParentId(block.readInt());
-						int keySize = block.readInt();
-						for (int i = 0; i < keySize; i++) {
-							node.add(block.readInt(),block.readInt());
-						}
-						return node;
-				 }
+				 else
+					 return null;
 			 }catch (Exception e) {
 				LOG.info("Node doesn't exist : " + nodeId);
 			}

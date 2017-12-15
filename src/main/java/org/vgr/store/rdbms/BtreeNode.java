@@ -65,6 +65,10 @@ public class BtreeNode{
 	       }
 	       return -1;
 	  }
+	  
+	  public int getChildKey(int childid) {
+		  return keys[this.getChildPos(childid)];
+	  }
 	 
 	 public void setChild(int pos,int childid) {
 		 childs[pos]=childid;
@@ -122,18 +126,11 @@ public class BtreeNode{
 		 
 		 public String childs() {
 				StringBuilder childsString=new StringBuilder("Childs=(");
-				for(int i=0;i<keySize+1;i++) 
+				for(int i=0;i<keySize;i++) 
 					childsString.append(childs[i]+",");
 				childsString.append(")");
 		        return new String(childsString);		 
 		  }
-	  
-	  
-	  
-	  
-	  
-	  
-	  
 	  
 	 public int getChildId(int pos) {
 		 return this.childs[pos];
