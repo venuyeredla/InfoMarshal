@@ -80,9 +80,6 @@ public class DataReader implements Closeable{
 	public void seek(int offset) {
 		try {
 			is.reset();
-			
-			
-			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

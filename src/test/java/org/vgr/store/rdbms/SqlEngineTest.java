@@ -7,7 +7,7 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-public class RdbmsTest {
+public class SqlEngineTest {
 	
 	static SqlEngine sqlEngine;
 	
@@ -41,14 +41,13 @@ public class RdbmsTest {
 		sqlEngine.createTable(table);
 	 }
 	
-	
 	@Test
-	@Ignore
 	public void getTable() {
 		sqlEngine.getTable("Student");
 	}
 	
 	@Test
+	@Ignore
 	public void insert() {
 		TableRow row=new TableRow();
 		row.addColumn("id", 1);

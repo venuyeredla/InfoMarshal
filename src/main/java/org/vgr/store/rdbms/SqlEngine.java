@@ -13,6 +13,7 @@ public class SqlEngine implements Closeable {
 	private static String DB_SUFFIX=".db";
 	private FileStore fileStore=null;
 	private SchemaInfo schemaInfo=null;
+	private static int SCHEMA_PAGE_ID=0;
 	
 	public SqlEngine(String schema, String userName, String passWord) {
 		  LOG.info("DB engine started ");
@@ -27,7 +28,7 @@ public class SqlEngine implements Closeable {
 		 boolean existed=fileStore.isExisted();
 		 if(existed) {
 			 LOG.info("Schema already existed and will be loaded...");
-			 schemaInfo=new SchemaInfo(fileStore); // loads existing schema 
+			 schemaInfo=fileStore.getSchemaInfo(SCHEMA_PAGE_ID);// loads existing schema 
 		 }else {
 			 schemaInfo=new SchemaInfo(schema, userName, passWord);
 			 LOG.info("New scheama created. Name : "+schema);
@@ -37,28 +38,19 @@ public class SqlEngine implements Closeable {
 	public void createTable(Table table) {
 		 if(!schemaInfo.contains(table.getName())) {
 			 table.setNum(schemaInfo.nextTableId());
-			 int pageid=schemaInfo.nextPage();
-			 schemaInfo.addTable(table.getName(), pageid);
-			 table.write(fileStore, pageid);
-			 LOG.info("Table created : "+table.getName() +" Page number : "+pageid);
+			 int pageNum=schemaInfo.nextPage();
+			 schemaInfo.addTable(table.getName(), pageNum);
+			 fileStore.writeTable(table, pageNum);
+			 LOG.info("Table created : "+table.getName() +" Page number : "+pageNum);
 		 }else {
 			 LOG.info("Table already existed : "+table.getName());
 		 }
 	 }
-	
-	
-	 public void getPageNum() {
-		 BTreeIndex bTreeIndex=new BTreeIndex(fileStore,1);
-		 
-	 }
-	
-	
-	
-	
+
 	public Table getTable(String tableName) {
-		int id=schemaInfo.tablePage(tableName);
-		if(id!=-1) {
-			Table table=new Table(fileStore, id);
+		int pageNum=schemaInfo.tablePage(tableName);
+		if(pageNum!=-1) {
+			Table table=fileStore.getTable(pageNum);
 			LOG.info("Table info loaded : "+table.getName());
 			LOG.info("Table : "+table);
 			return table;
@@ -70,6 +62,7 @@ public class SqlEngine implements Closeable {
 	
 	public void insert(String tableName,TableRow row) {
 		Table table=this.getTable(tableName);
+		int pageNum=schemaInfo.tablePage(tableName);
 		Bytes bytes=new Bytes();
 		if(table!=null) {
 			table.getColumns().forEach(column->{
@@ -79,6 +72,12 @@ public class SqlEngine implements Closeable {
 			});
 			LOG.info("New row added to the table :"+table.getName());
 		}
+		int pageid=this.nextPage();
+		fileStore.writeBlock(pageid, bytes);
+		BTreeIndex bTreeIndex=new BTreeIndex(fileStore, table.getIndexRoot());
+		int key=row.getId();
+		bTreeIndex.insert(key, pageid);
+		fileStore.writeTable(table, pageNum);
 	}
 	
 	public TableRow select(String tableName,int id) {
@@ -98,7 +97,14 @@ public class SqlEngine implements Closeable {
 	
 	@Override
 	public void close() throws IOException {
-		 schemaInfo.write(fileStore, 0);
+		fileStore.writeSchemaInfo(this.schemaInfo, SCHEMA_PAGE_ID);
+		fileStore.close();
+	}
+	
+	
+	private int nextPage() {
+	 return schemaInfo.nextPage();
+		
 	}
 	
 }

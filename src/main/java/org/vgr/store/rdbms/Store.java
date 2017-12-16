@@ -4,11 +4,18 @@ import org.vgr.store.io.Bytes;
 
 public interface Store {
 	
+	public boolean writeSchemaInfo(SchemaInfo schemaInfo,int pageNum);
+	public SchemaInfo getSchemaInfo(int pageNum) ;
+	public boolean writeTable(Table table,int pageNum);
+	public Table getTable(int pageNum);
+	public boolean writeTableRow();
+	
 	public void writeBlock(int blockNum, Bytes block);
 	public Bytes readBlock(int blockNum);
 	public void writeIdxNode(BtreeNode node);
 	public BtreeNode readIdxNode(int nodeId);
 	public void addToBuffer(int key,BtreeNode node);
 	public String getPageList();
+	public boolean isExisted();
 
 }

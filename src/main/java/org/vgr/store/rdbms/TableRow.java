@@ -12,6 +12,10 @@ public class TableRow {
 		this.colums = new HashMap<>();
 	}
 	
+	public int getId() {
+		return (int) colums.get("id");
+	}
+	
 	public void addColumn(String key,Object value) {
 		  colums.put(key, value);
 	}
