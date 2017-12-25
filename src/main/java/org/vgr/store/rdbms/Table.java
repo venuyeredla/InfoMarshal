@@ -10,9 +10,11 @@ public class Table {
 	private List<TableColumn> columns;
 	private short rowByteSize;
 	private int indexRoot;
+	private int rows;
 	
 	public Table(String name) {
 		this.name = name;
+		this.indexRoot=-1;
 		columns=new ArrayList<>();
 	}
 
@@ -72,11 +74,24 @@ public class Table {
 	public void setIndexRoot(int indexRoot) {
 		this.indexRoot = indexRoot;
 	}
+	
+	public int getRows() {
+		return rows;
+	}
 
+	public void setRows(int rows) {
+		this.rows = rows;
+	}
+
+	public void inrcreRowSize() {
+		this.rows++;
+	}
+
+	
+	
 	@Override
 	public String toString() {
-		return "Table [name=" + name + ", num=" + num + ", primary=" + primary + ", columns=" + columns
-				+ ", rowByteSize=" + rowByteSize + "]";
+		return "Table [name=" + name + ", num=" + num + ", primary=" + primary + ", columns=" + columns + ", indexRoot="
+				+ indexRoot + "]";
 	}
-	
 }

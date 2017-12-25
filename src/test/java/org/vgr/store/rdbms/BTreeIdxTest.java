@@ -23,7 +23,8 @@ public class BTreeIdxTest {
 	public static void init() {
 		//FileStore fileStore=new FileStore(index);
 		Store store=new MapStore();
-		bTree=new BTreeIndex(store,0);
+		SchemaInfo schemaInfo=new SchemaInfo("test", "tst", "tst");
+		bTree=new BTreeIndex(schemaInfo,null,store);
 	}
 	
 	@Test
@@ -43,7 +44,8 @@ public class BTreeIdxTest {
 	    	      bTree.insert(key,val);
 			}
 		   bTree.traverse();
-		  }
+	  }
+	
 	@Test
 	@Ignore
 	public void testTravrse() {
@@ -57,9 +59,9 @@ public class BTreeIdxTest {
 		String searchKeys= keySet.stream().map(num->""+num).collect(Collectors.joining(","));
 		System.out.println("Keys : "+searchKeys);
 		for (Integer integer : keySet) {
-			  BtreeNode result=bTree.search(bTree.root, integer);
-			  if(result!=null) {
-				  System.out.print("Key : "+ integer +" Page : "+result.getId() +" -> Keys : "+result.keys()+"\n");
+			  int result=bTree.search(integer);
+			  if(result!=-1) {
+				  System.out.print("Record page id is : "+result);
 			  }
 		   }
 	}

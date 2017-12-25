@@ -1,5 +1,10 @@
 package org.vgr.store.rdbms;
 
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,32 +15,42 @@ import org.slf4j.LoggerFactory;
  * @author vyeredla
  *
  */
-public class BTreeIndex {
+public class BTreeIndex implements Closeable {
 	private static final Logger LOG = LoggerFactory.getLogger(BTreeIndex.class);
 	private Store store = null;
 	public BtreeNode root;
 	private int degree = DBConstatnts.DEGREE;
 	private SchemaInfo schemaInfo = null;
-
-	public BTreeIndex(Store store, int rootid) {
+	private Table table;
+	Map<Integer, BtreeNode> nodeBuffer = null;
+	
+	public BTreeIndex(SchemaInfo schemaInfo, Table table, Store store) {
+		this.schemaInfo=schemaInfo;
 		this.store = store;
-		if (rootid != -1) {
-			root = store.readIdxNode(rootid);
+		this.table=table;
+		this.nodeBuffer = new HashMap<>();
+		if (table.getIndexRoot() != -1) {
+			root =this.getNode(table.getIndexRoot());
+			LOG.info("Index existed. (Table, root)=("+this.root.getId()+","+table.getIndexRoot()+")");
 		} else {
+			LOG.info("Index didn't exist");
 			root = newNode(true);
-		}
-	 }
+			table.setIndexRoot(this.root.getId());
+		 }
+	  }
 
 	public void insert(int key, int pageid) {
 		if (root.isLeaf() && root.isFull()) {
 			BtreeNode newRoot = newNode(false);
 			splitChild(newRoot, 0, root, key, pageid);
+			table.setIndexRoot(this.root.getId());
 			this.root = newRoot;
 		} else {
 			insertNotFull(null, root, key, pageid);
 		}
 	 }
-
+	
+	
 	private BtreeNode insertNotFull(BtreeNode parent, BtreeNode node, int key, int nodeid) {
 		try {
 			if (node.isLeaf() == true) {
@@ -113,6 +128,7 @@ public class BTreeIndex {
 		if (parentParent == null) {
 			parentParent = newNode(false);
 			this.root = parentParent;
+			table.setIndexRoot(this.root.getId());
 		}
 		int index = parentParent.getChildPos(parent.getId());
 		index = index == -1 ? 0 : index; // -1 means new root
@@ -176,54 +192,68 @@ public class BTreeIndex {
 			}
 		}
 	}
+	
+	
+	public int search(int key) {
+		int pageid=this.search(this.root, key);
+		return pageid;
+	
+	}
+	
 
-	public BtreeNode search(BtreeNode page, int key) {
+	private int search(BtreeNode node, int key) {
 		int position = 0;
 		try {
 			int i = 0;
-			while (i < page.getKeySize() && key > page.keyAt(i)) {
+			while (i < node.getKeySize() && key >= node.keyAt(i)) {
 				i++;
-			}
-			position = page.keyAt(i);
-			if (page.keyAt(i) == key)
-				return page;
-
-			if (page.isLeaf() == true) {
-				return null;
-			}
-			BtreeNode childePage = store.readIdxNode(page.getChildId(i));
+			 }
+			i--;
+			position = node.keyAt(i);
+			if (node.isLeaf() &&  node.keyAt(i) == key) {
+				return node.getChildId(i);
+			 }
+			BtreeNode childePage = this.getNodeSearch(node.getChildId(i));
 			return search(childePage, key);
-
 		} catch (Exception e) {
-			System.out.println("Errop Page:" + page.getId() + " index" + position);
+			System.out.println("Errop Page:" + node.getId() + " index" + position);
 		}
-		return null;
+		return -1;
 	}
 
 	public void delete() {
-
 	}
 
+	private BtreeNode getNodeSearch(int id) {
+		return store.readIdxNode(id);
+	}
+	
+	
+	private BtreeNode getNode(int nodeid) {
+		BtreeNode node=store.readIdxNode(nodeid);
+		this.nodeBuffer.put(node.getId(), node);
+		return node;
+	}
+	
 	private BtreeNode getParent(BtreeNode node) {
-		int parentId = node.getParentId();
-		if (parentId == -1)
-			return null;
-		else
-			return store.readIdxNode(parentId);
-	}
+		if (node.getParentId() != -1) {
+			return this.getNode(node.getParentId()) ;
+		}
+		return null;
+	 }
 
 	private BtreeNode getChild(BtreeNode node, int pos) {
 		int childPage = node.getChildId(pos);
-		return store.readIdxNode(childPage);
+		return this.getNode(childPage);
 	}
 
 	private BtreeNode newNode(boolean isLeaf) {
 		int nodeid = this.nextPageId();
 		BtreeNode node = new BtreeNode(nodeid, isLeaf);
-		store.addToBuffer(node.getId(), node);
+		this.nodeBuffer.put(node.getId(), node);
 		return node;
 	}
-
+	
 	private int nextPageId() {
 		return schemaInfo.nextPage();
 	}
@@ -232,4 +262,11 @@ public class BTreeIndex {
 		return this.root.getId();
 	}
 
+	@Override
+	public void close() throws IOException {
+		nodeBuffer.forEach((key,val)->{
+			store.writeIdxNode(val);
+		});
+	}
+	
 }

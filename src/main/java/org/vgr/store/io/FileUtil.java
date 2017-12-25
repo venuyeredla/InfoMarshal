@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 import java.util.Map;
 
 public class FileUtil {
-	private static String WIN_DIR="C:\\Work\\opensource\\appdata\\";
+	private static String WIN_DIR="C:\\Work\\opensource\\data\\";
 	private static String LINUX_DIR="/home/venugopal/Documents/Work/io/";
 	private static String MAC_DIR="/usr/local/data/";
 

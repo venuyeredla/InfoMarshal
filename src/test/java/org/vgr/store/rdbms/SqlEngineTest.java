@@ -21,7 +21,6 @@ public class SqlEngineTest {
 		try {
 			sqlEngine.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -42,35 +41,35 @@ public class SqlEngineTest {
 	 }
 	
 	@Test
+	@Ignore
 	public void getTable() {
 		sqlEngine.getTable("Student");
-	}
+	 }
 	
 	@Test
 	@Ignore
 	public void insert() {
-		TableRow row=new TableRow();
-		row.addColumn("id", 1);
-		row.addColumn("name", "Venugopal");
-		row.addColumn("age", 31);
-		row.addColumn("phone", "9533277");
-		row.addColumn("email", "venu@venu.org");
-		row.addColumn("job", "Programmer");
-		row.addColumn("city", "Hyderbade");
-		sqlEngine.insert("Student", row);
-	}
+		for(int i=1;i<20;i++) {
+			TableRow row=new TableRow();
+			row.addColumn("id",i);
+			row.addColumn("name", "Venugopal"+i);
+			row.addColumn("age", i+31);
+			row.addColumn("phone", "9533277");
+			row.addColumn("email", "venu@venu.org"+i);
+			row.addColumn("job", "Programmer"+i);
+			row.addColumn("city", "Hyderabad"+i);
+			sqlEngine.insert("Student", row);
+		}
+
+	 }
 	
 	@Test
-	@Ignore
 	public void select() {
-		insert();
-		sqlEngine.select("Student",1);
-		
+	  TableRow tableRow=sqlEngine.select("Student",5);
+	  System.out.println(tableRow);
 	}
 	
 	
-	
-
 	public void update() {
 		String table="create table english";
 	}

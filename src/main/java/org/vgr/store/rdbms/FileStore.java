@@ -25,7 +25,6 @@ public class FileStore implements Store,Closeable{
 		this.existed = new File(dbFile).exists();
 		this.writer = new DataWriter(dbFile, this.existed);
 		this.reader = new DataReader(dbFile);
-		this.bufferPages=new HashMap<>();
 	}
 
 	@Override
@@ -59,6 +58,7 @@ public class FileStore implements Store,Closeable{
         Map<String,Integer> tables=new HashMap<>();
 		if(schemaInfo.isHasTables()) {
 			byte tablesSize=b.readByte();
+			schemaInfo.setTablesSize(tablesSize);
 			for(int i=0;i<tablesSize;i++) {
 				tables.put(b.readString(), b.readInt());	
 			}
@@ -81,6 +81,7 @@ public class FileStore implements Store,Closeable{
 		});
 		block.write(table.getRowByteSize());
 		block.write(table.getIndexRoot());
+		block.write(table.getRows());
         this.writeBlock(pageNum, block);	
         LOG.info("Writing table :"+table);
 		return false;
@@ -100,9 +101,9 @@ public class FileStore implements Store,Closeable{
 		 table.setColumns(columns);
 		 table.setRowByteSize(b.readShort());
 		 table.setIndexRoot(b.readInt());
+		 table.setRows(b.readInt());
 		return table;
 	}
-	
 	
 	public void writeBlock(int blockNum, Bytes block) {
 		int offset=blockNum*Bytes.BLOCK_SIZE;
@@ -118,11 +119,11 @@ public class FileStore implements Store,Closeable{
 	
 	public void writeIdxNode(BtreeNode node) {
 		Bytes block = new Bytes();
-		int pageType = node.isLeaf() ? 2 : 1;
-		block.write(node.getId());// Page Number
-		block.write((byte) pageType);
-		block.write(node.getParentId());
-		block.write(node.getKeySize());//
+		BtreeNodeType nodeType=node.isLeaf()?BtreeNodeType.LEAF:BtreeNodeType.INTERNAL;
+		block.write(node.getId())// Page Number
+		     .writeByte(nodeType.getNodVal())
+		     .write(node.getParentId())
+		     .write(node.getKeySize());//
 		for (int i = 0; i < node.getKeySize(); i++) {
 			block.write(node.keyAt(i));
 			block.write(node.getChildId(i));
@@ -137,10 +138,11 @@ public class FileStore implements Store,Closeable{
 		int offset = nodeId * Bytes.BLOCK_SIZE;
 		Bytes block = reader.readBlock(offset);
 		int pageNum = block.readInt();
-		byte b = block.readByte();
-		boolean isLeaf = b == 2 ? true : false;
+		byte type = block.readByte();
+		BtreeNodeType nodeType=BtreeNodeType.getNodeType(type);
+		boolean isLeaf = nodeType == BtreeNodeType.LEAF ? true : false;
 		BtreeNode node = new BtreeNode(pageNum,isLeaf);
-		node.setId(pageNum);
+		//node.setId(pageNum);
 		node.setParentId(block.readInt());
 		int keySize = block.readInt();
 		for (int i = 0; i < keySize; i++) {
@@ -169,19 +171,14 @@ public class FileStore implements Store,Closeable{
 
 	@Override
 	public String getPageList() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public void close() throws IOException {
-		bufferPages.forEach((key,val)->{
-			this.writeIdxNode(val);
-		});
-  	 }
+   	 }
 	@Override
 	public boolean writeTableRow() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 }

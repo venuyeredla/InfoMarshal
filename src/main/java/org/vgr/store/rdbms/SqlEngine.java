@@ -2,6 +2,8 @@ package org.vgr.store.rdbms;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +16,8 @@ public class SqlEngine implements Closeable {
 	private FileStore fileStore=null;
 	private SchemaInfo schemaInfo=null;
 	private static int SCHEMA_PAGE_ID=0;
+	private boolean flag=false;
+	private Map<String, BTreeIndex> tableIndexers=new HashMap<>();
 	
 	public SqlEngine(String schema, String userName, String passWord) {
 		  LOG.info("DB engine started ");
@@ -39,8 +43,8 @@ public class SqlEngine implements Closeable {
 		 if(!schemaInfo.contains(table.getName())) {
 			 table.setNum(schemaInfo.nextTableId());
 			 int pageNum=schemaInfo.nextPage();
-			 schemaInfo.addTable(table.getName(), pageNum);
 			 fileStore.writeTable(table, pageNum);
+			 schemaInfo.addTable(table.getName(), pageNum);
 			 LOG.info("Table created : "+table.getName() +" Page number : "+pageNum);
 		 }else {
 			 LOG.info("Table already existed : "+table.getName());
@@ -60,9 +64,22 @@ public class SqlEngine implements Closeable {
 		}
 	}
 	
+	public BTreeIndex getBtreeIndex(Table table) {
+		BTreeIndex bTreeIndex=tableIndexers.get(table.getName());
+		if(bTreeIndex!=null) {
+			return bTreeIndex;
+		}else {
+			bTreeIndex=new BTreeIndex(this.schemaInfo, table,fileStore);;
+			tableIndexers.put(table.getName(), bTreeIndex);
+		}
+		
+		return bTreeIndex;
+	}
+	
 	public void insert(String tableName,TableRow row) {
 		Table table=this.getTable(tableName);
-		int pageNum=schemaInfo.tablePage(tableName);
+		BTreeIndex bTreeIndex=getBtreeIndex(table);
+		int tablePageNum=schemaInfo.tablePage(tableName);
 		Bytes bytes=new Bytes();
 		if(table!=null) {
 			table.getColumns().forEach(column->{
@@ -70,19 +87,20 @@ public class SqlEngine implements Closeable {
 			   Types type=column.getType();
 	           row.wirteColumn(bytes, name, type);
 			});
+			int pageid=this.nextPage();
+			fileStore.writeBlock(pageid, bytes);
+			int key=row.getId();
+			bTreeIndex.insert(key, pageid);
+			table.inrcreRowSize();
+			fileStore.writeTable(table, tablePageNum);
 			LOG.info("New row added to the table :"+table.getName());
 		}
-		int pageid=this.nextPage();
-		fileStore.writeBlock(pageid, bytes);
-		BTreeIndex bTreeIndex=new BTreeIndex(fileStore, table.getIndexRoot());
-		int key=row.getId();
-		bTreeIndex.insert(key, pageid);
-		fileStore.writeTable(table, pageNum);
 	}
 	
 	public TableRow select(String tableName,int id) {
 		Table table=this.getTable(tableName);
-		int pageid=id;
+		BTreeIndex bTreeIndex=new BTreeIndex(this.schemaInfo,table,fileStore);
+		int pageid=bTreeIndex.search(id);
 		Bytes bytes=fileStore.readBlock(pageid);
 		TableRow tableRow=new TableRow();
 		table.getColumns().forEach(column->{
@@ -91,20 +109,34 @@ public class SqlEngine implements Closeable {
 			   tableRow.addColumn(bytes, name, type);
 		});
 		 LOG.info("Selected a row :"+table.getName());
+		 try {
+			bTreeIndex.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return tableRow;
 	}
 	
 	
+	
 	@Override
 	public void close() throws IOException {
+		
+		tableIndexers.forEach((key,tableIndexer)->{
+			try {
+				tableIndexer.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		});
+		
 		fileStore.writeSchemaInfo(this.schemaInfo, SCHEMA_PAGE_ID);
 		fileStore.close();
 	}
 	
 	
 	private int nextPage() {
-	 return schemaInfo.nextPage();
-		
-	}
+	   return schemaInfo.nextPage();
+	 }
 	
 }

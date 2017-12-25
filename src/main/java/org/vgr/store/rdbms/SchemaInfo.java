@@ -13,8 +13,6 @@ public class SchemaInfo {
 	private short tablesSize;
 	private Map<String, Integer> tables;
 	private boolean existed;
-
-	
 	public SchemaInfo() {}
 	
 	/**
@@ -55,7 +53,6 @@ public class SchemaInfo {
 
 	public void addTable(String name, int pageid) {
 		tables.put(name, pageid);
-		tablesSize++;
 		this.hasTables = true;
 	}
 
@@ -149,6 +146,7 @@ public class SchemaInfo {
 	@Override
 	public String toString() {
 		return "SchemaInfo [pageId=" + pageId + ", name=" + name + ", user=" + user + ", pass=" + pass + ", pages="
-				+ pages + ", hasTables=" + hasTables + "]";
+				+ pages + ", hasTables=" + hasTables + ", tablesSize=" + tablesSize + ", tables=" + tables
+				+ ", existed=" + existed + "]";
 	}
 }
