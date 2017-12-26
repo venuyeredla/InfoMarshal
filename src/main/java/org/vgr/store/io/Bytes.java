@@ -31,14 +31,13 @@ public class Bytes{
 		wPos=b.length;
 		rPos=-1;
 	  }
-	
-	private Bytes writeByte(byte b) {
+	 private Bytes writeByte(byte b) {
 		if(wPos+1>=BLOCK_SIZE) {
 			System.out.println("Block is full: Block size:"+bytes.length+ " Position to write : "+wPos+1);
 		}
 		bytes[wPos++]=b;
 		return this;
-	}
+	 }
 	/**
 	 * Writes lower order 8 bits;
 	 * @param b
@@ -157,6 +156,18 @@ public class Bytes{
 		return bytes;
 	}
 	
+	public byte[] getActualBytes() {
+		byte[] temp=new byte[wPos-1];
+		for(int i=0;i<wPos-1;i++) {
+			temp[i]=bytes[i];
+		}
+		return temp;
+	}
+	
+	
+	public int size() {
+		return wPos;
+	}
 	/**
 	 * Adds the string bytes length as Vint and string bytes
 	 * @param str
