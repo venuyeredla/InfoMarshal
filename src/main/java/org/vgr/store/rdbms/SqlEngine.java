@@ -16,8 +16,8 @@ public class SqlEngine implements Closeable {
 	private FileStore fileStore=null;
 	private SchemaInfo schemaInfo=null;
 	private static int SCHEMA_PAGE_ID=0;
-	private boolean flag=false;
 	private Map<String, BTreeIndex> tableIndexers=new HashMap<>();
+	private Map<String, Table> tables=new HashMap<>();
 	
 	public SqlEngine(String schema, String userName, String passWord) {
 		  LOG.info("DB engine started ");
@@ -54,10 +54,16 @@ public class SqlEngine implements Closeable {
 	public Table getTable(String tableName) {
 		int pageNum=schemaInfo.tablePage(tableName);
 		if(pageNum!=-1) {
-			Table table=fileStore.getTable(pageNum);
-			LOG.info("Table info loaded : "+table.getName());
-			LOG.info("Table : "+table);
-			return table;
+			if (tables.containsKey(tableName)) {
+				return tables.get(tableName);
+			}else {
+				Table table=fileStore.getTable(pageNum);
+				table.setPageid(pageNum);
+				LOG.info("Table loaded : "+table);
+				tables.put(tableName, table);
+				return table;
+			}
+			
 		}else {
 			LOG.info("Table doesn't exist : "+tableName);
 			return null;
@@ -72,14 +78,12 @@ public class SqlEngine implements Closeable {
 			bTreeIndex=new BTreeIndex(this.schemaInfo, table,fileStore);;
 			tableIndexers.put(table.getName(), bTreeIndex);
 		}
-		
 		return bTreeIndex;
 	}
 	
 	public void insert(String tableName,TableRow row) {
 		Table table=this.getTable(tableName);
 		BTreeIndex bTreeIndex=getBtreeIndex(table);
-		int tablePageNum=schemaInfo.tablePage(tableName);
 		Bytes bytes=new Bytes();
 		if(table!=null) {
 			table.getColumns().forEach(column->{
@@ -92,7 +96,6 @@ public class SqlEngine implements Closeable {
 			int key=row.getId();
 			bTreeIndex.insert(key, pageid);
 			table.inrcreRowSize();
-			fileStore.writeTable(table, tablePageNum);
 			LOG.info("New row added to the table :"+table.getName());
 		}
 	}
@@ -101,27 +104,29 @@ public class SqlEngine implements Closeable {
 		Table table=this.getTable(tableName);
 		BTreeIndex bTreeIndex=new BTreeIndex(this.schemaInfo,table,fileStore);
 		int pageid=bTreeIndex.search(id);
-		Bytes bytes=fileStore.readBlock(pageid);
-		TableRow tableRow=new TableRow();
-		table.getColumns().forEach(column->{
-			   String name= column.getName();
-			   Types type=column.getType();
-			   tableRow.addColumn(bytes, name, type);
-		});
-		 LOG.info("Selected a row :"+table.getName());
-		 try {
-			bTreeIndex.close();
-		} catch (IOException e) {
-			e.printStackTrace();
+		if(pageid!=-1) {
+			Bytes bytes=fileStore.readBlock(pageid);
+			TableRow tableRow=new TableRow();
+			table.getColumns().forEach(column->{
+				   String name= column.getName();
+				   Types type=column.getType();
+				   tableRow.addColumn(bytes, name, type);
+			});
+			 LOG.info("Selected a row :"+table.getName());
+			 try {
+				bTreeIndex.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			 return tableRow;
 		}
-		return tableRow;
+		return null;
 	}
 	
 	
 	
 	@Override
 	public void close() throws IOException {
-		
 		tableIndexers.forEach((key,tableIndexer)->{
 			try {
 				tableIndexer.close();
@@ -129,7 +134,7 @@ public class SqlEngine implements Closeable {
 				e.printStackTrace();
 			}
 		});
-		
+		tables.forEach((key,val)->{	fileStore.writeTable(val, val.getPageid());	});
 		fileStore.writeSchemaInfo(this.schemaInfo, SCHEMA_PAGE_ID);
 		fileStore.close();
 	}

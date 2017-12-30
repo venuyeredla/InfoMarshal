@@ -43,7 +43,7 @@ public class BTreeIndex implements Closeable {
 		if (root.isLeaf() && root.isFull()) {
 			BtreeNode newRoot = newNode(false);
 			splitChild(newRoot, 0, root, key, pageid);
-			table.setIndexRoot(this.root.getId());
+			table.setIndexRoot(newRoot.getId());
 			this.root = newRoot;
 		} else {
 			insertNotFull(null, root, key, pageid);
@@ -202,21 +202,18 @@ public class BTreeIndex implements Closeable {
 	
 
 	private int search(BtreeNode node, int key) {
-		int position = 0;
 		try {
+			if(node.isLeaf()) {
+               return node.seach(key);				
+			}
 			int i = 0;
-			while (i < node.getKeySize() && key >= node.keyAt(i)) {
+			while (i < node.getKeySize() && key > node.keyAt(i)) {
 				i++;
-			 }
-			i--;
-			position = node.keyAt(i);
-			if (node.isLeaf() &&  node.keyAt(i) == key) {
-				return node.getChildId(i);
 			 }
 			BtreeNode childePage = this.getNodeSearch(node.getChildId(i));
 			return search(childePage, key);
 		} catch (Exception e) {
-			System.out.println("Errop Page:" + node.getId() + " index" + position);
+			System.out.println("Error in getting  Page:" + node.getId() + " index : ");
 		}
 		return -1;
 	}
@@ -230,9 +227,13 @@ public class BTreeIndex implements Closeable {
 	
 	
 	private BtreeNode getNode(int nodeid) {
-		BtreeNode node=store.readIdxNode(nodeid);
-		this.nodeBuffer.put(node.getId(), node);
-		return node;
+		if(nodeBuffer.containsKey(nodeid)) {
+			return nodeBuffer.get(nodeid);
+		}else {
+			BtreeNode node=store.readIdxNode(nodeid);
+			this.nodeBuffer.put(node.getId(), node);
+			return node;
+		}
 	}
 	
 	private BtreeNode getParent(BtreeNode node) {
@@ -261,7 +262,7 @@ public class BTreeIndex implements Closeable {
 	public int getRootPageId() {
 		return this.root.getId();
 	}
-
+	
 	@Override
 	public void close() throws IOException {
 		nodeBuffer.forEach((key,val)->{

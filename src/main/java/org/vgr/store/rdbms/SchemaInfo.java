@@ -14,7 +14,6 @@ public class SchemaInfo {
 	private Map<String, Integer> tables;
 	private boolean existed;
 	public SchemaInfo() {}
-	
 	/**
 	 * Creates new schema and saves to the disk
 	 * 

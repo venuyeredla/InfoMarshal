@@ -152,6 +152,22 @@ public class Bytes{
 		return b;
 	}
 	
+   /**
+    * Return all bytes from current Posistion
+    * @param len
+    * @return
+    */
+    public byte[] readBytes() {
+    	 int size=this.size();
+    	 int tempSize=size-rPos;
+		 byte[] b=new byte[tempSize];
+		for (int i = 0; i < tempSize; i++) {
+			b[i]=readByte();
+		}
+		return b;
+	}
+   
+   
 	public byte[] getBytes() {
 		return bytes;
 	}

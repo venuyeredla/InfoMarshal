@@ -1,11 +1,15 @@
 package org.vgr.store.rdbms;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.vgr.app.util.RandomUtil;
 
 public class SqlEngineTest {
 	
@@ -49,7 +53,7 @@ public class SqlEngineTest {
 	@Test
 	@Ignore
 	public void insert() {
-		for(int i=1;i<20;i++) {
+		for(int i=35;i<20000;i++) {
 			TableRow row=new TableRow();
 			row.addColumn("id",i);
 			row.addColumn("name", "Venugopal"+i);
@@ -60,15 +64,20 @@ public class SqlEngineTest {
 			row.addColumn("city", "Hyderabad"+i);
 			sqlEngine.insert("Student", row);
 		}
-
 	 }
 	
 	@Test
 	public void select() {
-	  TableRow tableRow=sqlEngine.select("Student",5);
-	  System.out.println(tableRow);
+		
+		 HashSet<Integer> keySet=RandomUtil.randomNumsSet(5, 19999);
+		 List<Integer> keyList=new ArrayList<>(keySet);
+		 for (Integer integer : keyList) {
+			 TableRow tableRow=sqlEngine.select("Student",integer);
+			  System.out.println(tableRow);
+		}
+		 
+	 
 	}
-	
 	
 	public void update() {
 		String table="create table english";

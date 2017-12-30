@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Table {
+	private int pageid;
 	private String name;
 	private int num;
 	private String primary;
@@ -87,8 +88,14 @@ public class Table {
 		this.rows++;
 	}
 
-	
-	
+	public int getPageid() {
+		return pageid;
+	}
+
+	public void setPageid(int pageid) {
+		this.pageid = pageid;
+	}
+
 	@Override
 	public String toString() {
 		return "Table [name=" + name + ", num=" + num + ", primary=" + primary + ", columns=" + columns + ", indexRoot="

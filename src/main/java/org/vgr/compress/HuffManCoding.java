@@ -11,39 +11,84 @@ public class HuffManCoding {
 	private HuffManNode[] nodes;
 	private int capacity;
 	private int heapSize;
-	private LinkedHashMap<String, String> huffmanCodes=new LinkedHashMap<>();
+	private LinkedHashMap<Byte, String> compressCodes=new LinkedHashMap<>();
+	private LinkedHashMap<String, Byte> decompressCodes=new LinkedHashMap<>();
 	public HuffManCoding() { }
-	public void compress(String txt) {
+	public byte[] compress(String txt) {
 		   this.buldHuffmannCodes(txt);
 		   Bytes bytes=new Bytes();
 		   StringBuilder compressed=new StringBuilder();
-		   bytes.write(huffmanCodes);
+		   bytes.writeByte(compressCodes.keySet().size());
+		   compressCodes.forEach((key,val)->{
+			   bytes.writeByte(key);
+			   bytes.write(val);
+		   });
+
 		   for(int i=0;i<txt.length();i++) {
-			   char c= txt.charAt(i);
-			   String code=huffmanCodes.get(new Character(c).toString());
+			   byte asciNum= (byte)txt.charAt(i);
+			   String code=compressCodes.get(asciNum);
 			   compressed.append(code);
 		     }
-		   byte[] compressedBytes=this.convertToBytes(new String(compressed));
+		   int compressedStrLength=compressed.length();
+		   int noOfChars=txt.length();
+		   byte[] compressedBytes=this.bitStringTobytes(new String(compressed));
+		   String reversProcess=this.bytesToBitString(compressedBytes);
+		   reversProcess=reversProcess.substring(0, compressedStrLength);
+		  // System.out.println("Compressed : "+compressed);
+		  // System.out.println("To String  : "+reversProcess);
+		   this.buildHuffmann(bytes);
+		   System.out.println("Compressed   : "+txt);
+		   System.out.println("Decompressed : "+toText(reversProcess));
+		   
 		   bytes.write(compressedBytes);
-		   System.out.println("Actual size : "+txt.getBytes().length+ "  , Compressed Size : "+compressedBytes.length);
-		   System.out.println("Size with including huffmann codes :  "+bytes.size());
-		  // byte[] byteArr=bytes.getActualBytes();
+		   System.out.println("Actual: "+txt.getBytes().length+ ", Compressed Size : "+compressedBytes.length);
+		   System.out.println("Including huffmann codes :  "+bytes.size());
+		   return bytes.getActualBytes();
 	   }
 	
-	public void decompress(String txt) {
-		
+	
+	  public String toText(String compressed) {
+		  StringBuffer buffer=new StringBuffer();
+		  String code="";
+		  for(int i=0;i<compressed.length();i++) {
+			  code=code+compressed.charAt(i);
+			  if(decompressCodes.containsKey(code)) {
+				  char c= (char)(int)decompressCodes.get(code);
+				  buffer.append(c);
+				  code="";
+			  }
+		  }
+		  return new String(buffer);
+	  }
+	
+	
+	public void decompress(byte[] compressedBytes) {
+		Bytes bytes=new Bytes();
+		bytes.write(compressedBytes);
+		this.buildHuffmann(bytes);
+		int noOfChars=bytes.readInt();
+		for(int i=0;i<noOfChars;i++) {
+		}
+	}
+	
+	  public void buildHuffmann(Bytes bytes) {
+		  byte codeSize=bytes.readByte();
+		for(byte i=0;i<codeSize;i++) {
+			byte val=bytes.readByte();
+			String key=bytes.readString();
+			decompressCodes.put(key,val );
+		  }
 	}
 	
 	public void buldHuffmannCodes(String txt) {
-		   Map<Character, Integer> dictonary=new HashMap<>();
+		   Map<Byte, Integer> dictonary=new HashMap<>();
 		   for(int i=0;i<txt.length();i++) {
-			  char c= txt.charAt(i);
-			  Character charcter=new Character(c);
-			  if(dictonary.containsKey(charcter)) {
-				  int count=dictonary.get(charcter);
-				  dictonary.put(charcter, count+1);
+			  byte asciNum= (byte)txt.charAt(i);
+			  if(dictonary.containsKey(asciNum)) {
+				  int count=dictonary.get(asciNum);
+				  dictonary.put(asciNum, count+1);
 			  }else {
-				  dictonary.put(charcter, 1);
+				  dictonary.put(asciNum, 1);
 			  }
 		    }
 			/* dictonary.forEach((key,val)->{
@@ -61,8 +106,9 @@ public class HuffManCoding {
 		   this.buildHuffManTree();
 		   this.printCodes(this.nodes[0], "");
 		   System.out.println("Huffmann codes : ");
-		   huffmanCodes.forEach((key,val)->{
-			   System.out.print(key+ "-"+val+" , ");
+		   compressCodes.forEach((key,val)->{
+			   char ch=(char)(int)key;
+			   System.out.print(key+ "("+ch+")-"+val+" , ");
 		   });
 		   System.out.println("");
 	   }
@@ -87,10 +133,9 @@ public class HuffManCoding {
 				this.printCodes(node.right, str+"1");
 		    }
 			if(node.left==null && node.right==null)
-				huffmanCodes.put(new Character(node.c).toString(), str);
+				compressCodes.put(node.key, str);
 		}
 	}
-	
 	
 	public void add(HuffManNode node) {
 		int i=heapSize++;
@@ -104,7 +149,7 @@ public class HuffManCoding {
 	public void printHeap() {
 		for(int i=0;i<heapSize;i++) {
 			HuffManNode node=this.nodes[i];
-			System.out.print(node.c+"--"+node.freq+" , ");
+			System.out.print(node.key+"--"+node.freq+" , ");
 		}
 		System.out.println();
 	}
@@ -152,8 +197,12 @@ public class HuffManCoding {
 	private HuffManNode getNodeAt(int i) {
 		return this.nodes[i];
 	}
-	
-    public byte[] convertToBytes(String bitString) {
+	/**
+	 * Convert bit string to bytes
+	 * @param bitString
+	 * @return
+	 */
+    public byte[] bitStringTobytes(String bitString) {
     	 int len=bitString.length();
     	 int bytesRequired=(int) Math.ceil(len/8.0);
     	 byte[] bytes=new byte[bytesRequired];
@@ -172,20 +221,36 @@ public class HuffManCoding {
 		 bytes[++i]=(byte)num;;
     	 return bytes;
     }
-}
+    
+    /**
+	 * Convert bit string to bytes
+	 * @param bitString
+	 * @return
+	 */
+    public String bytesToBitString(byte[] bytes) {
+    	 StringBuffer strBuffer=new StringBuffer();
+    	 for(int i=0;i<bytes.length;i++) {
+    		 byte b=bytes[i];
+    		 String str = String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
+    		 strBuffer.append(str);
+    	  }
+    	return new String(strBuffer);
+    }
+    
+  }
 class HuffManNode{
 	protected int freq;
-	protected char c;
+	protected byte key;
 	protected HuffManNode left, right;
 	public HuffManNode(int freq) {
 		this.freq = freq;
 	}
-	public HuffManNode(char c,int freq) {
+	public HuffManNode(byte key,int freq) {
 		this.freq = freq;
-		this.c = c;
+		this.key = key;
 	}
 	@Override
 	public String toString() {
-		return "HuffManNode [freq=" + freq + ", c=" + c + "]";
+		return "HuffManNode [freq=" + freq + ", key=" + key + "]";
 	}
 }

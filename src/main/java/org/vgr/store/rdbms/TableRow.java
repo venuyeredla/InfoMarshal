@@ -65,8 +65,10 @@ public class TableRow {
 	}
 	   
 	}
-	
 
-
+	@Override
+	public String toString() {
+		return "TableRow [colums=" + colums + "]";
+	}
 	
 }
