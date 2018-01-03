@@ -1,4 +1,4 @@
-package org.vgr.store.ds;
+package org.vgr.store.search;
 
 import org.vgr.store.io.DataReader;
 import org.vgr.store.io.DataWriter;

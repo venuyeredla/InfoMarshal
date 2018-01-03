@@ -75,8 +75,6 @@ public class SqlEngineTest {
 			 TableRow tableRow=sqlEngine.select("Student",integer);
 			  System.out.println(tableRow);
 		}
-		 
-	 
 	}
 	
 	public void update() {
