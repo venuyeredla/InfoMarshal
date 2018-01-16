@@ -5,11 +5,11 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vgr.store.io.Bytes;
+import org.vgr.store.io.ByteBuf;
 
 public class MapStore implements Store {
 	private static final Logger LOG = LoggerFactory.getLogger(MapStore.class);
-	Map<Integer, Bytes> mapStore = null;
+	Map<Integer, ByteBuf> mapStore = null;
 	Map<Integer, BtreeNode> bufferPages = null;
 
 	public MapStore() {
@@ -17,12 +17,12 @@ public class MapStore implements Store {
 		bufferPages = new HashMap<>();
 	}
 
-	public void writeBlock(int blockNum, Bytes block) {
+	public void writeBlock(int blockNum, ByteBuf block) {
 		mapStore.put(blockNum, block);
 	}
 
-	public Bytes readBlock(int blockNum) {
-		Bytes block = mapStore.get(blockNum);
+	public ByteBuf readBlock(int blockNum) {
+		ByteBuf block = mapStore.get(blockNum);
 		return block;
 	}
 
@@ -31,7 +31,7 @@ public class MapStore implements Store {
 	}
 
 	public void writeIdxNode(BtreeNode node) {
-		Bytes block = new Bytes();
+		ByteBuf block = new ByteBuf();
 		int pageType = node.isLeaf() ? 2 : 1;
 		block.write(node.getId());// Page Number
 		block.write((byte) pageType);
@@ -66,7 +66,7 @@ public class MapStore implements Store {
 	}
 
 	public int getNodeOffset(int pageNum) {
-		int offset = pageNum * Bytes.BLOCK_SIZE;
+		int offset = pageNum * ByteBuf.BLOCK_SIZE;
 		return offset == -1 ? 0 : offset;
 	}
 

@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vgr.store.io.Bytes;
+import org.vgr.store.io.ByteBuf;
 import org.vgr.store.io.DataReader;
 import org.vgr.store.io.DataWriter;
 import org.vgr.store.rdbms.SchemaInfo;
@@ -20,7 +20,7 @@ import org.vgr.store.rdbms.SchemaInfo;
  */
 public class BTree implements Closeable {
 	private static final Logger LOG = LoggerFactory.getLogger(BTree.class);
-	public Page rootPage;
+	public Page root;
 	private int degree = Page.degree;
 	private DataWriter writer;
 	private DataReader reader;
@@ -31,14 +31,11 @@ public class BTree implements Closeable {
 		boolean exists = new File(dbFile).exists();
 		this.writer = new DataWriter(dbFile, exists);
 		this.reader = new DataReader(dbFile);
-		//this.init(exists);
 		unsavedPages = new ArrayList<>();
-		//rootPage = getPage(schemaInfo.getRootPage());
 	}
 
 	public void insert(int key, long data) {
-		rootPage = insert(rootPage, key, data);
-		//schemaInfo.setRootPage(rootPage.getId());
+		root = insert(root, key, data);
 	}
 
 	public Page insert(Page page, int key, long data) {
@@ -164,7 +161,7 @@ public class BTree implements Closeable {
 	}
 
 	public void writePage(Page page) {
-		Bytes block = new Bytes();
+		ByteBuf block = new ByteBuf();
 		int pageType = page.isLeaf() ? 2 : 1;
 		block.write(page.getId());// Page Number
 		block.write((byte) pageType);
@@ -226,8 +223,8 @@ public class BTree implements Closeable {
 	}
 
 	public Page readPage(int pageId) {
-		int offset = pageId * Bytes.BLOCK_SIZE;
-		Bytes block = reader.readBlock(offset);
+		int offset = pageId * ByteBuf.BLOCK_SIZE;
+		ByteBuf block = reader.readBlock(offset);
 		int pageNum = block.readInt();
 		byte b = block.readByte();
 		boolean isLeaf = b == 2 ? true : false;
@@ -246,7 +243,7 @@ public class BTree implements Closeable {
 	}
 
 	public int getPageOffset(int pageNum) {
-		int offset = pageNum * Bytes.BLOCK_SIZE;
+		int offset = pageNum * ByteBuf.BLOCK_SIZE;
 		return offset == -1 ? 0 : offset;
 	}
 
@@ -254,51 +251,9 @@ public class BTree implements Closeable {
 		return schemaInfo.nextPage();
 	}
 
-/*	public boolean init(boolean exists) {
-		try {
-			if (exists) {
-				readMeta();
-			} else {
-				initialize();
-				writeMeta();
-			}
-			return true;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
-		}
-	}*/
-
 	private void initialize() {
 		schemaInfo = new SchemaInfo("venudb", "venugopal", "venugopal");
-	//	schemaInfo.setPageId(0);
-		//schemaInfo.setNoOfPages(0);
-		//schemaInfo.setRootPage(-1);
 	}
-/*
-	public void readMeta() {
-		Bytes block = reader.readBlock(0);
-	//	schemaInfo = new SchemaInfo(block);
-		schemaInfo.setPageId(block.readInt());
-		schemaInfo.setSchemaName(block.readString());
-		schemaInfo.setUserName(block.readString());
-		schemaInfo.setPassWord(block.readString());
-		schemaInfo.setNoOfPages(block.readInt());
-		int val = block.readByte();
-	}
-*/
-/*	public void writeMeta() {
-		Bytes block = new Bytes();
-		block.write(schemaInfo.getPageId());
-		block.write(schemaInfo.getSchemaName());
-		block.write(schemaInfo.getUserName());
-		block.write(schemaInfo.getPassWord());
-		System.out.println("Total numuber of pages  : " + schemaInfo.getNoOfPages());
-		block.write(schemaInfo.getNoOfPages());
-		writer.writeBlock(0, block);
-		writer.flush();
-	}*/
-
 	public void closeWriter() {
 		this.writer.close();
 	}

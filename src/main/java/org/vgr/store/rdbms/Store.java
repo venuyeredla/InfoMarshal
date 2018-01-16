@@ -1,6 +1,6 @@
 package org.vgr.store.rdbms;
 
-import org.vgr.store.io.Bytes;
+import org.vgr.store.io.ByteBuf;
 
 public interface Store {
 	
@@ -10,8 +10,8 @@ public interface Store {
 	public Table getTable(int pageNum);
 	public boolean writeTableRow();
 	
-	public void writeBlock(int blockNum, Bytes block);
-	public Bytes readBlock(int blockNum);
+	public void writeBlock(int blockNum, ByteBuf block);
+	public ByteBuf readBlock(int blockNum);
 	public void writeIdxNode(BtreeNode node);
 	public BtreeNode readIdxNode(int nodeId);
 	public void addToBuffer(int key,BtreeNode node);

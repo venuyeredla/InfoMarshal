@@ -8,30 +8,30 @@ import java.util.List;
  * Wraps byte array and default size is 512 bytes equivalent to HDD block size.
  * 
  */
-public class Bytes{
+public class ByteBuf{
 	public static int BLOCK_SIZE=512;
 	private byte[] bytes;
 	private int wPos;
 	private int rPos;
 	
-	public Bytes() {
+	public ByteBuf() {
 		bytes=new byte[BLOCK_SIZE];
 		wPos=0;//points to the next position to be inserted.
 		rPos=-1;
 	}
-	public Bytes(int size) {
+	public ByteBuf(int size) {
 		BLOCK_SIZE=size;
 		bytes=new byte[BLOCK_SIZE];
 		rPos=-1;
 	}
-	public Bytes(byte[] b) {
+	public ByteBuf(byte[] b) {
 		bytes=new byte[b.length];
 		for(int i=0;i<b.length;i++) 
 			bytes[wPos++]=b[i];
 		wPos=b.length;
 		rPos=-1;
 	  }
-	 private Bytes writeByte(byte b) {
+	 private ByteBuf writeByte(byte b) {
 		if(wPos+1>=BLOCK_SIZE) {
 			System.out.println("Block is full: Block size:"+bytes.length+ " Position to write : "+wPos+1);
 		}
@@ -43,7 +43,7 @@ public class Bytes{
 	 * @param b
 	 * @return
 	 */
-	public Bytes writeByte(int b) {
+	public ByteBuf writeByte(int b) {
 		this.writeByte((byte)b);
 		return this;
 	  }
@@ -79,7 +79,7 @@ public class Bytes{
         return -1;
 	   }
 	
-	public Bytes write(short s) {
+	public ByteBuf write(short s) {
 		writeByte(s >> 8); 
 		writeByte(s);
 		return this;
@@ -88,7 +88,7 @@ public class Bytes{
 		return  (short)((read() << 8)|(read()));
 	 }
 	
-	public Bytes write(int i) {
+	public ByteBuf write(int i) {
 		writeByte(i >> 24);	
 		writeByte(i >> 16);
 		writeByte(i >> 8);
@@ -98,7 +98,7 @@ public class Bytes{
 	public int readInt() {
 		return (read() << 24) | (read() << 16) |(read() << 8)|(read());
 	 }
-	public Bytes writeVInt(int i) {
+	public ByteBuf writeVInt(int i) {
 		while((i & ~0x7F) !=0 ) {
 			writeByte(((i&0x7F) | 0x80));
 			i>>=7;
@@ -127,7 +127,7 @@ public class Bytes{
 		return 0;
 	}
 	
-	public Bytes writeLong(long l) {
+	public ByteBuf writeLong(long l) {
 		writeByte((byte)l >> 56);	writeByte((byte)(l >> 48));	writeByte((byte)(l >> 40)); writeByte((byte)(l >> 32));
 		writeByte((byte)(l >> 24));	writeByte((byte)(l >> 16));	writeByte((byte)(l >> 8)); writeByte((byte)(l));
 		return this;
@@ -137,7 +137,7 @@ public class Bytes{
 				(read() << 24) | (read() << 16) |(read() << 8)|(read());
 	}
 	
-	public Bytes write(byte[] b) {
+	public ByteBuf write(byte[] b) {
 		for(int i=0;i<b.length;i++) {
 			bytes[wPos++]=b[i];
 		}
@@ -173,8 +173,8 @@ public class Bytes{
 	}
 	
 	public byte[] getActualBytes() {
-		byte[] temp=new byte[wPos-1];
-		for(int i=0;i<wPos-1;i++) {
+		byte[] temp=new byte[wPos];
+		for(int i=0;i<wPos;i++) {
 			temp[i]=bytes[i];
 		}
 		return temp;
@@ -188,7 +188,7 @@ public class Bytes{
 	 * Adds the string bytes length as Vint and string bytes
 	 * @param str
 	 */
-	public Bytes write(String str) {
+	public ByteBuf write(String str) {
 		writeVInt(str.getBytes().length);
 		this.write(str.getBytes());
 		return this;
@@ -198,7 +198,7 @@ public class Bytes{
 		 return new String(readBytes(readVInt()));
 	}
 	
-	public Bytes write(boolean b) {
+	public ByteBuf write(boolean b) {
 		if(b) {
 			writeByte(1);
 		}else {
@@ -212,7 +212,7 @@ public class Bytes{
 		  return b==1?true:false;
 	}
 	
-	public Bytes write(LinkedHashMap<String,String> map) {
+	public ByteBuf write(LinkedHashMap<String,String> map) {
 		writeVInt(map.keySet().size());
 		map.forEach((key,value)-> {	write(key);	write(value);});
 		return this;
@@ -231,7 +231,7 @@ public class Bytes{
 		}
 		return list;
 	}
-	public Bytes writeList(List<String> strings) {
+	public ByteBuf writeList(List<String> strings) {
 		write(strings.size());
 		strings.forEach(str -> write(str));
 		return this;
@@ -239,6 +239,10 @@ public class Bytes{
     public static int getBlockSize() {
 		return BLOCK_SIZE;
 	}
+    public int readPos() {
+    	return rPos;
+    }
+    
 }
 
 class OutOfRangException extends Exception{

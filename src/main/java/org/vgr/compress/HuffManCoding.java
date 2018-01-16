@@ -1,117 +1,137 @@
 package org.vgr.compress;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import org.vgr.store.io.Bytes;
+import org.vgr.store.io.ByteBuf;
+import org.vgr.store.io.ByteList;
 
-public class HuffManCoding {
-	
+public class HuffManCoding implements Compressor {
 	private HuffManNode[] nodes;
 	private int capacity;
 	private int heapSize;
-	private LinkedHashMap<Byte, String> compressCodes=new LinkedHashMap<>();
-	private LinkedHashMap<String, Byte> decompressCodes=new LinkedHashMap<>();
+	private LinkedHashMap<Byte, String> hCodes=new LinkedHashMap<>();
 	public HuffManCoding() { }
+	
+	@Override
+	public byte[] compress(byte[] bytes) {
+		Map<Byte, Long> charFreq = this.charFreqs(bytes);
+	    this.buildHCodes(charFreq);
+		ByteBuf byteBuf = new ByteBuf();
+		byteBuf.writeByte(hCodes.keySet().size());
+		charFreq.forEach((key, val) -> {
+			byteBuf.writeByte(key);
+			int v = Math.toIntExact(val);
+			byteBuf.writeVInt(v);
+		});
+		StringBuilder compressed = new StringBuilder();
+		for (int i = 0; i < bytes.length; i++) {
+			String code = hCodes.get(bytes[i]);
+			compressed.append(code);
+		}
+		byte[] cData = BitUtil.bitStringTobytes(new String(compressed));
+		byteBuf.write(cData.length);
+		byteBuf.write(cData);
+		System.out.println("\nActual size="+bytes.length+" , Compressed size="+cData.length+", Including char freq="+byteBuf.getActualBytes().length);
+		return byteBuf.getActualBytes();
+	}
+	
+	@Override
+	public byte[] decompress(byte[] compressed) {
+		ByteBuf byteBuf=new ByteBuf(compressed);
+		this.buildHCodes(this.readFreq(byteBuf));
+		int cDataSize=byteBuf.readInt();
+		byte[] cData=new byte[cDataSize];
+		for(int i=0;i<cDataSize;i++) {
+			cData[i]=byteBuf.readByte();
+		}
+		String bitString = BitUtil.bytesToBitString(cData);
+		return this.toBytes(bitString);
+	}
+	
+	@Override
 	public byte[] compress(String txt) {
-		   this.buldHuffmannCodes(txt);
-		   Bytes bytes=new Bytes();
-		   StringBuilder compressed=new StringBuilder();
-		   bytes.writeByte(compressCodes.keySet().size());
-		   compressCodes.forEach((key,val)->{
-			   bytes.writeByte(key);
-			   bytes.write(val);
-		   });
+		 return this.compress(txt.getBytes());
+	 }	
+	
+	@Override
+	public byte[] decompress(String txt) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-		   for(int i=0;i<txt.length();i++) {
-			   byte asciNum= (byte)txt.charAt(i);
-			   String code=compressCodes.get(asciNum);
-			   compressed.append(code);
-		     }
-		   int compressedStrLength=compressed.length();
-		   int noOfChars=txt.length();
-		   byte[] compressedBytes=this.bitStringTobytes(new String(compressed));
-		   String reversProcess=this.bytesToBitString(compressedBytes);
-		   reversProcess=reversProcess.substring(0, compressedStrLength);
-		  // System.out.println("Compressed : "+compressed);
-		  // System.out.println("To String  : "+reversProcess);
-		   this.buildHuffmann(bytes);
-		   System.out.println("Compressed   : "+txt);
-		   System.out.println("Decompressed : "+toText(reversProcess));
-		   
-		   bytes.write(compressedBytes);
-		   System.out.println("Actual: "+txt.getBytes().length+ ", Compressed Size : "+compressedBytes.length);
-		   System.out.println("Including huffmann codes :  "+bytes.size());
-		   return bytes.getActualBytes();
-	   }
+	public String decompressToTxt(byte[] compressed) {
+		byte[] actual=this.decompress(compressed);
+		StringBuilder txt=new StringBuilder();
+		for(int i=0;i<actual.length;i++) {
+			   txt.append((char)actual[i]);
+		}
+		return new String(txt);
+	}
 	
-	
-	  public String toText(String compressed) {
-		  StringBuffer buffer=new StringBuffer();
+	public byte[] toBytes(String compressed) {
 		  String code="";
+		  Map<String,Byte> dHCodes=new HashMap<>();
+		  hCodes.forEach((key,val)->{ dHCodes.put(val, key); });
+		  ByteList byteList=new ByteList();
 		  for(int i=0;i<compressed.length();i++) {
 			  code=code+compressed.charAt(i);
-			  if(decompressCodes.containsKey(code)) {
-				  char c= (char)(int)decompressCodes.get(code);
-				  buffer.append(c);
-				  code="";
+			  if(dHCodes.containsKey(code)) {
+				byte b=dHCodes.get(code);
+				byteList.add(b);
+				code="";
 			  }
 		  }
-		  return new String(buffer);
+		  return byteList.getBytes();
 	  }
 	
-	
-	public void decompress(byte[] compressedBytes) {
-		Bytes bytes=new Bytes();
-		bytes.write(compressedBytes);
-		this.buildHuffmann(bytes);
-		int noOfChars=bytes.readInt();
-		for(int i=0;i<noOfChars;i++) {
+	public Map<Byte, Long> readFreq(ByteBuf bytes) {
+		byte codeSize = bytes.readByte();
+		Map<Byte, Long> charFreq=new HashMap<>();
+		for (byte i = 0; i < codeSize; i++) {
+			byte key = bytes.readByte();
+			long val = bytes.readVInt();
+			charFreq.put(key, val);
 		}
+		return charFreq;
 	}
-	
-	  public void buildHuffmann(Bytes bytes) {
-		  byte codeSize=bytes.readByte();
-		for(byte i=0;i<codeSize;i++) {
-			byte val=bytes.readByte();
-			String key=bytes.readString();
-			decompressCodes.put(key,val );
-		  }
+
+	public Map<Byte, Long> charFreqs(String txt) {
+		return this.charFreqs(txt.getBytes());
 	}
-	
-	public void buldHuffmannCodes(String txt) {
-		   Map<Byte, Integer> dictonary=new HashMap<>();
-		   for(int i=0;i<txt.length();i++) {
-			  byte asciNum= (byte)txt.charAt(i);
-			  if(dictonary.containsKey(asciNum)) {
-				  int count=dictonary.get(asciNum);
-				  dictonary.put(asciNum, count+1);
-			  }else {
-				  dictonary.put(asciNum, 1);
-			  }
-		    }
-			/* dictonary.forEach((key,val)->{
-					System.out.print(key+ "--"+val +"  , ");
-			 });*/
+
+	public Map<Byte, Long> charFreqs(byte[] bytes) {
+		List<Byte> byteList = new ArrayList<>();
+		for (int i = 0; i < bytes.length; i++)
+			byteList.add(bytes[i]);
+		Map<Byte, Long> charFreq = byteList.stream().collect(Collectors.groupingBy(b -> b, Collectors.counting()));
+		return charFreq;
+	}
+
+	public void buildHCodes(Map<Byte, Long> dictonary) {
 			 this.capacity=dictonary.keySet().size();
 			 this.nodes=new HuffManNode[capacity];
 			 this.heapSize=0;
 			 dictonary.forEach((key,val)->{
-				HuffManNode node=new HuffManNode(key,val);
+				int v=Math.toIntExact(val);
+				HuffManNode node=new HuffManNode(key,v);
 				this.add(node);
 			 });
-			 
 		 /*  this.printHeap();*/
 		   this.buildHuffManTree();
 		   this.printCodes(this.nodes[0], "");
-		   System.out.println("Huffmann codes : ");
-		   compressCodes.forEach((key,val)->{
+		   System.out.print("Huffmann codes: ");
+		   hCodes.forEach((key,val)->{
 			   char ch=(char)(int)key;
 			   System.out.print(key+ "("+ch+")-"+val+" , ");
 		   });
-		   System.out.println("");
 	   }
+	
+
 	
 	private void buildHuffManTree() {
 		while(this.heapSize>1) {
@@ -133,7 +153,7 @@ public class HuffManCoding {
 				this.printCodes(node.right, str+"1");
 		    }
 			if(node.left==null && node.right==null)
-				compressCodes.put(node.key, str);
+				hCodes.put(node.key, str);
 		}
 	}
 	
@@ -197,47 +217,9 @@ public class HuffManCoding {
 	private HuffManNode getNodeAt(int i) {
 		return this.nodes[i];
 	}
-	/**
-	 * Convert bit string to bytes
-	 * @param bitString
-	 * @return
-	 */
-    public byte[] bitStringTobytes(String bitString) {
-    	 int len=bitString.length();
-    	 int bytesRequired=(int) Math.ceil(len/8.0);
-    	 byte[] bytes=new byte[bytesRequired];
-    	 int i=-1;
-    	 while(bitString.length()>7) {
-    		  String byteStr=bitString.substring(0, 8);
-    		  int num=Integer.parseInt(byteStr, 2);
-    		  bytes[++i]=(byte)num;
-    		  bitString=bitString.substring(8);
-    	  }
-    	 int currentLength=bitString.length();
-    	 for(int j=0;j<8-currentLength;j++) {
-    		 bitString=bitString+"0";
-    	  }
-    	 int num=Integer.parseInt(bitString, 2);
-		 bytes[++i]=(byte)num;;
-    	 return bytes;
-    }
-    
-    /**
-	 * Convert bit string to bytes
-	 * @param bitString
-	 * @return
-	 */
-    public String bytesToBitString(byte[] bytes) {
-    	 StringBuffer strBuffer=new StringBuffer();
-    	 for(int i=0;i<bytes.length;i++) {
-    		 byte b=bytes[i];
-    		 String str = String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
-    		 strBuffer.append(str);
-    	  }
-    	return new String(strBuffer);
-    }
-    
+
   }
+
 class HuffManNode{
 	protected int freq;
 	protected byte key;

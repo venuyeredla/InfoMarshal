@@ -45,7 +45,7 @@ public class DataWriter implements Closeable {
 		this.os = new BufferedOutputStream(os);
 	}
 
-	public void writeBlock(int offset, Bytes block) {
+	public void writeBlock(int offset, ByteBuf block) {
 		try {
 			Path path = FileSystems.getDefault().getPath(fileName);
 			SeekableByteChannel sbc = Files.newByteChannel(path, StandardOpenOption.WRITE);

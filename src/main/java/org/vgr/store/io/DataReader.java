@@ -35,12 +35,12 @@ public class DataReader implements Closeable{
 		this.is.mark(0);
 	  }
 
-	public Bytes readBytes(int size) {
+	public ByteBuf readBytes(int size) {
 		try {
 			byte[] bytes=new byte[size];
 			int count=this.is.read(bytes);
 			System.out.println("No of bytes read :"+count);
-			return new Bytes(bytes);
+			return new ByteBuf(bytes);
 		 } catch (IOException e) {
 			e.printStackTrace();
 		 }
@@ -48,29 +48,28 @@ public class DataReader implements Closeable{
 	}
 	
 	
-	public Bytes readBlockOld(int offset) {
+	public ByteBuf readBlockOld(int offset) {
 		try {
-			byte[] bytes=new byte[Bytes.BLOCK_SIZE];
+			byte[] bytes=new byte[ByteBuf.BLOCK_SIZE];
 			int count=this.is.read(bytes);
 			System.out.println("No of bytes read :"+count);
-			return new Bytes(bytes);
+			return new ByteBuf(bytes);
 		 } catch (IOException e) {
 			e.printStackTrace();
 		 }
 		return null;
 	}
 	
-	public Bytes readBlock(int offset) {
+	public ByteBuf readBlock(int offset) {
 		try {
 		    Path path=FileSystems.getDefault().getPath(fileName);
 			SeekableByteChannel sbc=Files.newByteChannel(path, StandardOpenOption.READ);
 			sbc.position(offset);
-		    ByteBuffer byteBuffer=ByteBuffer.allocate(Bytes.BLOCK_SIZE);
-		    int  noOfbytes=sbc.read(byteBuffer);
-			byte[] bytes= byteBuffer.array();
+		    ByteBuffer byteBuffer=ByteBuffer.allocate(ByteBuf.BLOCK_SIZE);
+;			byte[] bytes= byteBuffer.array();
 			//System.out.println("Read BufferSize : "+noOfbytes);
 		    sbc.close();	
-			return new Bytes(bytes);
+			return new ByteBuf(bytes);
 		 } catch (IOException e) {
 			e.printStackTrace();
 		 }

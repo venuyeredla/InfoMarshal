@@ -6,7 +6,7 @@ public class DataIOTest {
 	String file=FileUtil.getPath("io.data");
 	public void writeTest() {
 		DataWriter writer=new DataWriter(file,false);
-		Bytes block=new Bytes(100);
+		ByteBuf block=new ByteBuf(100);
 		block.write("venugopal Reddy");
 		block.write(4104);
 		block.write((byte)127);
@@ -24,7 +24,7 @@ public class DataIOTest {
 	   }
 public void readTest() {
 		DataReader reader=new DataReader(file);
-		Bytes block=reader.readBlock(0);
+		ByteBuf block=reader.readBlock(0);
 		System.out.println("String :"+block.readString());
 		System.out.println("Integer:"+block.readInt());
 		System.out.println("byte:"+block.readByte());

@@ -1,6 +1,6 @@
 package org.vgr.store.ds;
 
-import org.vgr.store.io.Bytes;
+import org.vgr.store.io.ByteBuf;
 import org.vgr.store.io.DataReader;
 import org.vgr.store.io.DataWriter;
 
@@ -176,7 +176,7 @@ public class Bst {
 			if(node.right!=null) inOrder(node.right); 
 		 }
 	}
-	public void preOrder(Node node,Bytes bytes) {
+	public void preOrder(Node node,ByteBuf bytes) {
 		if(node!=null) {
 			    if(bytes==null) {
 			    	System.out.print(node.key+", ");	
@@ -197,7 +197,7 @@ public class Bst {
 	}
 
 	public void writeToStorage(DataWriter dataWriter) {
-		Bytes block=new Bytes(4096);
+		ByteBuf block=new ByteBuf(4096);
 		block.write("BST#pre");
 		block.writeVInt(totalNodes);
 		preOrder(root,block);
@@ -206,7 +206,7 @@ public class Bst {
 	}
 	
 	public static Bst readFromStorage(DataReader reader) {
-		Bytes block=reader.readBlock(0);
+		ByteBuf block=reader.readBlock(0);
 		Bst bst=new Bst();
 		String codec=block.readString();
 		System.out.println("BST index prefix: "+codec);

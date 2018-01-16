@@ -1,6 +1,6 @@
 package org.vgr.compress;
 
-public class LZWCompression implements Compressor{
+public class ArthimeticCoding implements Compressor{
 
 	@Override
 	public byte[] compress(String txt) {
@@ -25,5 +25,4 @@ public class LZWCompression implements Compressor{
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 }

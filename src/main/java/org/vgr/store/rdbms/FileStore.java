@@ -10,7 +10,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vgr.store.io.Bytes;
+import org.vgr.store.io.ByteBuf;
 import org.vgr.store.io.DataReader;
 import org.vgr.store.io.DataWriter;
 
@@ -29,7 +29,7 @@ public class FileStore implements Store,Closeable{
 
 	@Override
 	public boolean writeSchemaInfo(SchemaInfo schemaInfo,int pageNum) {
-		Bytes block = new Bytes();
+		ByteBuf block = new ByteBuf();
 		block.write(schemaInfo.getPageId())
 		     .write(schemaInfo.getSchemaName())
 		     .write(schemaInfo.getUserName())
@@ -47,7 +47,7 @@ public class FileStore implements Store,Closeable{
 	
 	@Override
 	public SchemaInfo getSchemaInfo(int pageNum) {
-		Bytes b=this.readBlock(pageNum);
+		ByteBuf b=this.readBlock(pageNum);
 		SchemaInfo schemaInfo=new SchemaInfo();
 		schemaInfo.setPageId(b.readInt());
 		schemaInfo.setSchemaName(b.readString());
@@ -69,7 +69,7 @@ public class FileStore implements Store,Closeable{
 
 	@Override
 	public boolean writeTable(Table table,int pageNum) {
-		Bytes block=new Bytes();
+		ByteBuf block=new ByteBuf();
 		block.write(table.getName());
 		block.write(table.getNum());
 		block.write(table.getPrimary());
@@ -89,7 +89,7 @@ public class FileStore implements Store,Closeable{
 
 	@Override
 	public Table getTable(int pageid) {
-		 Bytes b=this.readBlock(pageid);
+		 ByteBuf b=this.readBlock(pageid);
 		 Table table=new Table(b.readString());
 		 table.setNum(b.readInt());
 		 table.setPrimary(b.readString());
@@ -105,20 +105,20 @@ public class FileStore implements Store,Closeable{
 		return table;
 	}
 	
-	public void writeBlock(int blockNum, Bytes block) {
-		int offset=blockNum*Bytes.BLOCK_SIZE;
+	public void writeBlock(int blockNum, ByteBuf block) {
+		int offset=blockNum*ByteBuf.BLOCK_SIZE;
 		writer.writeBlock(offset, block);
 		writer.flush();
 	 }
 	
-	public Bytes readBlock(int blockNum) {
-		int offset=blockNum*Bytes.BLOCK_SIZE;
-		Bytes block=reader.readBlock(offset);
+	public ByteBuf readBlock(int blockNum) {
+		int offset=blockNum*ByteBuf.BLOCK_SIZE;
+		ByteBuf block=reader.readBlock(offset);
 		return block;
 	}
 	
 	public void writeIdxNode(BtreeNode node) {
-		Bytes block = new Bytes();
+		ByteBuf block = new ByteBuf();
 		BtreeNodeType nodeType=node.isLeaf()?BtreeNodeType.LEAF:BtreeNodeType.INTERNAL;
 		block.write(node.getId())// Page Number
 		     .writeByte(nodeType.getNodVal())
@@ -135,8 +135,8 @@ public class FileStore implements Store,Closeable{
 	}
 	
 	public BtreeNode readIdxNode(int nodeId) {
-		int offset = nodeId * Bytes.BLOCK_SIZE;
-		Bytes block = reader.readBlock(offset);
+		int offset = nodeId * ByteBuf.BLOCK_SIZE;
+		ByteBuf block = reader.readBlock(offset);
 		int pageNum = block.readInt();
 		byte type = block.readByte();
 		BtreeNodeType nodeType=BtreeNodeType.getNodeType(type);
@@ -152,7 +152,7 @@ public class FileStore implements Store,Closeable{
 	}
 	
 	public int getNodeOffset(int pageNum) {
-		int offset = pageNum * Bytes.BLOCK_SIZE;
+		int offset = pageNum * ByteBuf.BLOCK_SIZE;
 		return offset == -1 ? 0 : offset;
 	}
 

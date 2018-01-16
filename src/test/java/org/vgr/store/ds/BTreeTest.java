@@ -30,7 +30,7 @@ public class BTreeTest {
 	@Ignore
 	public void testTravrse() {
 			  bTree=new BTree(index);
-		      bTree.traverse(bTree.rootPage);
+		      bTree.traverse(bTree.root);
 		  }
 	@Test
 	public void testSerach() {
@@ -39,7 +39,7 @@ public class BTreeTest {
 		String searchKeys= keySet.stream().map(num->""+num).collect(Collectors.joining(","));
 		System.out.println("Keys : "+searchKeys);
 		for (Integer integer : keySet) {
-			  Page result=bTree.search(bTree.rootPage, integer);
+			  Page result=bTree.search(bTree.root, integer);
 			  if(result!=null) {
 				  System.out.print("Key : "+ integer +" Page : "+result.getId() +" -> Keys : "+result.getKeys()+"\n");
 			  }

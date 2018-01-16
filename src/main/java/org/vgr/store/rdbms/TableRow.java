@@ -3,7 +3,7 @@ package org.vgr.store.rdbms;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.vgr.store.io.Bytes;
+import org.vgr.store.io.ByteBuf;
 
 public class TableRow {
 	private Map<String,Object> colums;
@@ -20,7 +20,7 @@ public class TableRow {
 		  colums.put(key, value);
 	}
 	
-	public void addColumn(Bytes bytes,String key,Types type) {
+	public void addColumn(ByteBuf bytes,String key,Types type) {
 		   switch (type) {
 		case BYTE:
 			    this.addColumn(key,  bytes.readByte());
@@ -42,7 +42,7 @@ public class TableRow {
 		}
 	}
 	
-	public void wirteColumn(Bytes bytes,String key,Types type) {
+	public void wirteColumn(ByteBuf bytes,String key,Types type) {
 	   Object Obj= colums.get(key);
 	   switch (type) {
 	case BYTE:

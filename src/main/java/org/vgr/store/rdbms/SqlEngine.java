@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vgr.store.io.Bytes;
+import org.vgr.store.io.ByteBuf;
 import org.vgr.store.io.FileUtil;
 
 public class SqlEngine implements Closeable {
@@ -21,7 +21,7 @@ public class SqlEngine implements Closeable {
 	
 	public SqlEngine(String schema, String userName, String passWord) {
 		  LOG.info("DB engine started ");
-		  LOG.info("OS block size is : "+Bytes.BLOCK_SIZE);
+		  LOG.info("OS block size is : "+ByteBuf.BLOCK_SIZE);
 		  schema=schema.toLowerCase();
 		  String dbFile=FileUtil.getPath(schema+DB_SUFFIX);
 		  fileStore=new FileStore(dbFile);	
@@ -84,7 +84,7 @@ public class SqlEngine implements Closeable {
 	public void insert(String tableName,TableRow row) {
 		Table table=this.getTable(tableName);
 		BTreeIndex bTreeIndex=getBtreeIndex(table);
-		Bytes bytes=new Bytes();
+		ByteBuf bytes=new ByteBuf();
 		if(table!=null) {
 			table.getColumns().forEach(column->{
 			   String name= column.getName();
@@ -105,7 +105,7 @@ public class SqlEngine implements Closeable {
 		BTreeIndex bTreeIndex=new BTreeIndex(this.schemaInfo,table,fileStore);
 		int pageid=bTreeIndex.search(id);
 		if(pageid!=-1) {
-			Bytes bytes=fileStore.readBlock(pageid);
+			ByteBuf bytes=fileStore.readBlock(pageid);
 			TableRow tableRow=new TableRow();
 			table.getColumns().forEach(column->{
 				   String name= column.getName();

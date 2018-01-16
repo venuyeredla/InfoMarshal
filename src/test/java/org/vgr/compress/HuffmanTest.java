@@ -4,12 +4,14 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 public class HuffmanTest {
-	
-	@Test
+    @Test
 	public void testCompress() {
 		HuffManCoding huffManCoding=new HuffManCoding();
-		String str="aaaabbbccccddddddddddeeeeeeeffffffiiiiiiiiiiiiiiiiiasdlfkasdfsadfsadfasfdsafdaaasdfasfsafsadfsafdsafdffaaaabbbccccddddddddddeeeeeeeffffffiiiiiiiiiiiiiiiiiasdlfkasdfsadfsadfasfdsafdaaasdfasfsafsadfsafdsafdffaaaabbbccccddddddddddeeeeeeeffffffiiiiiiiiiiiiiiiiiasdlfkasdfsadfsadfasfdsafdaaasdfasfsafsadfsafdsafdff";
-		huffManCoding.compress(str);
+		String actual="aaaabbbccccddddddddddeeeeeeeffffffiiiiiiiiiiiiiiiiiasdlfkasdfsadfsadfasfdsafdaaasdfasfsafsadfsafdsafdffaaaabbbccccddddddddddeeeeeeeffffffiiiiiiiiiiiiiiiiiasdlfkasdfsadfsadfasfdsafdaaasdfasfsafsadfsafdsafdffaaaabbbccccddddddddddeeeeeeeffffffiiiiiiiiiiiiiiiiiasdlfkasdfsadfsadfasfdsafdaaasdfasfsafsadfsafdsafdff";
+		byte[] bytes=huffManCoding.compress(actual);
+		String decompressed=huffManCoding.decompressToTxt(bytes);
+		System.out.println("\nActual       ="+actual);
+		System.out.println("Decompressed ="+decompressed);
 	 }
 
 	@Test
@@ -22,10 +24,11 @@ public class HuffmanTest {
 	@Test
 	@Ignore
 	public void testbitStrToBytes() {
-		HuffManCoding huffManCoding=new HuffManCoding();
 		//String bitString="1011101110111011101010101010010010010010000000000000000000001001001001001001001000110110110110110111111111111111111111111111111111111";
 		String bitString="000001000001";
-		huffManCoding.bitStringTobytes(bitString);
+		BitUtil.bitStringTobytes(bitString);
 	}
+	
+	
 	
 }
