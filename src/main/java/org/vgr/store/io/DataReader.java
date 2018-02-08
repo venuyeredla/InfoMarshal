@@ -23,10 +23,10 @@ public class DataReader implements Closeable{
 	private String fileName;
 
     public DataReader(String fileName) {
-			try {
+		  try {
 				this.fileName=fileName;
 				this.is=new BufferedInputStream(new FileInputStream(fileName));
-			} catch (FileNotFoundException e) {
+		   } catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
 	   }
@@ -66,7 +66,8 @@ public class DataReader implements Closeable{
 			SeekableByteChannel sbc=Files.newByteChannel(path, StandardOpenOption.READ);
 			sbc.position(offset);
 		    ByteBuffer byteBuffer=ByteBuffer.allocate(ByteBuf.BLOCK_SIZE);
-;			byte[] bytes= byteBuffer.array();
+		    sbc.read(byteBuffer);
+		    byte[] bytes= byteBuffer.array();
 			//System.out.println("Read BufferSize : "+noOfbytes);
 		    sbc.close();	
 			return new ByteBuf(bytes);
