@@ -4,8 +4,8 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.vgr.ioc.core.AopCar;
 import org.vgr.ioc.core.AopIVehicle;
-import org.vgr.ioc.core.LoggingAspect;
 import org.vgr.ioc.core.AopProxyFactory;
+import org.vgr.ioc.core.LoggingAspect;
 
 
 public class AopTest {
