@@ -26,12 +26,10 @@ class ClassesProivdeImpl implements ClassesProvider{
 	@Override
 	public Set<String> getClasses(String fileName, String classsName) {
 		Set<String> classes=new HashSet<>();
-		classes.add("org.vgr.ioc.jdbc.JDBCTemplate");
+		classes.add("org.vgr.ioc.core.JdbcTemplate");
 		classes.add("org.vgr.app.controllers.ProfileController");
-		classes.add("org.vgr.app.controllers.FriendsController");
 		classes.add("org.vgr.app.controllers.AdminController");
 		classes.add("org.vgr.app.controllers.ForwardController");
-		classes.add("org.vgr.app.controllers.FileUploadController");
 		classes.add("org.vgr.app.controllers.SearchController");
 		classes.add("org.vgr.app.controllers.AppController");
 		classes.add("org.vgr.app.service.ProfileService");
@@ -43,7 +41,7 @@ class ClassesProivdeImpl implements ClassesProvider{
 		classes.add("org.vgr.app.dao.AdminDao");
 		classes.add("org.vgr.app.dao.FriendsDao");
 		classes.add("org.vgr.http.server.HttpServer");
-		classes.add("org.vgr.ioc.web.RequestDispatcher");
+		classes.add("org.vgr.ioc.core.RequestDispatcher");
 		return classes;
 	}
 }

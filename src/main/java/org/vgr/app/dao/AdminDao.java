@@ -7,12 +7,12 @@ import java.util.List;
 import org.vgr.app.domain.Profile;
 import org.vgr.ioc.annot.Dao;
 import org.vgr.ioc.annot.Inject;
-import org.vgr.ioc.core.JDBCTemplate;
+import org.vgr.ioc.core.JdbcTemplate;
 
 @Dao(id="adminDao")
 public class AdminDao {
 	@Inject(ref="jdbcTemplate")
-	JDBCTemplate jdbcTemplate=null;
+	JdbcTemplate jdbcTemplate=null;
 	
 	public List<Profile> getAllUsers() throws SQLException {
 	List<Profile> users = new ArrayList<Profile>();
@@ -58,10 +58,10 @@ public class AdminDao {
 		return profile;
 	}
 	
-	public JDBCTemplate getJdbcTemplate() {
+	public JdbcTemplate getJdbcTemplate() {
 		return jdbcTemplate;
 	}
-	public void setJdbcTemplate(JDBCTemplate jdbcTemplate) {
+	public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 	}
 	

@@ -3,13 +3,6 @@ package org.vgr.store.search;
 public class PatternMatching {
 	
 
-	
-	
-	
-	
-	
-	
-	
 	public boolean startingWith(String pat, String txt) {
 		
 		  int patLength=pat.length();
@@ -23,19 +16,10 @@ public class PatternMatching {
 	
 	public boolean endingWith(String pat, String txt) {
 		
-		
 		  return false;
 		}
 	
-	
-	
-	
-	
-	
-	
-	
 	public boolean match(String pat, String txt) {
-		
 		
 	  return false;
 	}
@@ -61,8 +45,5 @@ public class PatternMatching {
 		  }
 		return lps;
 	}
-	
-	
-	
 
 }

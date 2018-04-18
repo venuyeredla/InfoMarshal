@@ -5,14 +5,14 @@ import org.slf4j.LoggerFactory;
 import org.vgr.app.domain.Profile;
 import org.vgr.ioc.annot.Dao;
 import org.vgr.ioc.annot.Inject;
-import org.vgr.ioc.core.JDBCTemplate;
+import org.vgr.ioc.core.JdbcTemplate;
 
 @Dao(id="loginDao")
 public class LoginDao {
 	public static final Logger logger=LoggerFactory.getLogger(LoginDao.class);
 	
 	@Inject(ref="jdbcTemplate")
-	JDBCTemplate jdbcTemplate=null;
+	JdbcTemplate jdbcTemplate=null;
 	 
     public Profile authenticate(String mail, String password){
 	        
@@ -39,11 +39,11 @@ public class LoginDao {
 			   return profile;
 	       }
 	
-	public JDBCTemplate getJdbcTemplate() {
+	public JdbcTemplate getJdbcTemplate() {
 		return jdbcTemplate;
 	}
 
-	public void setJdbcTemplate(JDBCTemplate jdbcTemplate) {
+	public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 	}
 

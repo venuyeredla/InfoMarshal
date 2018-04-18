@@ -5,7 +5,7 @@ import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoggingAspect implements Advices{
+public class LoggingAspect implements AopAdvices{
 	private static final Logger LOGGER=LoggerFactory.getLogger(LoggingAspect.class);
 	public void before(){
 		LOGGER.info(" ********  Before Advice **********");

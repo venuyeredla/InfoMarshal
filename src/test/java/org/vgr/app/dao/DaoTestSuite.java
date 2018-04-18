@@ -13,14 +13,14 @@ import java.util.Set;
 import org.vgr.app.common.AbstractTest;
 import org.vgr.app.domain.Profile;
 import org.vgr.app.service.ProfileService;
-import org.vgr.ioc.core.JDBCTemplate;
+import org.vgr.ioc.core.JdbcTemplate;
 import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
 public class DaoTestSuite  extends AbstractTest{
 	 
-	  static JDBCTemplate jdbcTemplate=null;
+	  static JdbcTemplate jdbcTemplate=null;
 	
 	  @AfterClass
 	  public static void afterClass() {

@@ -30,6 +30,7 @@ public class SqlEngineTest {
 	}
 
 	@Test
+	@Ignore
 	public void createTable() {
 		Table table=new Table("Student");
 		table.addColumn(new TableColumn("id", 0, Types.INT));
@@ -50,6 +51,7 @@ public class SqlEngineTest {
 	 }
 	
 	@Test
+	@Ignore
 	public void insert() {
 		for(int i=1;i<30000;i++) {
 			TableRow row=new TableRow();
@@ -65,9 +67,7 @@ public class SqlEngineTest {
 	 }
 	
 	@Test
-	@Ignore
 	public void select() {
-		
 		 HashSet<Integer> keySet=RandomUtil.randomNumsSet(5, 19999);
 		 List<Integer> keyList=new ArrayList<>(keySet);
 		 for (Integer integer : keyList) {

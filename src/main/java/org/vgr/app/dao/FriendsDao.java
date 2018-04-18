@@ -9,12 +9,12 @@ import org.vgr.app.domain.Friend;
 import org.vgr.app.domain.Profile;
 import org.vgr.ioc.annot.Dao;
 import org.vgr.ioc.annot.Inject;
-import org.vgr.ioc.core.JDBCTemplate;
+import org.vgr.ioc.core.JdbcTemplate;
 
 @Dao(id="friendsDao")
 public class FriendsDao {
 	@Inject(ref="jdbcTemplate")
-	JDBCTemplate jdbcTemplate=null;
+	JdbcTemplate jdbcTemplate=null;
 	public static final Logger logger=LoggerFactory.getLogger(FriendsDao.class);
 		
 	public List<Profile> getFriends(int userId) {
@@ -62,11 +62,11 @@ public class FriendsDao {
 		return null;
 	}
 	
-	public JDBCTemplate getJdbcTemplate() {
+	public JdbcTemplate getJdbcTemplate() {
 		return jdbcTemplate;
 	}
 
-	public void setJdbcTemplate(JDBCTemplate jdbcTemplate) {
+	public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 	}
 }

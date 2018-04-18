@@ -9,13 +9,13 @@ import org.vgr.app.domain.Image;
 import org.vgr.app.domain.Profile;
 import org.vgr.ioc.annot.Dao;
 import org.vgr.ioc.annot.Inject;
-import org.vgr.ioc.core.JDBCTemplate;
+import org.vgr.ioc.core.JdbcTemplate;
 
 @Dao(id="profileDao")
 public class ProfileDao {
 	
 	@Inject(ref="jdbcTemplate")
-	private JDBCTemplate  jdbcTemplate=null;
+	private JdbcTemplate  jdbcTemplate=null;
 	
 	public int saveProfile(Profile profile) {
 		String sql="insert into profile(homeurl,pass,f_name,l_name,email)" +
@@ -66,11 +66,11 @@ public class ProfileDao {
     	  return num;
     }
 	
-	public JDBCTemplate getJdbcTemplate() {
+	public JdbcTemplate getJdbcTemplate() {
 		return jdbcTemplate;
 	}
 
-	public void setJdbcTemplate(JDBCTemplate jdbcTemplate) {
+	public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 	}
 }

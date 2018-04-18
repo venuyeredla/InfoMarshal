@@ -21,7 +21,7 @@ public class HttpServer implements Runnable{
      * the socket reading thread forever (or as long the browser is open).
      */
     public static final int SOCKET_READ_TIMEOUT = 5000;
-    private int SERVER_PORT=8080;
+    private int SERVER_PORT=2050;
     ServerSocket socketServer=null;
     ExecutorService executorService=Executors.newFixedThreadPool(10);
 	@Inject(ref="requestDispatcher")

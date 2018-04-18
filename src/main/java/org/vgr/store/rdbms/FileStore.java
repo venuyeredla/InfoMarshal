@@ -15,6 +15,7 @@ import org.vgr.store.io.DataReader;
 import org.vgr.store.io.DataWriter;
 
 public class FileStore implements Store,Closeable{
+	
 	private static final Logger LOG = LoggerFactory.getLogger(FileStore.class);
 	private DataWriter writer;
 	private DataReader reader;

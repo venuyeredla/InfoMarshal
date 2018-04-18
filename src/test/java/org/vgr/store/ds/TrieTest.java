@@ -41,6 +41,7 @@ public class TrieTest {
 		String query=scanner.next();
 		while(!query.equalsIgnoreCase("-1")) {
 			System.out.println("Does '"+query+"' exists? :: "+trie.search(query));
+			System.out.print("\nEnter next word :: ");
 			query=scanner.next();
 		}
 		scanner.close();
