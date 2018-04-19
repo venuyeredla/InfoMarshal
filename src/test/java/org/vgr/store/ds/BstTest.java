@@ -1,7 +1,7 @@
 package org.vgr.store.ds;
-
 import java.util.HashSet;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +14,8 @@ public class BstTest {
 	private static final Logger LOG=LoggerFactory.getLogger(BstTest.class);
 	String indexFile=FileUtil.getPath("bst.idx");
 	
+	@Test
+	@Ignore
 	public void testInsert(){
 		//int[] keys= {4104, 2088, 1048};//{36,45,78,32,13,61,94,50,74,47,91,21,84,94,41,54,70,19,61,73};
 		int[] keys= RandomUtil.randomNumbers(500, 10000);
@@ -32,6 +34,7 @@ public class BstTest {
 	 }
 	
 	@Test
+	@Ignore
 	public void testSerach() {
 	 DataReader reader=new DataReader(indexFile);
 	 Bst bst=Bst.readFromStorage(reader);

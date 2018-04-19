@@ -25,18 +25,19 @@ public class HuffManCoding implements Compressor {
 		byteBuf.writeByte(hCodes.keySet().size());
 		charFreq.forEach((key, val) -> {
 			byteBuf.writeByte(key);
-			int v = Math.toIntExact(val);
-			byteBuf.writeVInt(v);
+			byteBuf.writeVInt(Math.toIntExact(val));
 		});
-		StringBuilder compressed = new StringBuilder();
+		byteBuf.write(bytes.length);
 		for (int i = 0; i < bytes.length; i++) {
 			String code = hCodes.get(bytes[i]);
-			compressed.append(code);
-		}
-		byte[] cData = BitUtil.bitStringTobytes(new String(compressed));
-		byteBuf.write(cData.length);
-		byteBuf.write(cData);
-		System.out.println("\nActual size="+bytes.length+" , Compressed size="+cData.length+", Including char freq="+byteBuf.getActualBytes().length);
+			while(code.length()>0) {
+				int bit=Integer.parseInt(code.substring(0, 1));
+				byteBuf.writeBit(bit);
+				code=code.substring(1);
+			}
+		 }
+	    byteBuf.fillLast();
+		System.out.println("\n Actual -> Compressed  :: "+ bytes.length+ " ->  "+byteBuf.getActualBytes().length);
 		return byteBuf.getActualBytes();
 	}
 	
@@ -44,14 +45,21 @@ public class HuffManCoding implements Compressor {
 	public byte[] decompress(byte[] compressed) {
 		ByteBuf byteBuf=new ByteBuf(compressed);
 		this.buildHCodes(this.readFreq(byteBuf));
-		int cDataSize=byteBuf.readInt();
-		byte[] cData=new byte[cDataSize];
-		for(int i=0;i<cDataSize;i++) {
-			cData[i]=byteBuf.readByte();
+		Map<String,Byte> dHCodes=new HashMap<>();
+		hCodes.forEach((key,val)->{ dHCodes.put(val, key); });
+		int datasize=byteBuf.readInt();
+		byte[] data=new byte[datasize];
+		String code="";
+		for(int i=0;i<datasize;i++) {
+			while(!dHCodes.containsKey(code)) {
+				code=code+byteBuf.readBit();
+			}
+			data[i]=dHCodes.get(code);
+			code="";
 		}
-		String bitString = BitUtil.bytesToBitString(cData);
-		return this.toBytes(bitString);
+		return data;
 	}
+	
 	
 	@Override
 	public byte[] compress(String txt) {
@@ -63,7 +71,7 @@ public class HuffManCoding implements Compressor {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
+    @Override
 	public String decompressToTxt(byte[] compressed) {
 		byte[] actual=this.decompress(compressed);
 		StringBuilder txt=new StringBuilder();
@@ -73,21 +81,6 @@ public class HuffManCoding implements Compressor {
 		return new String(txt);
 	}
 	
-	public byte[] toBytes(String compressed) {
-		  String code="";
-		  Map<String,Byte> dHCodes=new HashMap<>();
-		  hCodes.forEach((key,val)->{ dHCodes.put(val, key); });
-		  ByteList byteList=new ByteList();
-		  for(int i=0;i<compressed.length();i++) {
-			  code=code+compressed.charAt(i);
-			  if(dHCodes.containsKey(code)) {
-				byte b=dHCodes.get(code);
-				byteList.add(b);
-				code="";
-			  }
-		  }
-		  return byteList.getBytes();
-	  }
 	
 	public Map<Byte, Long> readFreq(ByteBuf bytes) {
 		byte codeSize = bytes.readByte();

@@ -70,10 +70,15 @@ public class SqlEngineTest {
 	public void select() {
 		 HashSet<Integer> keySet=RandomUtil.randomNumsSet(5, 19999);
 		 List<Integer> keyList=new ArrayList<>(keySet);
+		 List<TableRow> results=new ArrayList<>();
 		 for (Integer integer : keyList) {
 			 TableRow tableRow=sqlEngine.select("Student",integer);
-			  System.out.println(tableRow);
+			 results.add(tableRow);
+			 
 		}
+		 results.forEach(row->{
+			 System.out.println(row);
+		 });
 	}
 	
 	public void update() {

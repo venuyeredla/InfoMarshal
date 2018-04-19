@@ -5,4 +5,5 @@ public interface Compressor {
 	public byte[] compress(byte[] bytes);
 	public byte[] decompress(String txt);
 	public byte[] decompress(byte[] bytes);
+	String decompressToTxt(byte[] compressed);
 }

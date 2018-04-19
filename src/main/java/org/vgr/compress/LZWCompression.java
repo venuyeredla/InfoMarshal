@@ -26,4 +26,10 @@ public class LZWCompression implements Compressor{
 		return null;
 	}
 
+	@Override
+	public String decompressToTxt(byte[] compressed) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

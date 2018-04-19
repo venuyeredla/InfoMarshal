@@ -13,6 +13,12 @@ public class ByteBuf{
 	private byte[] bytes;
 	private int wPos;
 	private int rPos;
+	//Used only for I/O of bit streams.
+	private int bitBuf;
+	private short wbitCount;
+	private short rbitCount;
+	
+	
 	
 	public ByteBuf() {
 		bytes=new byte[BLOCK_SIZE];
@@ -243,7 +249,35 @@ public class ByteBuf{
     	return rPos;
     }
     
+    public void writeBit(int bit) {
+    	int actualBit=bit &1;
+    	this.bitBuf=this.bitBuf<<1 | actualBit;
+    	this.wbitCount +=1;
+    	if(this.wbitCount==8) {
+    		this.writeByte(this.bitBuf);
+    		this.bitBuf=0;
+    		this.wbitCount=0;
+    	}
+    }
+    
+    public void fillLast() {
+    	int toBe=8-this.wbitCount;
+    	for(int i=0;i<toBe;i++) {
+    		this.writeBit(0);
+    	 }
+    }
+    
+    public int readBit() {
+    	if(this.rbitCount==0) {
+    		this.bitBuf=this.readByte();
+    		this.rbitCount=8;
+    	}
+    	int bit=(this.bitBuf >> (this.rbitCount-1)) & 1;
+    	rbitCount -=1;
+    	return bit;
+    }
 }
+
 
 class OutOfRangException extends Exception{
 	private static final long serialVersionUID = 1L;

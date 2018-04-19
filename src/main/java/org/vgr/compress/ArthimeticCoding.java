@@ -101,6 +101,13 @@ public class ArthimeticCoding implements Compressor{
 		}
 		return freqTableMap;
 	}
+
+
+	@Override
+	public String decompressToTxt(byte[] compressed) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
 
 class FreqTable{

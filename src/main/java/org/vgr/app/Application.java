@@ -26,7 +26,7 @@ class ClassesProivdeImpl implements ClassesProvider{
 	@Override
 	public Set<String> getClasses(String fileName, String classsName) {
 		Set<String> classes=new HashSet<>();
-		classes.add("org.vgr.ioc.core.JdbcTemplate");
+		classes.add("org.vgr.ioc.core.JdTemplate");
 		classes.add("org.vgr.app.controllers.ProfileController");
 		classes.add("org.vgr.app.controllers.AdminController");
 		classes.add("org.vgr.app.controllers.ForwardController");
