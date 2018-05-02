@@ -1,51 +1,60 @@
 package org.vgr.compress;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import org.vgr.store.io.ByteBuf;
 
 public class ArthimeticCoding implements Compressor{
 	private byte bits=8;
-	private int total=0;
 	private int underflow=0;
-	BitStream bitStream=new BitStream();
+	ByteBuf byteBuf=new ByteBuf();
+	private int bitCount=0;
+	
 	@Override
 	public byte[] compress(String txt) {
 		byte[] bytes=txt.getBytes();
-		Map<Byte, FreqTable> freqTableMap=this.charFreqs(txt);
 		int  low=0,high=(1<<8)-1;
-		int TOP=1<<bits-1, SECOND=1<<bits-2;
+		int MASK=(1<<bits)-1 ,TOP_MASK=1<<bits-1, SECOND_MASK=1<<bits-2;
+		int MAX_ALLOWED=SECOND_MASK-1;
+		System.out.print("MASK:"+MASK+"-"+NumSysUtil.decToBin(MASK));
+		System.out.print(" TOP_MASK:"+TOP_MASK+"-"+NumSysUtil.decToBin(TOP_MASK));
+		System.out.println(" SECOND_MASK:"+SECOND_MASK+"-"+NumSysUtil.decToBin(SECOND_MASK));
+		FreqTable freqTable=new FreqTable(MAX_ALLOWED,256);
+		freqTable.buildRanges(bytes);
+		int total=freqTable.getTotal();
 		for(int i=0;i<bytes.length;i++) {
-			FreqTable sym=freqTableMap.get(bytes[i]);
-			int symLow=sym.low, symHigh=sym.high;
-			int range=high-low;
+			int symLow=freqTable.getLow(bytes[i]), symHigh=freqTable.getHigh(bytes[i]);
+			int range=high-low+1;
 			int newLow=low+(symLow*range)/total;
-			int newHigh=low+(symHigh*range)/total;
+			int newHigh=low+(symHigh*range)/total-1;
 			low=newLow;high=newHigh;
-			while(((newLow ^ newHigh) & TOP)==0) {
-		         newLow=(newLow<<1) & TOP;
-		         newHigh=((newHigh<<1) & TOP) | 1;
+			System.out.print("low-high:"+low+"-"+high+" "+NumSysUtil.decToBin(low)+"-"+NumSysUtil.decToBin(high));
+			while(((low ^ high) & TOP_MASK)==0) {
+				 shift(low);
+		         low=(low<<1) & MASK;
+		         high=((high<<1) & MASK) | 1;
+		         System.out.print("low-high:"+low+"-"+high+" "+NumSysUtil.decToBin(low)+"-"+NumSysUtil.decToBin(high));
 			}
 			// While the second highest bit of low is 1 and the second highest bit of high is 0
-			while ((low & ~high & SECOND) != 0) {
+			while ((low & ~high & SECOND_MASK) != 0) {
 				underflow();
-				/*low = (low << 1) & (MASK >>> 1);
-				high = ((high << 1) & (MASK >>> 1)) | TOP_MASK | 1;*/
+				low = (low << 1) & (MASK >>> 1);
+				high = ((high << 1) & (MASK >>> 1)) | TOP_MASK | 1;
 			}
 			
 		}
-		
-		return null;
+		System.out.println();
+		System.out.println("written bit: "+bitCount);
+		return byteBuf.getActualBytes();
 	}
-
-	
 	public void shift(int num) {
-		int bit=num>>>(bits-1);
-		bitStream.write(bit);
-		for (; underflow > 0; underflow--)
-			bitStream.write(bit ^ 1);
+		int bit=num>>(bits-1)&1;
+		System.out.print("-- written "+bit+"\n");
+		byteBuf.writeBit(bit);
+		bitCount++;
+		for (; underflow > 0; underflow--) {
+			//System.out.println("");
+			byteBuf.writeBit(bit ^ 1);
+			bitCount++;
+		}
 	}
 	
 	public void underflow() {
@@ -66,43 +75,12 @@ public class ArthimeticCoding implements Compressor{
 
 	@Override
 	public byte[] decompress(byte[] bytes) {
-		// TODO Auto-generated method stub
+
+		
 		return null;
 	}
 	
 	
-	
-	public Map<Byte, FreqTable> charFreqs(String txt) {
-		return this.charFreqs(txt.getBytes());
-	}
-    /**
-     * Enumerates all bytes and calculates frequencies and does scaling on probability line.
-     * @param bytes
-     * @return
-     */
-	public Map<Byte, FreqTable> charFreqs(byte[] bytes) {
-		List<Byte> byteList = new ArrayList<>();
-		for (int i = 0; i < bytes.length; i++) {
-			byteList.add(bytes[i]);
-			total++;
-		}
-			
-		Map<Byte, Long> charFreq = byteList.stream().collect(Collectors.groupingBy(b -> b, Collectors.counting()));
-		Map<Byte, FreqTable> freqTableMap=new LinkedHashMap<>();
-		int scale=1<<bits-3;
-		int cumFreq=0;
-		for(Map.Entry<Byte, Long>  entry :charFreq.entrySet()) {
-			  byte symbol=entry.getKey();
-			  int freq = Math.toIntExact(entry.getValue());
-			  int low=cumFreq;
-			  int high=cumFreq+freq;
-			  cumFreq=high;
-			  freqTableMap.put(symbol, new FreqTable(symbol, freq, low, high));
-		}
-		return freqTableMap;
-	}
-
-
 	@Override
 	public String decompressToTxt(byte[] compressed) {
 		// TODO Auto-generated method stub
@@ -111,37 +89,84 @@ public class ArthimeticCoding implements Compressor{
 }
 
 class FreqTable{
-	 protected byte symbol;
-	 protected int freq;
-	 protected int low;
-	 protected int high;
-	 public FreqTable(byte symbol,int freq,int low ,int high) {
-        this.symbol=symbol;
-        this.freq=freq;
-        this.low=low;
-        this.high=high;
-	 }
-	@Override
-	public String toString() {
-		return "FreqTable [symbol=" + symbol + ", freq=" + freq + ", low=" + low + ", high=" + high + "]";
-	}
-}
-
-
-class BitStream{
-	short[] compressed=new short[50];
-	int currentByte=0; 
-	int filled=0;
-	int idx=0;
-	public void write(int bit) {
-		    currentByte=(currentByte<<1) |bit;
-	        filled++;
-	        if(filled==8) {
-	       	 compressed[idx++]=(short)currentByte;
-	       	 currentByte=0;
-	       	 filled=0;
-	      }
+	private int[] frequencies;
+	private int[] lows;
+	private int[] highs;
+	private int total;
+	private int MAX_PROBABLITY;
+	
+	public FreqTable(int max,int size) {
+		frequencies=new int[size];
+		highs=new int[size];
+		lows=new int[size];
+		this.MAX_PROBABLITY=max;
 	}
 	
+	public void buildRanges(byte[] data) {
+		for(int i=0;i<data.length;i++) {
+			frequencies[data[i]]++;
+		}
+		this.total=data.length;
+		//if the total frequncies > bits-2 we should rescale it.
+		if(this.total>=MAX_PROBABLITY)
+		{
+		  int rescaleValue=(this.total/MAX_PROBABLITY)+1;
+		  for(int j=0;j<frequencies.length;j++) {
+			  if(frequencies[j]>rescaleValue) {
+				  frequencies[j]=frequencies[j]/rescaleValue;
+			  }else if(frequencies[j] !=0){
+				  frequencies[j]=1;
+			  }
+		  }
+		}
+		int cum=0;
+		lows[0]=0;
+		highs[0]=frequencies[0];
+		for(int j=1;j<frequencies.length;j++) {
+			if(frequencies[j]!=0) {
+				lows[j]=cum;
+				cum=cum+frequencies[j];
+				highs[j]=cum;
+			}
+		}
+        this.total=cum;
+		
+		System.out.println("(Character, frequency, low, high)");
+		for(int k=0;k<frequencies.length;k++) {
+			if(frequencies[k]!=0) {
+			  System.out.print("("+(char)k+","+frequencies[k]+","+lows[k]+","+highs[k]+"),");
+			}
+		}
+		System.out.println("");
+		
+	}
+	
+	public int getLow(int symbol) {
+		if(symbol==0){
+			return 0;
+		}
+		return lows[symbol];	
+	}
+	
+	public int getHigh(int symbol) {
+		return highs[symbol];
+	}
+	public int getTotal() {
+		return this.total; 
+	}
 }
 
+
+class NumSysUtil{
+	public static String decToBin(int num) {
+		String binString="";
+		while(num>0) {
+			int bit=num%2;
+			binString=bit+binString;
+			num=num/2;
+		}
+		return binString;
+	}
+	
+	
+}

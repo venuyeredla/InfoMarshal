@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.vgr.store.io.ByteBuf;
-import org.vgr.store.io.ByteList;
 
 public class HuffManCoding implements Compressor {
 	private HuffManNode[] nodes;
@@ -18,18 +17,18 @@ public class HuffManCoding implements Compressor {
 	public HuffManCoding() { }
 	
 	@Override
-	public byte[] compress(byte[] bytes) {
-		Map<Byte, Long> charFreq = this.charFreqs(bytes);
+	public byte[] compress(byte[] data) {
+		Map<Byte, Long> charFreq = this.charFreqs(data);
 	    this.buildHCodes(charFreq);
-		ByteBuf byteBuf = new ByteBuf();
+		ByteBuf byteBuf = new ByteBuf(4096);
 		byteBuf.writeByte(hCodes.keySet().size());
 		charFreq.forEach((key, val) -> {
 			byteBuf.writeByte(key);
 			byteBuf.writeVInt(Math.toIntExact(val));
 		});
-		byteBuf.write(bytes.length);
-		for (int i = 0; i < bytes.length; i++) {
-			String code = hCodes.get(bytes[i]);
+		byteBuf.write(data.length);
+		for (int i = 0; i < data.length; i++) {
+			String code = hCodes.get(data[i]);
 			while(code.length()>0) {
 				int bit=Integer.parseInt(code.substring(0, 1));
 				byteBuf.writeBit(bit);
@@ -37,7 +36,7 @@ public class HuffManCoding implements Compressor {
 			}
 		 }
 	    byteBuf.fillLast();
-		System.out.println("\n Actual -> Compressed  :: "+ bytes.length+ " ->  "+byteBuf.getActualBytes().length);
+		System.out.println("\n Actual -> Compressed  :: "+ data.length+ " ->  "+byteBuf.getActualBytes().length);
 		return byteBuf.getActualBytes();
 	}
 	
@@ -120,7 +119,8 @@ public class HuffManCoding implements Compressor {
 		   System.out.print("Huffmann codes: ");
 		   hCodes.forEach((key,val)->{
 			   char ch=(char)(int)key;
-			   System.out.print(key+ "("+ch+")-"+val+" , ");
+			   //System.out.print(key+ "("+ch+")-"+val+" , ");
+			   System.out.print(ch+"-"+val+",");
 		   });
 	   }
 	
