@@ -59,28 +59,6 @@ public class HuffManCoding implements Compressor {
 		return data;
 	}
 	
-	
-	@Override
-	public byte[] compress(String txt) {
-		 return this.compress(txt.getBytes());
-	 }	
-	
-	@Override
-	public byte[] decompress(String txt) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-    @Override
-	public String decompressToTxt(byte[] compressed) {
-		byte[] actual=this.decompress(compressed);
-		StringBuilder txt=new StringBuilder();
-		for(int i=0;i<actual.length;i++) {
-			   txt.append((char)actual[i]);
-		}
-		return new String(txt);
-	}
-	
-	
 	public Map<Byte, Long> readFreq(ByteBuf bytes) {
 		byte codeSize = bytes.readByte();
 		Map<Byte, Long> charFreq=new HashMap<>();

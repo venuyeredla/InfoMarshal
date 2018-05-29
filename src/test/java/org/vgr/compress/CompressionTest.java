@@ -15,18 +15,24 @@ public class CompressionTest {
 	public static void init() {
 	 LOG.info("Initializing compressor");
 	 //compressor=new HuffManCoding();
-	 compressor=new ArthimeticCoding();
+	 compressor=new ArthimeticCompressor();
 	}
 	@Test
 	public void testCompress() {
 		String text=this.getText();
-		byte[] bytes=compressor.compress(text);
-		System.out.println("Compressed Size:"+bytes.length);
-		/*String decompressed=compressor.decompressToTxt(bytes);
-	    boolean result=text.equals(decompressed);
+		byte[] compressed=compressor.compress(text.getBytes());
+		System.out.println("Orignal: "+ text.getBytes().length+" Compressed Size:"+compressed.length);
+		int ratio=text.getBytes().length/compressed.length;
+		System.out.println("Compression Ratio: "+ratio );
+		byte[] decompressed=compressor.decompress(compressed);
+		StringBuilder adecompress=new StringBuilder();
+		for(int i=0;i<decompressed.length;i++) {
+			adecompress.append((char)decompressed[i]);
+		}
+		boolean result=text.equals(new String(decompressed));
 	    System.out.println("\nBefore="+text);
-		System.out.println("After ="+decompressed);
-		Assert.assertEquals("Two strings are equal",true,result);*/
+		System.out.println("After ="+adecompress);
+		Assert.assertEquals("Two strings are equal",true,result);
 	 }
 	public String getText() {
 		String text="venugopalananyavenkatraghuvenugopalananyavenkatraghuvenugopalreddyvenugopalananyavenkatraghuvenugopalananyavenkatraghuvenugopalreddy";
