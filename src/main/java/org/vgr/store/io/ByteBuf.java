@@ -248,6 +248,16 @@ public class ByteBuf{
     public int readPos() {
     	return rPos;
     }
+ 
+    public void resetByteRead() {
+    	this.rPos=-1;
+    }
+    
+    public void resetBitRead() {
+    	this.wbitCount=0;;
+    	this.rPos=-1;
+    }
+    
     
     public void writeBit(int bit) {
     	int actualBit=bit &1;
@@ -260,7 +270,10 @@ public class ByteBuf{
     	}
     }
     
-    public void fillLast() {
+    /**
+     * Flushes unwritten bits
+     */
+    public void flushBits() {
     	int toBe=8-this.wbitCount;
     	for(int i=0;i<toBe;i++) {
     		this.writeBit(0);

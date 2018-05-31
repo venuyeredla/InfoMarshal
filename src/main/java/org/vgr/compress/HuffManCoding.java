@@ -35,7 +35,7 @@ public class HuffManCoding implements Compressor {
 				code=code.substring(1);
 			}
 		 }
-	    byteBuf.fillLast();
+	    byteBuf.flushBits();
 		System.out.println("\n Actual -> Compressed  :: "+ data.length+ " ->  "+byteBuf.getActualBytes().length);
 		return byteBuf.getActualBytes();
 	}

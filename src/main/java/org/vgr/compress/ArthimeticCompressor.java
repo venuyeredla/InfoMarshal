@@ -15,6 +15,9 @@ public class ArthimeticCompressor implements Compressor{
 	private int bitCount=0;
 	private FreqTable freqTable;
 	
+	private String outbitString="";
+	private String inbitString="";
+	
 	private int low,high;
 	
 	public ArthimeticCompressor() {
@@ -37,45 +40,110 @@ public class ArthimeticCompressor implements Compressor{
 		this.freqTable=new FreqTable(MAX_ALLOWED,256);
 		this.freqTable.buildRanges(bytes);
 		for(int i=0;i<bytes.length;i++) {
-			System.out.print("\nEncoding:"+(char)bytes[i]+"\t");
+			System.out.print((char)bytes[i]);
 			this.applySymbolRange(bytes[i]);
 			while(((low ^ high) & TOP_MASK)==0) {
 				 eshift(low);
 		         low=(low<<1) & MASK;
 		         high=((high<<1) & MASK) | 1;
-		         //System.out.print(low+"-"+high+"->"+NumSysUtil.decToBin(low)+"-"+NumSysUtil.decToBin(high)+" ");
-		         System.out.print(low+"-"+high);
+		        // System.out.print(low+"-"+high);
 			}
 			// While the second highest bit of low is 1 and the second highest bit of high is 0
 			while ((low & ~high & SECOND_MASK) != 0) {
 				eunderflow();
 				low = (low << 1) & (MASK >>> 1);
 				high = ((high << 1) & (MASK >>> 1)) | TOP_MASK | 1;
-				System.out.print(low+"-"+high);
+				//System.out.print(low+"-"+high);
 			}
 			
 		}
-		System.out.println("written bit: "+bitCount);
+		while(low>0) {
+			byteBuf.writeBit(low&1);
+			low=low>>1;
+		}
+		
+		byteBuf.flushBits();
+		System.out.println("\nwritten bit: "+bitCount);
+		/*String temp="";
+		for(int k=0;k<bitCount;k++) {
+		   temp=temp+byteBuf.readBit();	
+		 }
+		
+		if(outbitString.equals(temp)) {
+			System.out.println("Two strings are equal..");
+		 }else {
+			System.out.println("Input :"+outbitString);
+			System.out.println("Output:"+temp); 
+		 }*/
+		System.out.println("Input :"+outbitString);
 		return byteBuf.getActualBytes();
 	}
+	
+	private int code=0;
+	
+	@Override
+	public byte[] decompress(byte[] bytes) {
+		this.byteBuf=new ByteBuf(bytes);
+		this.low=0;this.high=MASK;
+		int total=this.freqTable.getTotal();
+		//initialize the code
+		for(int i=0;i<bits;i++) {
+			int nextBit=byteBuf.readBit();
+			inbitString=inbitString+nextBit;
+			code=code<<1 | nextBit;
+		}
+		
+		try {
+		// Decoding the code;
+		for(int j=0;j<131;j++) {
+			int range=high-low+1;
+			int value=((code-low+1) * total-1)/range;
+			int symb=freqTable.getSymbol(value);
+			System.out.print((char)symb);
+			this.applySymbolRange(symb);
+			while (((low ^ high) & TOP_MASK) == 0) {
+				dshift();
+				low = (low << 1) & MASK;
+				high = ((high << 1) & MASK) | 1;
+				//System.out.print(low+"-"+high);
+			}
+			
+			// While the second highest bit of low is 1 and the second highest bit of high is 0
+			while ((low & ~high & SECOND_MASK) != 0) {
+				dunderflow();
+				low = (low << 1) & (MASK >>> 1);
+				high = ((high << 1) & (MASK >>> 1)) | TOP_MASK | 1;
+				//System.out.print(low+"-"+high);
+			}
+		}
+		
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("readBit string:"+inbitString);
+		}
+		System.out.println("\nin bitstring :"+inbitString);
+		return null;
+	}
+	
 	
 	public void applySymbolRange(int symbol) {
 		int symLow=this.freqTable.getLow(symbol), symHigh=this.freqTable.getHigh(symbol);
 		int cumulative=this.freqTable.getTotal();
-		int range=high-low+1;
-		high=low+(symHigh*range)/cumulative-1;
+		int range=high-low+1; //Adding 1 to include upper bound also.
+		high=low+(symHigh*range)/cumulative-1; // subtracting 1 to avoid overlap of intervals
 		low=low+(symLow*range)/cumulative;
-		//System.out.print(low+"-"+high+"->"+NumSysUtil.decToBin(low)+"-"+NumSysUtil.decToBin(high)+" ");
-		System.out.print(low+"-"+high);
+		//System.out.print(low+"-"+high);
 	}
 	
 	public void eshift(int num) {
 		int bit=num>>(bits-1)&1;
-		System.out.print("("+bit+")-->");
+		//System.out.print("("+bit+")-->");
+		outbitString=outbitString+bit;
 		byteBuf.writeBit(bit);
 		bitCount++;
 		for (; underflow > 0; underflow--) {
 			byteBuf.writeBit(bit ^ 1);
+			outbitString=outbitString+(bit ^ 1);
 			bitCount++;
 		}
 	}
@@ -84,58 +152,19 @@ public class ArthimeticCompressor implements Compressor{
 		underflow++;
 	 }
 	
-	private int code=0;
-	
-	@Override
-	public byte[] decompress(byte[] bytes) {
-		ByteBuf byteBuf=new ByteBuf(bytes);
-		this.low=0;this.high=MASK;
-		int total=this.freqTable.getTotal();
-		//initialize the code
-		for(int i=0;i<bits;i++) {
-			code=code<<1 | byteBuf.readBit();
-		}
-		// Decoding the code;
-		for(int j=0;j<132;j++) {
-			int range=high-low+1;
-			int offset=code-low;
-			int value=(offset * total-1)/range;
-			int symb=freqTable.getSymbol(value);
-			System.out.println((char)symb);
-			this.applySymbolRange(symb);
-			
-			while (((low ^ high) & TOP_MASK) == 0) {
-				dshift();
-				low = (low << 1) & MASK;
-				high = ((high << 1) & MASK) | 1;
-				System.out.print(low+"-"+high);
-			}
-			
-			// While the second highest bit of low is 1 and the second highest bit of high is 0
-			while ((low & ~high & SECOND_MASK) != 0) {
-				dunderflow();
-				low = (low << 1) & (MASK >>> 1);
-				high = ((high << 1) & (MASK >>> 1)) | TOP_MASK | 1;
-				System.out.print(low+"-"+high);
-			}
-		}
-		return null;
-	}
-	
 	public void dshift() {
 		int nextBit=byteBuf.readBit();
+		//System.out.print("("+nextBit+")-->");
+		inbitString=inbitString+nextBit;
 		code = ((code << 1) & MASK) |nextBit;
 	}
 	
 	public void dunderflow() {
 		int nextBit=byteBuf.readBit();
+		//System.out.print("("+nextBit+")-->");
+		inbitString=inbitString+nextBit;
 		code = (code & TOP_MASK) | ((code << 1) & (MASK >>> 1)) | nextBit;
 	}
-	
-	public void readEncodedBits(int code) {
-		
-	}
-	
 	
 }
 
@@ -213,12 +242,11 @@ class FreqTable{
 
 class NumSysUtil{
 	public static String decToBin(int num) {
-		String binString="";
+		String bitStr="";
 		while(num>0) {
-			int bit=num%2;
-			binString=bit+binString;
-			num=num/2;
+			bitStr=(num&1)+bitStr;
+			num=num>>1;
 		}
-		return binString;
+		return bitStr;
 	}
 }
