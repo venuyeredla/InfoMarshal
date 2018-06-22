@@ -7,12 +7,12 @@ import java.util.Set;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.vgr.app.ServerLife;
+import org.vgr.app.IServerLifeCycle;
 import org.vgr.app.LogLevels;
-import org.vgr.ioc.core.AopCar;
-import org.vgr.ioc.core.AopIVehicle;
+import org.vgr.app.LogAspect;
 import org.vgr.ioc.core.AopProxyFactory;
 import org.vgr.ioc.core.IocContainer;
-import org.vgr.ioc.core.LoggingAspect;
 
 public class IocTest{
 	static IocContainer ioc=null;
@@ -31,8 +31,8 @@ public class IocTest{
 	}
 	@Test
 	public void testAop() {
-		AopCar car=new AopCar("Venugopal");
-		AopIVehicle proxyCar=(AopIVehicle)AopProxyFactory.getProxy(car, AopIVehicle.class, new LoggingAspect());
+		ServerLife car=new ServerLife();
+		IServerLifeCycle proxyCar=(IServerLifeCycle)AopProxyFactory.getProxy(car, IServerLifeCycle.class, new LogAspect());
 		proxyCar.start();
 		proxyCar.stop();
 	}

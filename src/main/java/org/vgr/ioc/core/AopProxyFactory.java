@@ -3,14 +3,18 @@ package org.vgr.ioc.core;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.HashMap;
+
+import org.vgr.ioc.annot.After;
+import org.vgr.ioc.annot.Around;
+import org.vgr.ioc.annot.Before;
+
 /**
  *  Implementation of proxy Desing patterns
  * @author venugopal
  *
  */
 public class AopProxyFactory  {
-	 public static Object getProxy(Object tarObj,Class<?> clazz,AopAdvices aspect){
+	 public static Object getProxy(Object tarObj,Class<?> clazz,Object aspect){
 			 Object proxy=Proxy.newProxyInstance(clazz.getClassLoader(), new Class[] {clazz}, new ProxyInvocationHandler(tarObj,aspect)); 
 			 return proxy;
 	 }
@@ -18,8 +22,8 @@ public class AopProxyFactory  {
 
 class ProxyInvocationHandler  implements InvocationHandler {
  Object tarObj=null;
- AopAdvices aspect=null;
- public ProxyInvocationHandler(Object tarObj,AopAdvices aspect){
+ Object aspect=null;
+ public ProxyInvocationHandler(Object tarObj,Object aspect){
        this.tarObj=tarObj;
        this.aspect=aspect;
  }
@@ -27,30 +31,52 @@ class ProxyInvocationHandler  implements InvocationHandler {
 	 * Intercepting logic will go here
 	 */
    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-	   Object returnObject=null;
-	   HashMap<String, AopAdviceType> methodAdvice=aspect.pointCuts();
-	   String excutionMethod=method.getDeclaringClass().getName()+"."+method.getName();
-	   AopAdviceType adviceType=methodAdvice.get(excutionMethod);
-	   
+	    Object returnObject=null;
+	    Method objMethod=null;
+	    for (Method m : tarObj.getClass().getMethods()) {
+			if(m.getName().equals(method.getName())) {
+				objMethod=m;
+				break;
+			}
+		}
+	    
+	    AopAdviceType adviceType=null;
+	    String adviceMethod=null;
+	    String adviceMethod2=null;
+
+	    Before before= objMethod.getDeclaredAnnotation(Before.class);
+	    After after= objMethod.getDeclaredAnnotation(After.class);
+	    Around around= objMethod.getDeclaredAnnotation(Around.class);
+        
+        if(before!=null) {
+        	adviceType=AopAdviceType.BEFORE;
+        	adviceMethod=before.method();
+        }else if(after!=null) {
+             	adviceType=AopAdviceType.AFTER;
+             	adviceMethod=after.method();
+        }else if(around!=null){
+        	adviceType=AopAdviceType.AROUND;
+         	adviceMethod=around.aMethod();
+         	adviceMethod2=around.aMethod();
+        }
+        Method aspectMethod=null;
+        if(adviceMethod!=null) {
+        	aspectMethod= aspect.getClass().getDeclaredMethod(adviceMethod, new Class[]{}) ;
+        }
 	 switch (adviceType) {
 	   case BEFORE:
-		/* Method beforeMethod= aspect.getClass().getDeclaredMethod("before", new Class[]{});
-   		 beforeMethod.invoke(aspect, new Object[]{});*/
-   		 aspect.before();
-   	     returnObject= method.invoke(tarObj, args);
+		   aspectMethod.invoke(aspect, new Object[]{});
+   	       returnObject= method.invoke(tarObj, args);
 		break;
 	case AFTER:
 		 returnObject= method.invoke(tarObj, args);
-		 aspect.after();
-		/* Method after= aspect.getClass().getDeclaredMethod("after", new Class[]{});
-   		 after.invoke(aspect, new Object[]{});*/
+		 aspectMethod.invoke(aspect, new Object[]{});
 		break;
 	case AROUND:
-		 Method before= aspect.getClass().getDeclaredMethod("before", new Class[]{});
-   		 before.invoke(aspect, new Object[]{});
-   		 returnObject= method.invoke(tarObj, args);
-		 Method after= aspect.getClass().getDeclaredMethod("after", new Class[]{});
-   		 after.invoke(aspect, new Object[]{});
+		aspectMethod.invoke(aspect, new Object[]{});
+		returnObject= method.invoke(tarObj, args);
+		Method aspectMethod2= aspect.getClass().getDeclaredMethod(adviceMethod2, new Class[]{}) ;
+		aspectMethod2.invoke(aspect, new Object[]{});
 		break;
 
 	default:
@@ -59,4 +85,5 @@ class ProxyInvocationHandler  implements InvocationHandler {
 	}
 	return returnObject;
 }
+   
 }

@@ -8,8 +8,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Around {
-  String pointCut();
-  Class<?>  interfaceName();	
-
-
+  Class<?>  objInterface();	
+  String bMethod();
+  String aMethod();
 }
