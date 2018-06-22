@@ -13,13 +13,19 @@ import org.vgr.ioc.core.BeanDefinition;
 import org.vgr.ioc.core.BeanProperty;
 import org.vgr.ioc.core.HandlerConfig;
 import org.vgr.ioc.core.IocContainer;
+import org.vgr.ioc.core.IocMode;
 
 public class AnnotaionReader {
 	private static final Logger LOGGER=LoggerFactory.getLogger(AnnotaionReader.class);
+	private IocMode mode=IocMode.CORE;
 	public AnnotaionReader() {}
 	public AnnotaionReader(IocContainer iocContainer, Set<String> classesToScan){
 		this.createConfig(iocContainer, classesToScan);
 	 }
+	public AnnotaionReader(IocContainer iocContainer, Set<String> classesToScan,IocMode mode){
+		this.createConfig(iocContainer, classesToScan);
+		this.mode=mode;
+	}
 	/**
 	 * Provides  application config by reading annotation information.
 	 */
@@ -86,8 +92,11 @@ public class AnnotaionReader {
 			}
 		  });
 		    iocContainer.setBeanContainer(beansConfigMap);
-		    iocContainer.setHandlers(handlers);
-			LOGGER.info("Handlers :{ "+handlers.keySet().stream().collect(Collectors.joining(","))+" }");
-			LOGGER.info("Beans : { "+beansConfigMap.keySet().stream().collect(Collectors.joining(",")) +" }");
+		    if(mode==IocMode.WEB) {
+		    	iocContainer.setHandlers(handlers);
+				LOGGER.info("Handlers :{ "+handlers.keySet().stream().collect(Collectors.joining(","))+" }");
+		    }
+		    
+			LOGGER.info("Beans={"+beansConfigMap.keySet().stream().collect(Collectors.joining(",")) +"}");
 	}
 }

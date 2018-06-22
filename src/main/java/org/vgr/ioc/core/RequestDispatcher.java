@@ -14,14 +14,14 @@ public class RequestDispatcher implements ContainerAware {
 	IocContainer iocContainer=null;
     public void init(){
     	LOGGER.info("RequestDispatcher initilized");
-			iocContainer=null;
+		iocContainer=null;
 	}
 			
 	public String doRequestProcessing(HttpRequest request,HttpResponse response){
-		   String viewName="error";
-				try {
-			  		 String servletPath=request.getUri();
-				     if(iocContainer.isValidPath(servletPath)) {
+		  String viewName="error";
+		 try {
+				 String servletPath=request.getUri();
+			     if(iocContainer.isValidPath(servletPath)) {
 						    HandlerConfig handlerConfig=iocContainer.getHandlerConfig(servletPath);
 						    response.setMimeType(handlerConfig.getMimeType());
 							Object controller=iocContainer.getBean(handlerConfig.getController());

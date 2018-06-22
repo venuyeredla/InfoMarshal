@@ -1,5 +1,6 @@
 package org.vgr.ioc.core;
 
+
 public interface AopIVehicle{
 	public void start();
 	public void stop();

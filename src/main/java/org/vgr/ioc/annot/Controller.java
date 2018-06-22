@@ -9,5 +9,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Controller{
  String id();
- String scope()  default "prototype";
+ BeanScope scope()  default BeanScope.PROTOTYPE;
 }

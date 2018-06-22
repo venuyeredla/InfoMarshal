@@ -19,7 +19,6 @@ import org.vgr.security.AESUtils;
 import org.vgr.security.HashUtils;
 import org.vgr.security.HashUtils.HashAlgorithm;
 import org.vgr.security.HashUtils.HashEncoding;
-import org.vgr.security.KeyUtils.KeyPairAlgorithm;
 
 public class AESCryptTest {
 

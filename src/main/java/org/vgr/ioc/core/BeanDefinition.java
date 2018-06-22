@@ -2,6 +2,8 @@ package org.vgr.ioc.core;
 
 import java.util.List;
 
+import org.vgr.ioc.annot.BeanScope;
+
 /**
  * This class bean is  useful for holding bean defintion from Xml files 
  * @author venugopal
@@ -10,14 +12,14 @@ import java.util.List;
 public class BeanDefinition {
 	private String id;
 	private String className;
-	private String scope;
+	private BeanScope scope;
 	private Object object;
 	private Object proxy;
 	private List<BeanProperty> properties=null;
 	
 	public BeanDefinition(){}
 
-	public BeanDefinition(String id,String className,String scope){
+	public BeanDefinition(String id,String className,BeanScope scope){
 		this.id=id;
 		this.className=className;
 		this.scope=scope;
@@ -36,11 +38,11 @@ public class BeanDefinition {
 		this.className = className;
 	}
 	
-	public String getScope() {
+	public BeanScope getScope() {
 		return scope;
 	}
 
-	public void setScope(String scope) {
+	public void setScope(BeanScope scope) {
 		this.scope = scope;
 	}
 

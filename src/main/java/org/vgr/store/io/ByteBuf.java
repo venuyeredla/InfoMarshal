@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
  /**
- * Wraps byte array and default size is 512 bytes equivalent to HDD block size.
+ * Wraps byte array and default size is 512 bytes. and it grows as perneed.
  * 
  */
 public class ByteBuf{
@@ -15,10 +15,8 @@ public class ByteBuf{
 	private int rPos;
 	//Used only for I/O of bit streams.
 	private int bitBuf;
-	private short wbitCount;
-	private short rbitCount;
-	
-	
+	private short widx;
+	private short ridx;
 	
 	public ByteBuf() {
 		bytes=new byte[BLOCK_SIZE];
@@ -254,43 +252,48 @@ public class ByteBuf{
     }
     
     public void resetBitRead() {
-    	this.wbitCount=0;;
+    	this.widx=0;;
     	this.rPos=-1;
     }
     
-    
+    /**
+     * 
+     * Writes the single bit at the end of the bit buffer.
+     * @param bit
+     */
     public void writeBit(int bit) {
-    	int actualBit=bit &1;
-    	this.bitBuf=this.bitBuf<<1 | actualBit;
-    	this.wbitCount +=1;
-    	if(this.wbitCount==8) {
+    	this.bitBuf=this.bitBuf<<1 | (bit & 1);
+    	this.widx +=1;
+    	if(this.widx==8) {
     		this.writeByte(this.bitBuf);
     		this.bitBuf=0;
-    		this.wbitCount=0;
+    		this.widx=0;
     	}
+      }
+    /**
+     * Returns the bits starting from MSB.
+     * @return
+     */
+    public int readBit() {
+    	if(this.ridx==0) {
+    		this.bitBuf=this.readByte();
+    		this.ridx=8;
+    	}
+    	int bit=(this.bitBuf >> (this.ridx-1)) & 1;
+    	ridx -=1;
+    	return bit;
     }
-    
     /**
      * Flushes unwritten bits
      */
     public void flushBits() {
-    	int toBe=8-this.wbitCount;
+    	int toBe=8-this.widx;
     	for(int i=0;i<toBe;i++) {
     		this.writeBit(0);
     	 }
     }
-    
-    public int readBit() {
-    	if(this.rbitCount==0) {
-    		this.bitBuf=this.readByte();
-    		this.rbitCount=8;
-    	}
-    	int bit=(this.bitBuf >> (this.rbitCount-1)) & 1;
-    	rbitCount -=1;
-    	return bit;
-    }
-}
 
+}
 
 class OutOfRangException extends Exception{
 	private static final long serialVersionUID = 1L;

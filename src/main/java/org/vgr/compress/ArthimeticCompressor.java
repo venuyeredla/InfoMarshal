@@ -4,7 +4,6 @@ import org.vgr.store.io.ByteBuf;
 import org.vgr.store.io.NumberSystems;
 
 public class ArthimeticCompressor implements Compressor{
-	
 	private byte bits=8;
 	int MASK=(1<<bits)-1;           //Max range number with all ones. 1111...111
 	int TOP_MASK=1<<bits-1;         //Top bit mask. 10000...0000

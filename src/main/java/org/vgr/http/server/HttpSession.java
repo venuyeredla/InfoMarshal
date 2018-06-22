@@ -1,10 +1,8 @@
 package org.vgr.http.server;
 
-import org.vgr.app.domain.Profile;
-
 public class HttpSession {
 
-	public Profile getAttribute(String string) {
+	public Object getAttribute(String string) {
 		// TODO Auto-generated method stub
 		return null;
 	}

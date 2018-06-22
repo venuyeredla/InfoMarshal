@@ -7,7 +7,6 @@ public interface AopAdvices {
 	 * Before advice
 	 */
   public void before();
-  
   /**
    * After Advice
    */
@@ -24,5 +23,5 @@ public interface AopAdvices {
    * Here give the method name on which you want to apply advice.
    * @return
    */
-  public HashMap<String ,String> pointCuts();
+  public HashMap<String ,AopAdviceType> pointCuts();
 }

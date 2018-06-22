@@ -22,11 +22,10 @@ public class LoggingAspect implements AopAdvices{
 		LOGGER.info(" ********  afterThrowing Advice **********");
 	}
 	
-	public HashMap<String ,String> pointCuts(){
-		
-		HashMap<String,String> pointcuts=new HashMap<String, String>();
-		pointcuts.put("org.framework.aop.IVehicle.start", "before");
-		pointcuts.put("org.framework.aop.IVehicle.stop", "after");
+	public HashMap<String ,AopAdviceType> pointCuts(){
+		HashMap<String,AopAdviceType> pointcuts=new HashMap<String, AopAdviceType>();
+		pointcuts.put("org.vgr.ioc.core.AopIVehicle.start", AopAdviceType.BEFORE);
+		pointcuts.put("org.vgr.ioc.core.AopIVehicle.stop", AopAdviceType.AFTER);
 		return pointcuts;
 	}
 	

@@ -1,7 +1,7 @@
 package org.vgr.app.tst.util;
 
-import org.vgr.app.util.RandomUtil;
 import org.junit.Test;
+import org.vgr.app.util.RandomUtil;
 
 public class RandomUtilTest {
 	

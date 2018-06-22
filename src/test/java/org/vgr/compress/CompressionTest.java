@@ -32,7 +32,7 @@ public class CompressionTest {
 		boolean result=text.equals(new String(decompressed));
 	    System.out.println("\nBefore="+text);
 		System.out.println("After ="+adecompress);
-		Assert.assertEquals("Two strings are equal",true,result);
+		Assert.assertEquals(true,result);
 	 }
 	public String getText() {
 		String text="venugopalananyavenkatraghuvenugopalananyavenkatraghuvenugopalreddyvenugopalananyavenkatraghuvenugopalananyavenkatraghuvenugopalreddy";

@@ -5,7 +5,6 @@ import java.util.HashSet;
 public class RandomUtil {
 	
 	/**
-	 * 
 	 * @param count Number of integers
 	 * @param range range from 0-to mentioned.
 	 * @return
@@ -17,7 +16,6 @@ public class RandomUtil {
 		}
 		return randomNumbers;
 	}
-
 	public static HashSet<Integer> randomNumsSet(int count, int range){
 		HashSet<Integer> keySet=new HashSet<>(); 
 		for(int i=0;i<count;i++){
@@ -25,6 +23,4 @@ public class RandomUtil {
 		}
 		return keySet;
 	}
-	
-	
 }

@@ -11,7 +11,6 @@ public class FileUtilTest {
 		FileUtil.getMemorInfo();
 	}
 	
-	
 	@Test
 	public void getPath() {
 	  String path=FileUtil.getPath("venu.db");

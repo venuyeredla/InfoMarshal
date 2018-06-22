@@ -78,7 +78,7 @@ public class HuffManCoding implements Compressor {
 		List<Byte> byteList = new ArrayList<>();
 		for (int i = 0; i < bytes.length; i++)
 			byteList.add(bytes[i]);
-		Map<Byte, Long> charFreq = byteList.stream().collect(Collectors.groupingBy(b -> b, Collectors.counting()));
+		    Map<Byte, Long> charFreq = byteList.stream().collect(Collectors.groupingBy(b -> b, Collectors.counting()));
 		return charFreq;
 	}
 

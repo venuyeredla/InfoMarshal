@@ -1,14 +1,14 @@
 package org.vgr.store.io;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class BlockTest2 {
 	static String blockFile=FileUtil.getPath("block.dat");
 	
 	
-	@Before
+	@BeforeClass
 	public void writeTest() {
 		DataWriter writer=new DataWriter(blockFile,false);
 		
@@ -26,7 +26,7 @@ public class BlockTest2 {
 	  System.out.println("Writing complted and reading started");	
 	}
 	
-	@After
+	@AfterClass
    public void readTest() {
 	   DataReader reader=new DataReader(blockFile);
 	   for(int i=0;i<10;i++) {

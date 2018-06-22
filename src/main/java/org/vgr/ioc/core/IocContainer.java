@@ -1,5 +1,8 @@
 package org.vgr.ioc.core;
 
+import static org.vgr.ioc.annot.BeanScope.PROTOTYPE;
+import static org.vgr.ioc.annot.BeanScope.SINGLETON;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -11,44 +14,48 @@ import org.slf4j.LoggerFactory;
 import org.vgr.ioc.annot.AnnotaionReader;
    
 public class IocContainer implements BeanFactory {
-	private static final Logger LOGGER=LoggerFactory.getLogger(IocContainer.class);
+	private static final Logger LOG=LoggerFactory.getLogger(IocContainer.class);
 	private HashMap<String,BeanDefinition> beanContainer=null;
 	private HashMap<String, HandlerConfig>  handlers=null;
-	private static final String SINGLTON="singleton";
-	private static final String PROTOTYPE="prototype";
 	public IocContainer(Set<String> classes){
+		System.out.println("****   Starting ioc container   ******");
+		LOG.info("****   Starting ioc container   ******");
+		new AnnotaionReader(this,classes);
+		this.initializeSingletons();
+	}
+	
+	public IocContainer(Set<String> classes,IocMode mode){
+		System.out.println("****   Starting ioc container   ******");
+		LOG.info("****   Starting ioc container   ******");
 		new AnnotaionReader(this,classes);
 		this.initializeSingletons();
 	}
 	
 	private void initializeSingletons(){
-		beanContainer.forEach((key,beanDef) -> {
-			if(beanDef.getScope().equals(SINGLTON)){
-				Object obj=BeanCreation.createNewBean(key ,this);
-				beanDef.setObject(obj);
-			 }
-			else{
-				beanDef.setObject(null);
-			 }
-		});
-	}
+		LOG.debug("Initializing singleton beans...");
+		beanContainer.values().stream().filter(beanDef -> beanDef.getScope()==SINGLETON).forEach(beanDef-> beanDef.setObject(BeanCreation.createNewBean(beanDef.getId(),this)));
+	   }
 	
 	public Object getBean(String beanID) {
 		BeanDefinition beanDefinition= beanContainer.get(beanID);
-		Object object=null;
-		if(SINGLTON.equals(beanDefinition.getScope())){
-			if(beanDefinition.getObject()!=null)
-			object=beanDefinition.getObject();	
-			else{
-				 object=BeanCreation.createNewBean(beanID,this);
-				 beanDefinition.setObject(object);
-			}
+		if(beanDefinition==null) {
+			LOG.error("Bean doesn't exist. beadid : "+beanID);
+			LOG.error("Exiting the application");
+			System.exit(1);
 		}
-		else if (PROTOTYPE.equals(beanDefinition.getScope())) {
+		Object object=null;
+		if(beanDefinition.getScope()==SINGLETON){
+			if(beanDefinition.getObject()!=null)
+				object=beanDefinition.getObject();	
+			else{
+				object=BeanCreation.createNewBean(beanID,this);
+				beanDefinition.setObject(object);
+			}
+		 }else if (beanDefinition.getScope()==PROTOTYPE) {
 			   object=BeanCreation.createNewBean(beanID,this);
 		   }
-		   this.injectContainer(object);
-		   return object;
+		 this.injectContainer(object);
+		 return object;
 	}
 	
 	

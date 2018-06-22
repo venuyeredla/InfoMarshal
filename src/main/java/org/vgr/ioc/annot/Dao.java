@@ -9,5 +9,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Dao {
 	String id();
-	String scope()  default "singleton";
+	BeanScope scope()  default BeanScope.SINGLETON;
 }

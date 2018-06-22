@@ -12,7 +12,7 @@ public abstract class AbstractTest {
 	public BeanFactory factory=null;
 	@BeforeClass
     public void beforClass() {
-		  factory=new IocContainer(this.getClasses());
+	  factory=new IocContainer(this.getClasses());
 	}
     public abstract Set<String> getClasses();
 }
