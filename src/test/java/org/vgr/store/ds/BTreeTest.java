@@ -5,8 +5,8 @@ import java.util.stream.Collectors;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import org.vgr.app.util.RandomUtil;
 import org.vgr.store.io.FileUtil;
+import org.vgr.util.RandomUtil;
 
 public class BTreeTest {
 	private static BTree bTree=null;

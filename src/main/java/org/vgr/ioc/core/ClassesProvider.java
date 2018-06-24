@@ -4,5 +4,5 @@ import java.util.Set;
 
 @FunctionalInterface
 public interface ClassesProvider {
-	public Set<String> getClasses(String fileName);
+	public Set<String> getClasses();
 }

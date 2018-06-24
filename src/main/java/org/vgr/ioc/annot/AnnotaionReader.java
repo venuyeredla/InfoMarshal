@@ -23,8 +23,9 @@ public class AnnotaionReader {
 		this.createConfig(iocContainer, classesToScan);
 	 }
 	public AnnotaionReader(IocContainer iocContainer, Set<String> classesToScan,IocMode mode){
-		this.createConfig(iocContainer, classesToScan);
 		this.mode=mode;
+		this.createConfig(iocContainer, classesToScan);
+		
 	}
 	/**
 	 * Provides  application config by reading annotation information.

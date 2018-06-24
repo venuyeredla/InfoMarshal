@@ -1,6 +1,6 @@
-package org.vgr.store.io;
+package org.vgr.util;
 
-public class NumberSystems {
+public class NumSystems {
 	
 	public static String decToBin(int num) {
 		if(num==0) return ""+0;

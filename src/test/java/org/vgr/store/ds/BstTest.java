@@ -5,10 +5,10 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vgr.app.util.RandomUtil;
 import org.vgr.store.io.DataReader;
 import org.vgr.store.io.DataWriter;
 import org.vgr.store.io.FileUtil;
+import org.vgr.util.RandomUtil;
 
 public class BstTest {
 	private static final Logger LOG=LoggerFactory.getLogger(BstTest.class);
@@ -18,7 +18,7 @@ public class BstTest {
 	@Ignore
 	public void testInsert(){
 		//int[] keys= {4104, 2088, 1048};//{36,45,78,32,13,61,94,50,74,47,91,21,84,94,41,54,70,19,61,73};
-		int[] keys= RandomUtil.randomNumbers(500, 10000);
+		int[] keys= RandomUtil.randomInts(500, 10000);
 		HashSet<Integer> keySet=new HashSet<>();
 		for(int i=0;i<keys.length;i++) {
 			keySet.add(keys[i]);
@@ -39,7 +39,7 @@ public class BstTest {
 	 DataReader reader=new DataReader(indexFile);
 	 Bst bst=Bst.readFromStorage(reader);
 	 bst.traverse(Traversal.PRE);
-	 int[] searchKeys= RandomUtil.randomNumbers(20, 10000);
+	 int[] searchKeys= RandomUtil.randomInts(20, 10000);
 	// String str= Arrays.asList(searchKeys).stream().map(i-> i.toString()).collect(Collectors.joining(","));
 	// System.out.println("\nSearc keys : "+str);
 	 System.out.println("Found : ");

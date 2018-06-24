@@ -40,7 +40,7 @@ public class RequestProcessor implements Callable<String>{
 					return result;
 				}
 				nextView=viewPath.replaceAll("%viewname%", nextView);
-				LOG.info("Next view name is :"+nextView);
+				LOG.debug("Next view name is :"+nextView);
 				httpResponse.writeText(socket,nextView);
 			}
 	   	    socket.close();

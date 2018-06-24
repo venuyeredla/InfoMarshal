@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.vgr.store.io.ByteBuf;
-
 public class HuffManCoding implements Compressor {
 	private HuffManNode[] nodes;
 	private int capacity;
@@ -20,33 +18,33 @@ public class HuffManCoding implements Compressor {
 	public byte[] compress(byte[] data) {
 		Map<Byte, Long> charFreq = this.charFreqs(data);
 	    this.buildHCodes(charFreq);
-		ByteBuf byteBuf = new ByteBuf(4096);
-		byteBuf.writeByte(hCodes.keySet().size());
+		BitStream bitStream = new BitStream();
+		bitStream.writeByte(hCodes.keySet().size());
 		charFreq.forEach((key, val) -> {
-			byteBuf.writeByte(key);
-			byteBuf.writeVInt(Math.toIntExact(val));
+			bitStream.writeByte(key);
+			//bitStream.writeVInt(Math.toIntExact(val));
 		});
-		byteBuf.write(data.length);
+		//bitStream.write(data.length);
 		for (int i = 0; i < data.length; i++) {
 			String code = hCodes.get(data[i]);
 			while(code.length()>0) {
 				int bit=Integer.parseInt(code.substring(0, 1));
-				byteBuf.writeBit(bit);
+				bitStream.writeBit(bit);
 				code=code.substring(1);
 			}
 		 }
-	    byteBuf.flushBits();
-		System.out.println("\n Actual -> Compressed  :: "+ data.length+ " ->  "+byteBuf.getActualBytes().length);
-		return byteBuf.getActualBytes();
+	    bitStream.flushBits();
+		System.out.println("\n Actual -> Compressed  :: "+ data.length+ " ->  "+bitStream.getActualBytes().length);
+		return bitStream.getActualBytes();
 	}
 	
 	@Override
 	public byte[] decompress(byte[] compressed) {
-		ByteBuf byteBuf=new ByteBuf(compressed);
+		BitStream byteBuf=new BitStream(compressed);
 		this.buildHCodes(this.readFreq(byteBuf));
 		Map<String,Byte> dHCodes=new HashMap<>();
 		hCodes.forEach((key,val)->{ dHCodes.put(val, key); });
-		int datasize=byteBuf.readInt();
+		int datasize=0; //byteBuf.readInt();  --Need to see this.
 		byte[] data=new byte[datasize];
 		String code="";
 		for(int i=0;i<datasize;i++) {
@@ -59,14 +57,14 @@ public class HuffManCoding implements Compressor {
 		return data;
 	}
 	
-	public Map<Byte, Long> readFreq(ByteBuf bytes) {
-		byte codeSize = bytes.readByte();
+	public Map<Byte, Long> readFreq(BitStream bytes) {
+		//byte codeSize = bytes.readByte();
 		Map<Byte, Long> charFreq=new HashMap<>();
-		for (byte i = 0; i < codeSize; i++) {
+		/*for (byte i = 0; i < codeSize; i++) {
 			byte key = bytes.readByte();
 			long val = bytes.readVInt();
 			charFreq.put(key, val);
-		}
+		}*/
 		return charFreq;
 	}
 

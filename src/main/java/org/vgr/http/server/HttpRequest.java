@@ -33,7 +33,7 @@ public class HttpRequest {
 			  }
 			  		line=bufferedReader.readLine().trim();
 			 }
-			LOG.info("Request url is -- "+getUri()); 
+			LOG.debug("Request url is -- "+getUri()); 
 			
 		}catch (IOException ioe) {
 			ioe.printStackTrace();

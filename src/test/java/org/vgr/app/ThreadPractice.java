@@ -1,4 +1,4 @@
-package org.vgr.app.common;
+package org.vgr.app;
 
 import java.util.Iterator;
 import java.util.List;

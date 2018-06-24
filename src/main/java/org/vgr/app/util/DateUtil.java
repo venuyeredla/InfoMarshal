@@ -7,5 +7,4 @@ public class DateUtil {
 	public static Timestamp getCurrentTimeStamp(){
 		return new Timestamp(new Date().getTime());
 	}
-
 }

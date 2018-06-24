@@ -27,7 +27,7 @@ public class IocContainer implements BeanFactory {
 	public IocContainer(Set<String> classes,IocMode mode){
 		System.out.println("****   Starting ioc container   ******");
 		LOG.info("****   Starting ioc container   ******");
-		new AnnotaionReader(this,classes);
+		new AnnotaionReader(this,classes,mode);
 		this.initializeSingletons();
 	}
 	

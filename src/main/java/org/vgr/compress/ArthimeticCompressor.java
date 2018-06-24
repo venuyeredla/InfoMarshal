@@ -1,7 +1,6 @@
 package org.vgr.compress;
 
-import org.vgr.store.io.ByteBuf;
-import org.vgr.store.io.NumberSystems;
+import org.vgr.util.NumSystems;
 
 public class ArthimeticCompressor implements Compressor{
 	private byte bits=8;
@@ -11,7 +10,7 @@ public class ArthimeticCompressor implements Compressor{
 	int MAX_ALLOWED=SECOND_MASK-1;  // 00111..111
 
 	private int underflow=0;
-	ByteBuf byteBuf=new ByteBuf();
+	BitStream bitStream=new BitStream();
 	private FreqTable freqTable;
 	
 	private int low,high;
@@ -21,9 +20,9 @@ public class ArthimeticCompressor implements Compressor{
 	}
 
 	public void init() {
-		System.out.println("MASK:"+MASK+"-"+NumberSystems.decToBin(MASK));
-		System.out.println(" TOP_MASK:"+TOP_MASK+"-"+NumberSystems.decToBin(TOP_MASK));
-		System.out.println(" SECOND_MASK:"+SECOND_MASK+"-"+NumberSystems.decToBin(SECOND_MASK));
+		System.out.println("MASK:"+MASK+"-"+NumSystems.decToBin(MASK));
+		System.out.println(" TOP_MASK:"+TOP_MASK+"-"+NumSystems.decToBin(TOP_MASK));
+		System.out.println(" SECOND_MASK:"+SECOND_MASK+"-"+NumSystems.decToBin(SECOND_MASK));
 	}
 	public void initcompress() {
 	}
@@ -51,23 +50,23 @@ public class ArthimeticCompressor implements Compressor{
 			
 		}
 		for(int a=0;a<10;a++) {
-		   byteBuf.writeBit(0);
+		   bitStream.writeBit(0);
 		}
-		byteBuf.flushBits();
-		return byteBuf.getActualBytes();
+		bitStream.flushBits();
+		return bitStream.getActualBytes();
 	}
 	
 	private int code=0;
 	
 	@Override
 	public byte[] decompress(byte[] bytes) {
-		this.byteBuf=new ByteBuf(bytes);
-		ByteBuf outputBytes=new ByteBuf();
+		this.bitStream=new BitStream(bytes);
+		BitStream outputBytes=new BitStream();
 		this.low=0;this.high=MASK;
 		int total=this.freqTable.getTotal();
 		//initialize the code
 		for(int i=0;i<bits;i++) {
-			code=code<<1 | byteBuf.readBit();
+			code=code<<1 | bitStream.readBit();
 		}
 		try {
 		// Decoding the code;
@@ -106,9 +105,9 @@ public class ArthimeticCompressor implements Compressor{
 	
 	public void eshift(int num) {
 		int bit=num>>(bits-1)&1;
-		byteBuf.writeBit(bit);
+		bitStream.writeBit(bit);
 		for (; underflow > 0; underflow--) {
-			byteBuf.writeBit(bit ^ 1);
+			bitStream.writeBit(bit ^ 1);
 		}
 	}
 	
@@ -117,11 +116,11 @@ public class ArthimeticCompressor implements Compressor{
 	 }
 	
 	public void dshift() {
-		code = ((code << 1) & MASK) |byteBuf.readBit();
+		code = ((code << 1) & MASK) |bitStream.readBit();
 	}
 	
 	public void dunderflow() {
-		code = (code & TOP_MASK) | ((code << 1) & (MASK >>> 1)) | byteBuf.readBit();
+		code = (code & TOP_MASK) | ((code << 1) & (MASK >>> 1)) | bitStream.readBit();
 	}
 	
 }

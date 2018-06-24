@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
  /**
- * Wraps byte array and default size is 512 bytes. and it grows as perneed.
+ * Wraps byte array and default size is 512 bytes. and it grows as per need.
  * 
  */
 public class ByteBuf{
@@ -13,11 +13,7 @@ public class ByteBuf{
 	private byte[] bytes;
 	private int wPos;
 	private int rPos;
-	//Used only for I/O of bit streams.
-	private int bitBuf;
-	private short widx;
-	private short ridx;
-	
+
 	public ByteBuf() {
 		bytes=new byte[BLOCK_SIZE];
 		wPos=0;//points to the next position to be inserted.
@@ -203,11 +199,7 @@ public class ByteBuf{
 	}
 	
 	public ByteBuf write(boolean b) {
-		if(b) {
-			writeByte(1);
-		}else {
-			writeByte(0);
-		}
+		if(b) writeByte(1); else writeByte(0);
 		return this;
 	}
 	
@@ -250,49 +242,10 @@ public class ByteBuf{
     public void resetByteRead() {
     	this.rPos=-1;
     }
-    
-    public void resetBitRead() {
-    	this.widx=0;;
-    	this.rPos=-1;
-    }
-    
-    /**
-     * 
-     * Writes the single bit at the end of the bit buffer.
-     * @param bit
-     */
-    public void writeBit(int bit) {
-    	this.bitBuf=this.bitBuf<<1 | (bit & 1);
-    	this.widx +=1;
-    	if(this.widx==8) {
-    		this.writeByte(this.bitBuf);
-    		this.bitBuf=0;
-    		this.widx=0;
-    	}
-      }
-    /**
-     * Returns the bits starting from MSB.
-     * @return
-     */
-    public int readBit() {
-    	if(this.ridx==0) {
-    		this.bitBuf=this.readByte();
-    		this.ridx=8;
-    	}
-    	int bit=(this.bitBuf >> (this.ridx-1)) & 1;
-    	ridx -=1;
-    	return bit;
-    }
-    /**
-     * Flushes unwritten bits
-     */
-    public void flushBits() {
-    	int toBe=8-this.widx;
-    	for(int i=0;i<toBe;i++) {
-    		this.writeBit(0);
-    	 }
-    }
-
+	@Override
+	public String toString() {
+		return "ByteBuf [wPos=" + wPos + ", rPos=" + rPos + "]";
+	}
 }
 
 class OutOfRangException extends Exception{
