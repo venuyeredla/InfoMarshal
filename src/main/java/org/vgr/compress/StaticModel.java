@@ -1,5 +1,6 @@
 package org.vgr.compress;
 
+import org.vgr.compress.IntegerCompressor.INT_MODE;
 import org.vgr.store.io.ByteBuf;
 
 /**
@@ -11,7 +12,7 @@ public class StaticModel {
 	  int[] freqs=new int[256];
 	  KeyVal[] keyValues;
 	  public StaticModel() {}
-	  
+
 	  public void calculateFreq(byte[] bytes) {
 		    for (byte c : bytes) freqs[c]++;
 		    int count=0;
@@ -40,23 +41,20 @@ public class StaticModel {
 			   values[i]=kv.val;
 			   i++;
 		    }
-		   DeltaCompression deltaCompression=new DeltaCompression();
-		   byte[] keysCompressed=deltaCompression.deltaCompress(keys);
+		   IntegerCompressor integerCompressor=new IntegerCompressor();
+		   byte[] keysCompressed=integerCompressor.compress(keys, INT_MODE.DELTA_BITPACKING);
 		   byteBuf.write(keysCompressed);
 		   
 		   return keys;
 	   }
 	  
 	  public int[] readFreqs(ByteBuf byteBuf) {
-		  DeltaCompression deltaCompression=new DeltaCompression();
-		  int[] keys=deltaCompression.deltaDCompress(byteBuf.getActualBytes());
+		  IntegerCompressor integerCompressor=new IntegerCompressor();
+		  int[] keys=integerCompressor.decompress(byteBuf.getActualBytes(),INT_MODE.DELTA_BITPACKING);
 		  for(int i:keys) System.out.print(i+",");
 		  return keys;
 	  }
-	   
-	   
 }
-
 
 
 class KeyVal{

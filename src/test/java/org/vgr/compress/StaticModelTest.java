@@ -15,7 +15,6 @@ public class StaticModelTest {
 		ByteBuf byteBuf=new ByteBuf();
 		int[] keysWritten=model.writeFreqs(byteBuf);
 		int[] keysRead=model.readFreqs(byteBuf);
-
 		for(int i=0;i<keysWritten.length;i++) {
     		if(keysWritten[i]!=keysRead[i]) {
     			Assert.fail("Numbers don't matched at position :"+i );

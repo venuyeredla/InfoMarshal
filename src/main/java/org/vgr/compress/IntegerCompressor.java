@@ -5,19 +5,58 @@ import java.util.Arrays;
 import org.vgr.store.io.ByteBuf;
 import org.vgr.store.io.IntBuf;
 
-/**
- * Supports only max 5 bit width numbers.
- * @param ints
- */
-public class BitPacking {
+public class IntegerCompressor {
+	 enum INT_MODE{BITPACKING,DELTA_BITPACKING}	 
+	 public byte[] compress(int[] ints,INT_MODE mode) {
+		 byte[] output = null;
+		  switch (mode) {
+		case BITPACKING:
+			BitPacking bitPacking=new BitPacking();
+			System.out.println("   ***Running Bitpacking  *** ");
+			output=bitPacking.compress(ints);
+			System.out.println("   ***Completed Bitpacking  ***\n ");
+			break;
+		case DELTA_BITPACKING:
+			DeltaCompression deltaCompression=new DeltaCompression();
+			System.out.println("***   Running Delta & Bitpacking   ***");
+			output=deltaCompression.deltaCompress(ints);
+			System.out.println("***   Running Delta & Bitpacking   ***\n");
+			break;
+
+		default:
+			break;
+		}
+		 return output;
+	 }
+	 
+	 public int[] decompress(byte[] bytes,INT_MODE mode) {
+		 int[] output = null;
+		  switch (mode) {
+		case BITPACKING:
+			BitPacking bitPacking=new BitPacking();
+			output=bitPacking.decompress(bytes, null);
+			break;
+		case DELTA_BITPACKING:
+			DeltaCompression deltaCompression=new DeltaCompression();
+			output=deltaCompression.deltaDCompress(bytes);
+			break;
+
+		default:
+			break;
+		}
+		 return output;
+	 }
+}
+
+class BitPacking {
 	 ByteBuf byteBuf=null;
 	 IntBuf intBuf=new IntBuf();
-     /**
-      * Supports only max 5 bit width numbers.
-      * @param ints
-      */
+    /**
+     * Supports only max 5 bit width numbers.
+     * @param ints
+     */
 	 public byte[] compress(int[] ints) {
-		 int bitWidth=getBitWidth(ints);
+		 int bitWidth=BitWidthUtil.getBitWidth(ints);
 		 if(bitWidth>5) {
 			 System.out.println("This implementation can't pack the number with bitwidth >5");
 		 }
@@ -63,7 +102,10 @@ public class BitPacking {
 			break;
 		}
 		 
-		 return byteBuf.getActualBytes();
+		 byte[] compressed=byteBuf.getActualBytes();
+		 byteBuf=null;
+		 System.out.println("Acutal bytes:"+(ints.length*4)+" Compressed:"+compressed.length);
+		 return compressed;
 		}
 	 
 	 public int[] decompress(byte[] bytes,ByteBuf bBuf) {
@@ -72,7 +114,6 @@ public class BitPacking {
 		 }else {
 			 byteBuf=new ByteBuf(bytes);
 		 }
-		 
 		 intBuf=new IntBuf();
 		 int bitWidth=byteBuf.readByte();
 		// int maxNum=(1<<bitWidth)-1;
@@ -214,12 +255,74 @@ public class BitPacking {
 	}
 	
 	
+	
+
+}
+
+
+
+/**
+ * Class for compression sorted order integers.
+ * @author vyeredla
+ *
+ */
+class DeltaCompression {
+	
+    /**
+     * Numbers should be in non decreasing pattern
+     * @param ints
+     */
+	public byte[] deltaCompress(int[] ints) {
+		 Arrays.sort(ints);
+		 ByteBuf byteBuf=new ByteBuf();
+		 int first=ints[0];
+		 byteBuf.writeVInt(ints.length);
+		 byteBuf.writeVInt(first);
+		 
+		 int[] deltas=new int[ints.length];
+		 deltas[0]=0;
+		 for(int j=1;j<ints.length;j++) {
+			 deltas[j]=ints[j]-ints[j-1];
+		 }
+		 BitPacking bitPacking=new BitPacking();
+		 byte[] deltacompressed=bitPacking.compress(deltas);
+		 byteBuf.write(deltacompressed);
+		 
+		 byte[] compressed=byteBuf.getActualBytes();
+		 byteBuf=null;
+		 System.out.println("Acutal bytes:"+(ints.length*4)+" Compressed:"+compressed.length);
+		 return compressed;
+		}
+
+	 /**
+     * Numbers should be in non decreasing pattern
+     * @param ints
+     */
+	public int[] deltaDCompress(byte[] bytes) {
+		   ByteBuf byteBuf=new ByteBuf(bytes);
+		   int size=byteBuf.readVInt();
+		   int first=byteBuf.readVInt();
+		   BitPacking bitPacking=new BitPacking();
+		   int[] deltas=bitPacking.decompress(bytes,byteBuf);
+		   
+		   int[] uncompressed=new int[deltas.length];
+			 uncompressed[0]=first;
+			 for(int k=1;k<deltas.length;k++) {
+				 uncompressed[k]=uncompressed[k-1]+deltas[k];
+			 }
+		return uncompressed;
+		}
+}
+
+
+
+class BitWidthUtil{
 	/**
 	 * Returns the required number of bits hold the information of max number.
 	 * @param ints
 	 * @return
 	 */
-	private int getBitWidth(int[] ints) {
+	public static int getBitWidth(int[] ints) {
 		 int max=0;
 		 for(int i=0;i<ints.length;i++) {
 			 if(max<ints[i]) {
@@ -234,5 +337,5 @@ public class BitPacking {
 		}
 		return 0;
 	}
-
 }
+
