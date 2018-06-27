@@ -6,7 +6,7 @@ public class AbsCTest {
 	
 	@Test
 	public void testABS() {
-		String bitStr="001010001011101010";
+		String bitStr="00101000101110101001010";
 		int[]  table={0,0};
 		bitStr.chars().map(num->num-48).forEach(bit->{
 			if(bit==0) table[0]++;
@@ -22,10 +22,15 @@ public class AbsCTest {
 		 
 		 System.out.println(bitStr);
 		 StringBuilder reverse=new StringBuilder(bitStr).reverse();
+		 
+		 for(int j=0;j<bitStr.length();j++) {
+			 int bit=bitStr.charAt(j)=='1'?1:0;
+			 binary=binary<<1|bit;
+		 }
+		 
 		 //Encoding
 		for(int i=0;i<reverse.length();i++) {
 			 int bit=reverse.charAt(i)=='1'?1:0;
-			 binary=binary<<1|bit;
 			// System.out.print(x+" -("+bit+")-> ");
 			 if(bit==0) {
 				// double temp=x/p0;

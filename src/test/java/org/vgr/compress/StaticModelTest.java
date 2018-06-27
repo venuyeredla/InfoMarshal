@@ -5,12 +5,11 @@ import org.junit.Test;
 import org.vgr.store.io.ByteBuf;
 
 public class StaticModelTest {
-	
 	@Test
 	public void testCounts() {
 		StaticModel model=new StaticModel();
 		String text=TextReader.getText();
-		System.out.println(text);
+		//System.out.println(text);
 		model.calculateFreq(text.getBytes());
 		ByteBuf byteBuf=new ByteBuf();
 		int[] keysWritten=model.writeFreqs(byteBuf);

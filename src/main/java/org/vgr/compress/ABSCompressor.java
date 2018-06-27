@@ -48,8 +48,9 @@ class Encoder {
     	this.buffer=buffer;
     	this.mode=mode;
     	this.x1=0;
-    	this.x2=0xffffffff;
+    	this.x2=0xffff;
     	this.x=0;
+    	this.predictor=new Predictor();
     	// In DECOMPRESS mode, initialize x to the first 4 bytes of the archive
     	if (mode==Mode.DECOMPRESS) {
     	    for (int i=0; i<4; ++i) {

@@ -47,6 +47,19 @@ public class ByteBuf{
 		this.writeByte((byte)b);
 		return this;
 	  }
+	/**
+	 * Useful to set byte at given position.
+	 * @param index
+	 * @param b
+	 */
+	public void setByte(int index,byte b) {
+		bytes[index]=b;
+	}
+	
+	public void setReadPos(int pos) {
+		  rPos=pos;
+	}
+	
 	 /**
 	 * returns signed byte.
 	 * @return
