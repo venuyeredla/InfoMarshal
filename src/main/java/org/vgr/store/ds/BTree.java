@@ -1,5 +1,5 @@
 package org.vgr.store.ds;
-
+import static org.vgr.store.io.IOConstants.*;
 import java.io.Closeable;
 import java.io.File;
 import java.util.ArrayList;
@@ -223,7 +223,7 @@ public class BTree implements Closeable {
 	}
 
 	public Page readPage(int pageId) {
-		int offset = pageId * ByteBuf.BLOCK_SIZE;
+		int offset = pageId * BLOCK_SIZE;
 		ByteBuf block = reader.readBlock(offset);
 		int pageNum = block.readInt();
 		byte b = block.readByte();
@@ -243,7 +243,7 @@ public class BTree implements Closeable {
 	}
 
 	public int getPageOffset(int pageNum) {
-		int offset = pageNum * ByteBuf.BLOCK_SIZE;
+		int offset = pageNum * BLOCK_SIZE;
 		return offset == -1 ? 0 : offset;
 	}
 

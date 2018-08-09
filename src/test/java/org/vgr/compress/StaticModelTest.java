@@ -10,7 +10,7 @@ public class StaticModelTest {
 		StaticModel model=new StaticModel();
 		String text=TextReader.getText();
 		//System.out.println(text);
-		model.calculateFreq(text.getBytes());
+		model.calFreq(text.getBytes());
 		ByteBuf byteBuf=new ByteBuf();
 		int[] keysWritten=model.writeFreqs(byteBuf);
 		int[] keysRead=model.readFreqs(byteBuf);
@@ -19,5 +19,5 @@ public class StaticModelTest {
     			Assert.fail("Numbers don't matched at position :"+i );
     		}
     	}
-	}
+	   }
 }

@@ -9,5 +9,7 @@ public class MathTest {
 		int c=1100000;
 		int x=c%21;
 		System.out.println("Value is : "+x);
+/*		 System.out.println("Log value: "+logval);*/
+		
 	}
 }

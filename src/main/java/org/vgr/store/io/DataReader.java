@@ -1,5 +1,6 @@
 package org.vgr.store.io;
 
+import static org.vgr.store.io.IOConstants.*;
 import java.io.BufferedInputStream;
 import java.io.Closeable;
 import java.io.FileInputStream;
@@ -50,7 +51,7 @@ public class DataReader implements Closeable{
 	
 	public ByteBuf readBlockOld(int offset) {
 		try {
-			byte[] bytes=new byte[ByteBuf.BLOCK_SIZE];
+			byte[] bytes=new byte[BLOCK_SIZE];
 			int count=this.is.read(bytes);
 			System.out.println("No of bytes read :"+count);
 			return new ByteBuf(bytes);
@@ -65,7 +66,7 @@ public class DataReader implements Closeable{
 		    Path path=FileSystems.getDefault().getPath(fileName);
 			SeekableByteChannel sbc=Files.newByteChannel(path, StandardOpenOption.READ);
 			sbc.position(offset);
-		    ByteBuffer byteBuffer=ByteBuffer.allocate(ByteBuf.BLOCK_SIZE);
+		    ByteBuffer byteBuffer=ByteBuffer.allocate(BLOCK_SIZE);
 		    sbc.read(byteBuffer);
 		    byte[] bytes= byteBuffer.array();
 			//System.out.println("Read BufferSize : "+noOfbytes);

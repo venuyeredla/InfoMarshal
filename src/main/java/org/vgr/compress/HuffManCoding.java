@@ -1,32 +1,29 @@
 package org.vgr.compress;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+
+import org.vgr.store.io.ByteBuf;
 
 public class HuffManCoding implements Compressor {
 	private HuffManNode[] nodes;
-	private int capacity;
 	private int heapSize;
-	private LinkedHashMap<Byte, String> hCodes=new LinkedHashMap<>();
+	private LinkedHashMap<Integer, String> hCodes=new LinkedHashMap<Integer, String>();
 	public HuffManCoding() { }
 	
 	@Override
 	public byte[] compress(byte[] data) {
-		Map<Byte, Long> charFreq = this.charFreqs(data);
-	    this.buildHCodes(charFreq);
-		BitStream bitStream = new BitStream();
-		bitStream.writeByte(hCodes.keySet().size());
-		charFreq.forEach((key, val) -> {
-			bitStream.writeByte(key);
-			//bitStream.writeVInt(Math.toIntExact(val));
-		});
-		//bitStream.write(data.length);
-		for (int i = 0; i < data.length; i++) {
-			String code = hCodes.get(data[i]);
+		StaticModel model = new StaticModel();
+		model.calFreq(data);
+		ByteBuf byteBuf = new ByteBuf();
+		model.writeFreqs(byteBuf);
+		this.buildHCodes(model.getFreqs());
+		BitStream bitStream = new BitStream(byteBuf.getBytes());
+		bitStream.writeVInt(data.length);
+	    for (int i = 0; i < data.length; i++) {
+	    	int dat=data[i];
+			String code = hCodes.get(dat);
 			while(code.length()>0) {
 				int bit=Integer.parseInt(code.substring(0, 1));
 				bitStream.writeBit(bit);
@@ -34,73 +31,50 @@ public class HuffManCoding implements Compressor {
 			}
 		 }
 	    bitStream.flushBits();
-		System.out.println("\n Actual -> Compressed  :: "+ data.length+ " ->  "+bitStream.getActualBytes().length);
-		return bitStream.getActualBytes();
+		System.out.println("\n Actual -> Compressed  :: "+ data.length+ " ->  "+bitStream.getBytes().length);
+		return bitStream.getBytes();
 	}
+	
+	
+	public void buildHCodes(SymDict[] dict) {
+		 int capacity=dict.length;
+		 this.nodes=new HuffManNode[capacity];
+		 this.heapSize=0;
+		 for(SymDict sd: dict) {
+			 HuffManNode node=new HuffManNode(sd.key,sd.val);
+			 this.add(node);
+		 }
+	   this.buildHuffManTree();
+	   this.printCodes(this.nodes[0], "");
+	   System.out.print("Huffmann codes: ");
+	   hCodes.forEach((key,val)->{
+		   char ch=(char)(int)key;
+		   //System.out.print(key+ "("+ch+")-"+val+" , ");
+		   System.out.print(ch+"-"+val+",");
+	   });
+  }
 	
 	@Override
 	public byte[] decompress(byte[] compressed) {
 		BitStream byteBuf=new BitStream(compressed);
-		this.buildHCodes(this.readFreq(byteBuf));
-		Map<String,Byte> dHCodes=new HashMap<>();
-		hCodes.forEach((key,val)->{ dHCodes.put(val, key); });
-		int datasize=0; //byteBuf.readInt();  --Need to see this.
+		StaticModel staticModel=new StaticModel();
+		staticModel.readFreqs(byteBuf);
+		this.buildHCodes(staticModel.getFreqs());
+		Map<String,Integer> dhCodes=new HashMap<>();
+		hCodes.forEach((key,val)->{ dhCodes.put(val, key); });
+		int datasize=byteBuf.readVInt();
 		byte[] data=new byte[datasize];
 		String code="";
 		for(int i=0;i<datasize;i++) {
-			while(!dHCodes.containsKey(code)) {
+			while(!dhCodes.containsKey(code)) {
 				code=code+byteBuf.readBit();
 			}
-			data[i]=dHCodes.get(code);
+			int num=dhCodes.get(code);
+			data[i]=(byte)num;
 			code="";
 		}
 		return data;
 	}
-	
-	public Map<Byte, Long> readFreq(BitStream bytes) {
-		//byte codeSize = bytes.readByte();
-		Map<Byte, Long> charFreq=new HashMap<>();
-		/*for (byte i = 0; i < codeSize; i++) {
-			byte key = bytes.readByte();
-			long val = bytes.readVInt();
-			charFreq.put(key, val);
-		}*/
-		return charFreq;
-	}
-
-	public Map<Byte, Long> charFreqs(String txt) {
-		return this.charFreqs(txt.getBytes());
-	}
-
-	public Map<Byte, Long> charFreqs(byte[] bytes) {
-		List<Byte> byteList = new ArrayList<>();
-		for (int i = 0; i < bytes.length; i++)
-			byteList.add(bytes[i]);
-		    Map<Byte, Long> charFreq = byteList.stream().collect(Collectors.groupingBy(b -> b, Collectors.counting()));
-		return charFreq;
-	}
-
-	public void buildHCodes(Map<Byte, Long> dictonary) {
-			 this.capacity=dictonary.keySet().size();
-			 this.nodes=new HuffManNode[capacity];
-			 this.heapSize=0;
-			 dictonary.forEach((key,val)->{
-				int v=Math.toIntExact(val);
-				HuffManNode node=new HuffManNode(key,v);
-				this.add(node);
-			 });
-		 /*  this.printHeap();*/
-		   this.buildHuffManTree();
-		   this.printCodes(this.nodes[0], "");
-		   System.out.print("Huffmann codes: ");
-		   hCodes.forEach((key,val)->{
-			   char ch=(char)(int)key;
-			   //System.out.print(key+ "("+ch+")-"+val+" , ");
-			   System.out.print(ch+"-"+val+",");
-		   });
-	   }
-	
-
 	
 	private void buildHuffManTree() {
 		while(this.heapSize>1) {
@@ -191,12 +165,12 @@ public class HuffManCoding implements Compressor {
 
 class HuffManNode{
 	protected int freq;
-	protected byte key;
+	protected int key;
 	protected HuffManNode left, right;
 	public HuffManNode(int freq) {
 		this.freq = freq;
 	}
-	public HuffManNode(byte key,int freq) {
+	public HuffManNode(int key,int freq) {
 		this.freq = freq;
 		this.key = key;
 	}

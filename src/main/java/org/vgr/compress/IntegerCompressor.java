@@ -2,27 +2,25 @@ package org.vgr.compress;
 
 import java.util.Arrays;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vgr.store.io.ByteBuf;
 import org.vgr.store.io.IntBuf;
 
 public class IntegerCompressor {
 	 enum INT_MODE{BITPACKING,DELTA_BITPACKING}	 
+	 
 	 public byte[] compress(int[] ints,INT_MODE mode) {
 		 byte[] output = null;
 		  switch (mode) {
 		case BITPACKING:
 			BitPacking bitPacking=new BitPacking();
-			System.out.println("   ***Running Bitpacking  *** ");
 			output=bitPacking.compress(ints);
-			System.out.println("   ***Completed Bitpacking  ***\n ");
 			break;
 		case DELTA_BITPACKING:
 			DeltaCompression deltaCompression=new DeltaCompression();
-			System.out.println("***   Running Delta & Bitpacking   ***");
 			output=deltaCompression.deltaCompress(ints);
-			System.out.println("***   Running Delta & Bitpacking   ***\n");
 			break;
-
 		default:
 			break;
 		}
@@ -49,6 +47,7 @@ public class IntegerCompressor {
 }
 
 class BitPacking {
+	 private static final Logger LOG=LoggerFactory.getLogger(BitPacking.class);
 	 ByteBuf byteBuf=null;
 	 IntBuf intBuf=new IntBuf();
     /**
@@ -57,11 +56,11 @@ class BitPacking {
      */
 	 public byte[] compress(int[] ints) {
 		 int bitWidth=BitWidthUtil.getBitWidth(ints);
+		//int maxNum=(1<<bitWidth)-1;
 		 if(bitWidth>5) {
-			 System.out.println("This implementation can't pack the number with bitwidth >5");
+			 LOG.error("This implementation can't pack the number with bitwidth >5");
+			 System.exit(-1);
 		 }
-		 //int maxNum=(1<<bitWidth)-1;
-		 System.out.println("Packing numbers with bit width :"+bitWidth);
 		 byteBuf=new ByteBuf();
 		 byteBuf.writeByte(bitWidth);
 		 int size=ints.length;
@@ -93,18 +92,19 @@ class BitPacking {
 				 }
 				break;
 			case 5:
-				for(int i=0;i<ints.length;i=i+2) {
-					 pack2(Arrays.copyOfRange(ints, i, i+1));
+				int rem5=size % 3;
+				if(rem5!=0) ints=Arrays.copyOf(ints, size+(3-rem5));
+				for(int i=0;i<ints.length;i=i+3) {
+					 pack5(Arrays.copyOfRange(ints, i, i+3));
 				 }
 				break;
 	
 		default:
 			break;
 		}
-		 
-		 byte[] compressed=byteBuf.getActualBytes();
+		 byte[] compressed=byteBuf.getBytes();
 		 byteBuf=null;
-		 System.out.println("Acutal bytes:"+(ints.length*4)+" Compressed:"+compressed.length);
+		 LOG.debug("Bitpacking completed. original size="+(ints.length*4)+", Compressed size:"+compressed.length);
 		 return compressed;
 		}
 	 
@@ -117,7 +117,6 @@ class BitPacking {
 		 intBuf=new IntBuf();
 		 int bitWidth=byteBuf.readByte();
 		// int maxNum=(1<<bitWidth)-1;
-		 System.out.println("Unpacking numbers with bit width :"+bitWidth);
 		 int count=byteBuf.readVInt();
 		 switch (bitWidth) {
 				 case 2:
@@ -142,6 +141,7 @@ class BitPacking {
 				default:
 					break;
 		 }
+		 LOG.debug("Bit unpacking completed. with bit width="+bitWidth);
 		 return Arrays.copyOf(intBuf.getInts(), count);
 		 
 		}
@@ -253,10 +253,6 @@ class BitPacking {
 		nums[2]=num & 31;
 	    return nums;
 	}
-	
-	
-	
-
 }
 
 
@@ -267,9 +263,9 @@ class BitPacking {
  *
  */
 class DeltaCompression {
-	
+	 private static final Logger LOG=LoggerFactory.getLogger(DeltaCompression.class);
     /**
-     * Numbers should be in non decreasing pattern
+     * Numbers should be in non decreasing pattern.
      * @param ints
      */
 	public byte[] deltaCompress(int[] ints) {
@@ -278,7 +274,6 @@ class DeltaCompression {
 		 int first=ints[0];
 		 byteBuf.writeVInt(ints.length);
 		 byteBuf.writeVInt(first);
-		 
 		 int[] deltas=new int[ints.length];
 		 deltas[0]=0;
 		 for(int j=1;j<ints.length;j++) {
@@ -287,10 +282,9 @@ class DeltaCompression {
 		 BitPacking bitPacking=new BitPacking();
 		 byte[] deltacompressed=bitPacking.compress(deltas);
 		 byteBuf.write(deltacompressed);
-		 
-		 byte[] compressed=byteBuf.getActualBytes();
+		 byte[] compressed=byteBuf.getBytes();
 		 byteBuf=null;
-		 System.out.println("Acutal bytes:"+(ints.length*4)+" Compressed:"+compressed.length);
+		 LOG.debug("Delta compression completed. original size="+(ints.length*4)+", Compressed size:"+compressed.length);
 		 return compressed;
 		}
 

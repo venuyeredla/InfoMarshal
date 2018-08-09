@@ -59,7 +59,6 @@ class Encoder {
     		  }
     	}
       }
-    
 
     public void encode(int y) {  // Compress bit y
     	  // Update the range

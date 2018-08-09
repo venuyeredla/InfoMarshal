@@ -1,5 +1,5 @@
 package org.vgr.store.rdbms;
-
+import static org.vgr.store.io.IOConstants.*;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.HashMap;
@@ -21,7 +21,7 @@ public class SqlEngine implements Closeable {
 	
 	public SqlEngine(String schema, String userName, String passWord) {
 		  LOG.info("DB engine started ");
-		  LOG.info("OS block size is : "+ByteBuf.BLOCK_SIZE);
+		  LOG.info("OS block size is : "+BLOCK_SIZE);
 		  schema=schema.toLowerCase();
 		  String dbFile=FileUtil.getPath(schema+DB_SUFFIX);
 		  fileStore=new FileStore(dbFile);	

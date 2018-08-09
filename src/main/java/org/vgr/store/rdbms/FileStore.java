@@ -1,5 +1,6 @@
 package org.vgr.store.rdbms;
 
+import static org.vgr.store.io.IOConstants.*;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -107,13 +108,13 @@ public class FileStore implements Store,Closeable{
 	}
 	
 	public void writeBlock(int blockNum, ByteBuf block) {
-		int offset=blockNum*ByteBuf.BLOCK_SIZE;
+		int offset=blockNum*BLOCK_SIZE;
 		writer.writeBlock(offset, block);
 		writer.flush();
 	 }
 	
 	public ByteBuf readBlock(int blockNum) {
-		int offset=blockNum*ByteBuf.BLOCK_SIZE;
+		int offset=blockNum*BLOCK_SIZE;
 		ByteBuf block=reader.readBlock(offset);
 		return block;
 	}
@@ -136,7 +137,7 @@ public class FileStore implements Store,Closeable{
 	}
 	
 	public BtreeNode readIdxNode(int nodeId) {
-		int offset = nodeId * ByteBuf.BLOCK_SIZE;
+		int offset = nodeId * BLOCK_SIZE;
 		ByteBuf block = reader.readBlock(offset);
 		int pageNum = block.readInt();
 		byte type = block.readByte();
@@ -153,7 +154,7 @@ public class FileStore implements Store,Closeable{
 	}
 	
 	public int getNodeOffset(int pageNum) {
-		int offset = pageNum * ByteBuf.BLOCK_SIZE;
+		int offset = pageNum * BLOCK_SIZE;
 		return offset == -1 ? 0 : offset;
 	}
 

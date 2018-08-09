@@ -21,6 +21,9 @@ public class NumSystems {
 		return num;
 	}
 	
+	
+	
+	
 	/*public static int binaryToDec(String binary) {
 		int num=0;
 		int noofbits=binary.length()-1;// no of bits minus to perform decimal conversion

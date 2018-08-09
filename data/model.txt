@@ -1,1 +1,2 @@
 venugopalananyavenkatraghuvenugopalananyavenkatraghuvenugopalreddyvenugopalananyavenkatraghuvenugopalananyavenkatraghuvenugopalreddy
+SolrCloud is flexible distributed search and indexing, without a master node to allocate nodes, shards and replicas. Instead, Solr uses ZooKeeper to manage these locations, depending on configuration files and schemas. Queries and updates can be sent to any server. Solr will use the information in the ZooKeeper database to figure out which servers need to handle the request.

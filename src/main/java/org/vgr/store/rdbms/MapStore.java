@@ -1,5 +1,5 @@
 package org.vgr.store.rdbms;
-
+import static org.vgr.store.io.IOConstants.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -66,7 +66,7 @@ public class MapStore implements Store {
 	}
 
 	public int getNodeOffset(int pageNum) {
-		int offset = pageNum * ByteBuf.BLOCK_SIZE;
+		int offset = pageNum * BLOCK_SIZE;
 		return offset == -1 ? 0 : offset;
 	}
 

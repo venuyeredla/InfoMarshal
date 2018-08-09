@@ -16,7 +16,7 @@ public class ArthimeticCompressor implements Compressor{
 	private int low,high;
 	
 	public ArthimeticCompressor() {
-		// TODO Auto-generated constructor stub
+		//TODO Auto-generated constructor stub
 	}
 
 	public void init() {
@@ -53,13 +53,14 @@ public class ArthimeticCompressor implements Compressor{
 		   bitStream.writeBit(0);
 		}
 		bitStream.flushBits();
-		return bitStream.getActualBytes();
+		return bitStream.getBytes();
 	}
 	
 	private int code=0;
 	
 	@Override
 	public byte[] decompress(byte[] bytes) {
+		int size=132;
 		this.bitStream=new BitStream(bytes);
 		BitStream outputBytes=new BitStream();
 		this.low=0;this.high=MASK;
@@ -70,13 +71,20 @@ public class ArthimeticCompressor implements Compressor{
 		}
 		try {
 		// Decoding the code;
-		for(int j=0;j<132;j++) {
+		for(int j=0;j<size;j++) {
+			if(j==129) {
+				System.out.println("Debug point at" + j);
+			}
 			int range=high-low+1;
 			int value=((code-low+1) * total-1)/range;
 			int symb=freqTable.getSymbol(value);
 			outputBytes.writeByte(symb);
 			//System.out.print((char)symb);
 			this.applySymbolRange(symb);
+			if(j==size-1) {
+				return outputBytes.getBytes();
+			}
+			
 			while (((low ^ high) & TOP_MASK) == 0) {
 				dshift();
 				low = (low << 1) & MASK;
@@ -92,7 +100,7 @@ public class ArthimeticCompressor implements Compressor{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return outputBytes.getActualBytes();
+		return outputBytes.getBytes();
 	}
 	
 	public void applySymbolRange(int symbol) {

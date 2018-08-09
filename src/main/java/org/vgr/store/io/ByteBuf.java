@@ -1,6 +1,7 @@
 package org.vgr.store.io;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -9,32 +10,43 @@ import java.util.List;
  * 
  */
 public class ByteBuf{
-	public static int BLOCK_SIZE=512;
+	int capacity=128;
 	private byte[] bytes;
-	private int wPos;
+	private int wPos;//points to the next position to be written.
 	private int rPos;
 
 	public ByteBuf() {
-		bytes=new byte[BLOCK_SIZE];
-		wPos=0;//points to the next position to be inserted.
+		bytes=new byte[capacity];
+		wPos=0;
 		rPos=-1;
 	}
 	public ByteBuf(int size) {
-		BLOCK_SIZE=size;
-		bytes=new byte[BLOCK_SIZE];
+		capacity=size;
+		bytes=new byte[capacity];
+		wPos=0;
 		rPos=-1;
 	}
 	public ByteBuf(byte[] b) {
-		bytes=new byte[b.length];
+		capacity=b.length+10;
+		bytes=new byte[capacity];
 		for(int i=0;i<b.length;i++) 
 			bytes[wPos++]=b[i];
 		wPos=b.length;
 		rPos=-1;
 	  }
+	
+	private void resize() {
+		capacity=capacity+100;
+		bytes=Arrays.copyOf(bytes, capacity);
+		
+	}
+	
+	
 	 private ByteBuf writeByte(byte b) {
-		if(wPos+1>=BLOCK_SIZE) {
-			System.out.println("Block is full: Block size:"+bytes.length+ " Position to write : "+wPos+1);
-		}
+		 if(wPos==capacity) {
+			 resize();
+			 System.out.println("Block is full: Block size:"+bytes.length+ " Position to write : "+wPos+1);
+		 }
 		bytes[wPos++]=b;
 		return this;
 	 }
@@ -47,19 +59,6 @@ public class ByteBuf{
 		this.writeByte((byte)b);
 		return this;
 	  }
-	/**
-	 * Useful to set byte at given position.
-	 * @param index
-	 * @param b
-	 */
-	public void setByte(int index,byte b) {
-		bytes[index]=b;
-	}
-	
-	public void setReadPos(int pos) {
-		  rPos=pos;
-	}
-	
 	 /**
 	 * returns signed byte.
 	 * @return
@@ -79,9 +78,9 @@ public class ByteBuf{
 	 * Reads one byte and returns as short. other wise last bit considered as negative number.
 	 * @return
 	 */
-	private short read() {
+	public short read() {
 		 try {
-		   if(++rPos>=wPos) throw new OutOfRangException("There are no bytes at postion:"+rPos);{
+		   if(++rPos>=wPos) throw new OutOfRangException("Read position is greater than size of buffer. Buffer size: "+(wPos-1) +" Read postion ="+rPos);{
 			   byte b=bytes[rPos];
 			   return (b&0x80)==0x80?(short)(b & 0xff):b;
 		   }
@@ -157,47 +156,7 @@ public class ByteBuf{
 		return this;
 	  }
 	
-   public byte[] readBytes(int len) {
-		 byte[] b=new byte[len];
-		for (int i = 0; i < len; i++) {
-			b[i]=readByte();
-		}
-		return b;
-	}
-	
-   /**
-    * Return all bytes from current Posistion
-    * @param len
-    * @return
-    */
-    public byte[] readBytes() {
-    	 int size=this.size();
-    	 int tempSize=size-rPos;
-		 byte[] b=new byte[tempSize];
-		for (int i = 0; i < tempSize; i++) {
-			b[i]=readByte();
-		}
-		return b;
-	}
-   
-   
-	public byte[] getBytes() {
-		return bytes;
-	}
-	
-	public byte[] getActualBytes() {
-		byte[] temp=new byte[wPos];
-		for(int i=0;i<wPos;i++) {
-			temp[i]=bytes[i];
-		}
-		return temp;
-	}
-	
-	
-	public int size() {
-		return wPos;
-	}
-	/**
+		/**
 	 * Adds the string bytes length as Vint and string bytes
 	 * @param str
 	 */
@@ -245,8 +204,48 @@ public class ByteBuf{
 		strings.forEach(str -> write(str));
 		return this;
 	}
-    public static int getBlockSize() {
-		return BLOCK_SIZE;
+	
+	
+	public byte[] getBytes() {
+		return Arrays.copyOf(bytes, wPos);
+	}
+	
+	 /**
+	  * Don't increase the read position.
+	  * @param from
+	  * @param to
+	  * @return
+	  */
+     public byte[] readBytes(int from ,int to) {
+    	return Arrays.copyOfRange(bytes, from, to);
+	 }
+   
+    /**
+     * Return all bytes from current position to specified position.
+     * @param len
+     * @return
+     */
+     public byte[] readBytes(int size) {
+ 		 byte[] b=new byte[size];
+ 		 for (int i = 0; i < size; i++) b[i]=readByte();
+ 		 return b;
+ 	}
+	
+	public int size() {
+		return wPos;
+	}
+
+	/**
+	 * Useful to set byte at given position.
+	 * @param index
+	 * @param b
+	 */
+	public void setByte(int index,byte b) {
+		bytes[index]=b;
+	}
+	
+	public void setReadPos(int pos) {
+		  rPos=pos;
 	}
     public int readPos() {
     	return rPos;
