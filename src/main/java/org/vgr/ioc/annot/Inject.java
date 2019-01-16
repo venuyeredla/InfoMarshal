@@ -8,7 +8,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface Inject {
-	 String ref() default "";
-	 String value() default "";
-  
+	String value() default "";
 }

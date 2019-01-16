@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Around {
-  Class<?>  objInterface();	
-  String bMethod();
-  String aMethod();
+  String aspectObj();
+  String aspectBeforeMethod();
+  String aspectAfterMethod();
 }

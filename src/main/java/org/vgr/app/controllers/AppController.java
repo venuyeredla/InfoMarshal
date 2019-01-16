@@ -12,19 +12,24 @@ import org.vgr.http.server.MimeType;
 import org.vgr.ioc.annot.Controller;
 import org.vgr.ioc.annot.Handler;
 
-@Controller(id="appController")
+@Controller(/*"appController"*/)
 public class AppController {
 	private static final Logger LOG=LoggerFactory.getLogger(AppController.class);
 	
-	@Handler(path="/home.htm")
+	@Handler("/")
+    public String home(HttpRequest servletRequest,HttpResponse servletResponse) {
+		 return "home";
+	 }
+	
+	@Handler("/home.htm")
     public String indexPage(HttpRequest servletRequest,HttpResponse servletResponse) {
 		 return "home";
 	 }
-	 @Handler(path="/welcome.htm")
+	 @Handler("/welcome.htm")
 	 public String welcome(HttpRequest servletRequest,HttpResponse servletResponse) {
 		 return "welcome";
 	 }
-	 @Handler(path="/login.htm",mimeType=MimeType.JSON)
+	 @Handler(value="/login.htm",mimeType=MimeType.JSON)
 	 public String authenticate(HttpRequest req,HttpResponse res) {
 		try {
 		      String user=req.getParameter("name");
@@ -44,8 +49,7 @@ public class AppController {
 			return "json";
 		}
 	    
-
-	   @Handler(path="/logout.htm")
+	   @Handler("/logout.htm")
 		public String logout(HttpRequest servletRequest,HttpResponse servletResponse){
 		     	  HttpSession sess=servletRequest.getSession(false);
 		     	  sess.getAttribute("loginUser");

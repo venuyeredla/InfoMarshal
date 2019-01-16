@@ -12,7 +12,13 @@ import org.vgr.ioc.annot.Inject;
 import org.vgr.ioc.annot.Service;
 import org.vgr.ioc.core.RequestDispatcher;
 
-@Service(id="httpServer")
+/**
+ * HttpServer starting point. SocketServer is started on given port and waits for http requests.
+ * Whenever there is new request new socket is created and request processing is delegated to RequestProcessor. 
+ * @author vyeredla
+ *
+ */
+@Service()
 public class HttpServer implements Runnable{
 	private static final Logger LOG=LoggerFactory.getLogger(HttpServer.class);
    /**
@@ -24,7 +30,7 @@ public class HttpServer implements Runnable{
     private int SERVER_PORT=2050;
     ServerSocket socketServer=null;
     ExecutorService executorService=Executors.newFixedThreadPool(10);
-	@Inject(ref="requestDispatcher")
+	@Inject("requestDispatcher")
 	RequestDispatcher requestDispatcher=null;
 	private boolean stopSignal=false;
 	public HttpServer() {	}
@@ -44,6 +50,12 @@ public class HttpServer implements Runnable{
 		   }
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
+		}finally {
+			try {
+				socketServer.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -69,6 +81,4 @@ public class HttpServer implements Runnable{
 	public void setRequestDispatcher(RequestDispatcher requestDispatcher) {
 		this.requestDispatcher = requestDispatcher;
 	}
-	
-	
 }

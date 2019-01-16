@@ -12,6 +12,7 @@ public class IntegerCompressorTest {
 	
 	   IntegerCompressor integerCompressor=new IntegerCompressor();
 	    @Test
+	    @Ignore
 		public void testBitPacking() {
 			int[] ints= RandomUtil.randomIntsBW(10, 1, 16);
 			byte[] compressed=integerCompressor.compress(ints, INT_MODE.BITPACKING);

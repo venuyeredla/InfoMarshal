@@ -8,10 +8,9 @@ import org.slf4j.LoggerFactory;
 import org.vgr.ioc.annot.Service;
 import org.vgr.ioc.core.RequestDispatcher;
 
-@Service(id="requestProcessor")
+@Service("requestProcessor")
 public class RequestProcessor implements Callable<String>{
 	private static final Logger LOG=LoggerFactory.getLogger(RequestProcessor.class);
-	
 	String viewPath="/static/html/%viewname%.html";
 	/*@Inject(ref="requestDispatcher")*/
 	RequestDispatcher requestDispatcher=null;

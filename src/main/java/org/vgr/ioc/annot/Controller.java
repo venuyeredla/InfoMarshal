@@ -8,6 +8,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface Controller{
- String id();
+ String value() default "";
  BeanScope scope()  default BeanScope.PROTOTYPE;
 }

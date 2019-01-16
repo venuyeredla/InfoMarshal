@@ -17,8 +17,8 @@ import org.vgr.app.util.JsonUtil;
 
 public class HttpResponse  {
 	private static final Logger LOGGER=LoggerFactory.getLogger(HttpResponse.class);
-    private Method method;
-    private Status status=Status.OK; 
+    private HttpMethod method;
+    private HttpStatus status=HttpStatus.OK; 
     private MimeType mimeType=MimeType.HTML;
     private String close="close";
 	private static String NEW_LINE=" \n";
@@ -28,13 +28,13 @@ public class HttpResponse  {
 		headers=new LinkedHashMap<String,String>();
 	}
 	/**
-	 * Write text data like javascript,html,css.
+	 * Reads files like Write text data like JS,html,css.
 	 * @param socket
 	 * @param fileName
 	 * @throws IOException
 	 */
 	public void writeText(Socket socket,String fileName) throws IOException {
- 		 PrintWriter printWriter=new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
+		 PrintWriter printWriter=new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
  		 String data=this.getTextData(fileName);
 		 int contentSize=data.getBytes().length;
          this.writeHeader(printWriter, contentSize);		 
@@ -99,13 +99,13 @@ public class HttpResponse  {
 	public void setMimeType(MimeType mimeType) {
 		this.mimeType = mimeType;
 	}
-    public Status getStatus() {
+    public HttpStatus getStatus() {
         return this.status;
     }
-	public Method getMethod() {
+	public HttpMethod getMethod() {
 		return method;
 	}
-	public void setMethod(Method method) {
+	public void setMethod(HttpMethod method) {
 		this.method = method;
 	}
 	public Map<String,String> getData() {

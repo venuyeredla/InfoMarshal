@@ -15,10 +15,10 @@ import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vgr.ioc.annot.Inject;
 import org.vgr.ioc.annot.Service;
+import org.vgr.ioc.annot.Value;
 
-@Service(id="jdbcTemplate")
+@Service(/*"jdbcTemplate"*/)
 public class JdbcTemplate {
 	public static final Logger logger=LoggerFactory.getLogger(JdbcTemplate.class);
 	public JdbcTemplate(){ }
@@ -265,11 +265,11 @@ public Map<String,Object> callProcedure(String procedureCall,Map<String,Object> 
 }
 
 private static DataSource dataSource=null;
-@Inject(value="jdbc:mysql://localhost:3306/venugopal")
+@Value(value="jdbc:mysql://localhost:3306/venugopal")
 private String url=null;
-@Inject(value="root")
+@Value(value="root")
 private String user=null;
-@Inject(value="venugopal")
+@Value(value="venugopal")
 private String password=null;
 
 public Connection getConnection() throws SQLException{

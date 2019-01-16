@@ -10,6 +10,6 @@ import org.vgr.http.server.MimeType;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Handler {
-	 String path();
+	 String value();
 	 MimeType mimeType() default MimeType.HTML;
 }

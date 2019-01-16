@@ -1,14 +1,8 @@
 package org.vgr.app;
 
-import java.util.Set;
+import org.junit.runner.RunWith;
+import org.vgr.ioc.core.TestRunner;
 
-import org.vgr.ioc.core.IocContainer;
-
+@RunWith(TestRunner.class)
 public abstract class AbstractTest {
-	protected Set<String> classes;
-	
-	public IocContainer getContainer(Set<String> classes){
-		IocContainer ioc=new IocContainer(classes);
-		return ioc;
-	}
 }

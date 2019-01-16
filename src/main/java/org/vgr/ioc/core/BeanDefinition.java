@@ -15,6 +15,8 @@ public class BeanDefinition {
 	private BeanScope scope;
 	private Object object;
 	private Object proxy;
+	private Class<?> objInterface=null;
+	private boolean hasProxy=false;
 	private List<BeanProperty> properties=null;
 	
 	public BeanDefinition(){}
@@ -23,6 +25,10 @@ public class BeanDefinition {
 		this.id=id;
 		this.className=className;
 		this.scope=scope;
+	}
+	
+	public boolean isObjPresent() {
+		return object!=null?true:false;
 	}
 	
 	public String getId() {
@@ -65,6 +71,22 @@ public class BeanDefinition {
 	}
 	public void setProxy(Object proxy) {
 		this.proxy = proxy;
+	}
+	
+	public Class<?> getObjInterface() {
+		return objInterface;
+	}
+
+	public void setObjInterface(Class<?> objInterface) {
+		this.objInterface = objInterface;
+	}
+	
+	public boolean isHasProxy() {
+		return hasProxy;
+	}
+
+	public void setHasProxy(boolean hasProxy) {
+		this.hasProxy = hasProxy;
 	}
 
 	@Override

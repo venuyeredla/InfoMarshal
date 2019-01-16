@@ -8,6 +8,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface Dao {
-	String id();
+	String value() default "";
 	BeanScope scope()  default BeanScope.SINGLETON;
 }
