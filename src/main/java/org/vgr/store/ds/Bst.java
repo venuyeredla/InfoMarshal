@@ -13,6 +13,7 @@ public class Bst {
 	private Node root;
 	private static int totalNodes=0;
 	public Bst() {	}
+	
 	public void insert(int key,long pointer) {
 	    root=insert(root,key, pointer);
 	  }

@@ -37,7 +37,7 @@ public class HttpRequest {
 			
 		}catch (IOException ioe) {
 			ioe.printStackTrace();
-			}
+		}
 
 	}
 	private void parseRequest(String line) {

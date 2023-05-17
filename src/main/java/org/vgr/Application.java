@@ -1,4 +1,4 @@
-package org.vgr.app;
+package org.vgr;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -17,7 +17,10 @@ import org.vgr.ioc.core.AppMode;
  */
 public class Application{
 	private static final Logger LOG=LoggerFactory.getLogger(Application.class);
-	public static void main(String...strings) throws InterruptedException {
+	
+	public static void main(String...strings){
+		 LOG.info("Loading context..");
+		  //Lambda expression.
 		  ClassesProvider provider=()->{
 			  try (Stream<String> stream = Files.lines(Paths.get(ClassLoader.getSystemResource("classes.txt").toURI()))) {
 					return stream.collect(Collectors.toSet());
@@ -28,11 +31,21 @@ public class Application{
 				}
 				return Collections.emptySet();
 			};
+		 
 		  LOG.debug("Application is gonna started...");
+		  provider.defaultMethod();
 		  AppContext container = new AppContext(AppMode.WEB, provider);
 		  HttpServer httpServer =(HttpServer)container.getBean("httpServer");
 		  httpServer.start();
 	}
-}
-
 	
+	public boolean testLogleves() {
+		//LOG.fatal("FATAL");
+		LOG.error("ERROR");
+		LOG.warn("WARN");
+		LOG.info("INFO");
+		LOG.debug("DEBUG");
+		LOG.trace("TRACE");
+		return true;
+	}
+}

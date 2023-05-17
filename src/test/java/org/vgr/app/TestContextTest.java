@@ -9,31 +9,23 @@ import org.vgr.ioc.annot.Inject;
 import org.vgr.ioc.annot.Service;
 import org.vgr.ioc.annot.TestConfig;
 
-@TestConfig(dependents= {"org.vgr.app.LogLevels",
+@TestConfig(dependents= {
 		                 "org.vgr.http.server.ServerLife",
 		                 "org.vgr.http.server.ServerLogAspect",
 						})
 @Service
 public class TestContextTest extends AbstractTest{
-	private static final Logger LOG=LoggerFactory.getLogger(LogLevels.class);
+	private static final Logger LOG=LoggerFactory.getLogger(TestContextTest.class);
 	
 	@Inject
 	ServerLife serveLife;
-	@Inject
-	LogLevels log;
 			
 	@Test
 	public void test() {
 		//fail("Not yet implemented");
-		log.testLogleves();
 		LOG.info("Running : test");
 		System.out.println();
 		Assert.assertTrue(true);
-	}
-	
-	@Test
-	public void testSecond() {
-		log.testLogleves();
 	}
 	
 	@Test

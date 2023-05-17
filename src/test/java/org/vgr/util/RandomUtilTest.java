@@ -1,16 +1,36 @@
-package org.vgr.app.tst.util;
+package org.vgr.util;
 
 import org.junit.Test;
-import org.vgr.util.RandomUtil;
 
 public class RandomUtilTest {
 	
 	@Test
 	public void testRandomArray(){
-		int[] numbers=RandomUtil.randomInts(30,100);
-		for(int i=0;i<numbers.length;i++){
-			System.out.print(numbers[i]+",");
+		int iterations=3;
+		while(iterations>0) {
+			int[] numbers=RandomUtil.randomInts(5,10);
+			StringBuffer stringBuffer=new StringBuffer();
+			for(int i=0;i<numbers.length;i++){
+				stringBuffer.append(numbers[i]+",");
+			}
+			System.out.println(stringBuffer);
+			iterations--;
+		}
+	}
+	
+	@Test
+	public void testRandomArrayRange(){
+		int iterations=3;
+		while(iterations>0) {
+			int[] numbers=RandomUtil.randomInts(5,5,10);
+			StringBuffer stringBuffer=new StringBuffer();
+			for(int i=0;i<numbers.length;i++){
+				stringBuffer.append(numbers[i]+",");
+			}
+			System.out.println(stringBuffer);
+			iterations--;
 		}
 	}
 
 }
+

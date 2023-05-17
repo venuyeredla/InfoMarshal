@@ -4,6 +4,11 @@ import java.util.HashSet;
 
 public class RandomUtil {
 	
+	
+	public static int randomInt(int range){
+		return (int) (Math.random()*range);
+	}
+	
 	/**
 	 * @param count Number of integers
 	 * @param range range from 0-to mentioned.
@@ -15,15 +20,14 @@ public class RandomUtil {
 			randomNumbers[i]=(int) (Math.random()*range);
 		}
 		return randomNumbers;
-	}
+	}	
 	
-	
-	public static int[] randomIntsBW(int count, int from, int to){
+	public static int[] randomInts(int count, int from, int to){
 		int[] randomNumbers=new int[count];
 		for(int i=0;i<count;){
-			int num=(int) (Math.random()*to);
-			if(num>=from && num<=to){
-				randomNumbers[i]=num;
+			int num=(int)((Math.random()*to)); //-from
+			 if(num>=from && num<=to){
+				 randomNumbers[i]=num;
 				i++;
 			}
 		}

@@ -9,5 +9,4 @@ public enum Traversal {
 	public String getText() {
 		return text;
 	}
-	
 }

@@ -14,7 +14,6 @@ import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vgr.app.LogLevels;
 import org.vgr.ioc.annot.Service;
 import org.vgr.ioc.annot.TestConfig;
 
@@ -24,7 +23,7 @@ import org.vgr.ioc.annot.TestConfig;
  *
  */
 public class TestRunner extends BlockJUnit4ClassRunner{
-	private static final Logger LOG=LoggerFactory.getLogger(LogLevels.class);
+	private static final Logger LOG=LoggerFactory.getLogger(TestRunner.class);
 	private AppContext applicationTestContext=null;
 	public TestRunner(Class<?> klass) throws InitializationError {
 		  super(klass);

@@ -1,7 +1,5 @@
 package org.vgr.compress;
 
-import org.vgr.util.NumSystems;
-
 public class ArthimeticCompressor implements Compressor{
 	private byte bits=8;
 	int MASK=(1<<bits)-1;           //Max range number with all ones. 1111...111
@@ -20,9 +18,9 @@ public class ArthimeticCompressor implements Compressor{
 	}
 
 	public void init() {
-		System.out.println("MASK:"+MASK+"-"+NumSystems.decToBin(MASK));
-		System.out.println(" TOP_MASK:"+TOP_MASK+"-"+NumSystems.decToBin(TOP_MASK));
-		System.out.println(" SECOND_MASK:"+SECOND_MASK+"-"+NumSystems.decToBin(SECOND_MASK));
+		System.out.println("MASK:"+MASK+"-"+decToBin(MASK));
+		System.out.println(" TOP_MASK:"+TOP_MASK+"-"+decToBin(TOP_MASK));
+		System.out.println(" SECOND_MASK:"+SECOND_MASK+"-"+decToBin(SECOND_MASK));
 	}
 	public void initcompress() {
 	}
@@ -131,6 +129,25 @@ public class ArthimeticCompressor implements Compressor{
 		code = (code & TOP_MASK) | ((code << 1) & (MASK >>> 1)) | bitStream.readBit();
 	}
 	
+	
+	public static String decToBin(int num) {
+		if(num==0) return "0";
+		String bitStr="";
+		while(num>0) {
+			bitStr=(num&1)+bitStr; //Extracting last  bit
+			num=num>>1;
+		}
+		return bitStr;
+	}
+	
+	public static int binToDec(String binary) {
+		int num=0;
+		for(int i=0;i<binary.length();i++) {    // 100 => 4   
+			int bit=binary.charAt(i)=='0'?0:1;
+			num =num<<1 | bit;  // Adding binary number to a number
+		}
+		return num;
+	}
 }
 
 class FreqTable{

@@ -1,4 +1,4 @@
-package org.vgr.store.ds;
+package org.vgr.store.search;
 
 import java.util.Scanner;
 
@@ -6,7 +6,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vgr.app.Application;
+import org.vgr.Application;
 import org.vgr.store.search.Trie;
 
 public class TrieTest {

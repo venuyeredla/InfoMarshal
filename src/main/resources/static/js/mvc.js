@@ -4,6 +4,7 @@
 	 var location = window.location,uid=0;
 	 function getUid(){ ++uid;   return "00"+uid;}
 	 function toJson(str){return JSON.parse(str);}
+	// function toStr(obj){return JSON.stringify(obj); }
 	 function foreach(array,fn){  
 		     for(var i=0;i<array.length;i++){
 			  	  	fn(array[i]);
@@ -389,16 +390,16 @@ function registerController(conele) {
        $ioc=new IOC(),
 	     $template=new Template();
 
-   		 mvc.service("$http",$http);
-   		 mvc.service("$html",$html);
+   	   mvc.service("$http",$http);
+   	   mvc.service("$html",$html);
        mvc.service("$template",new Template());
        mvc.service("$log",$log);
    
-  		 window.mvc=mvc;
-   		function init(){
+  	   window.mvc=mvc;
+   	   function init(){
 		 			$location.process($http);
 		 			compileDom();
-			 }
+		}
 	
    /**
 	 * setInterval(callback, delay); setTimeout(callback, delay)

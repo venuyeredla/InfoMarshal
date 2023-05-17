@@ -14,7 +14,7 @@ public class IntegerCompressorTest {
 	    @Test
 	    @Ignore
 		public void testBitPacking() {
-			int[] ints= RandomUtil.randomIntsBW(10, 1, 16);
+			int[] ints= RandomUtil.randomInts(10, 1, 16);
 			byte[] compressed=integerCompressor.compress(ints, INT_MODE.BITPACKING);
 			int[] decompressed=integerCompressor.decompress(compressed,INT_MODE.BITPACKING);
 			for(int i=0;i<ints.length;i++) {

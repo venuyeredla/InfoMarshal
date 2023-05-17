@@ -11,7 +11,6 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vgr.http.server.IServerLifeCycle;
 import org.vgr.ioc.annot.After;
 import org.vgr.ioc.annot.AnnotaionReader;
 import org.vgr.ioc.annot.AopAdviceType;

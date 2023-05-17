@@ -1,10 +1,11 @@
 package org.vgr.app;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.vgr.Application;
 import org.vgr.ioc.core.AppContext;
 import org.vgr.ioc.core.ClassesProvider;
 
@@ -14,12 +15,10 @@ public class ContextTest {
 	public void test() {
 		//fail("Not yet implemented");
 		ClassesProvider classesProvider=()->{
-		 Set<String> classes=new HashSet<>();
-		  classes.add("org.vgr.app.LogLevels");
-		  return classes;
+		  return Stream.of("org.vgr.Application").collect(Collectors.toSet());
 		};
 		AppContext applicationContext=new AppContext(classesProvider);
-		LogLevels  log=(LogLevels)applicationContext.getBean("logLevels");
+		Application  log=(Application)applicationContext.getBean("application");
 		log.testLogleves();
 		System.out.println();
 		Assert.assertTrue(true);
