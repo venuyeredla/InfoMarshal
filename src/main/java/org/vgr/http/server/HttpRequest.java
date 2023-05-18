@@ -16,7 +16,6 @@ public class HttpRequest {
 	private Map<String,String> headers=new HashMap<String,String>();
 	private Map<String,String> params=new HashMap<String,String>();
 	private String method;
-	private String HTTP_VERSION;
 	private String uri;
 	
 	public HttpRequest(Socket socket) {
@@ -44,7 +43,7 @@ public class HttpRequest {
           try {
         	  String[] str=line.split(" ");
      		  method=str[0];
-     		  HTTP_VERSION=str[2];
+     		String  HTTP_VERSION=str[2];
      		  String uriStr=str[1];
      		  if(uriStr.contains("?")) {
      			 String[] uriParts=uriStr.split("\\?");
