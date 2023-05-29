@@ -23,7 +23,9 @@ import org.vgr.ioc.annot.Before;
  *
  */
 public class AppContext implements BeanFactory{
+	
 	private static final Logger LOG=LoggerFactory.getLogger(AppContext.class);
+	
 	public static final   String INT_TYPE="int";
 	public static final   String LONG_TYPE="long";
 	public static final   String BYTE_TYPE="byte";
@@ -35,21 +37,31 @@ public class AppContext implements BeanFactory{
 	
 	private HashMap<String,BeanDefinition> beanConfigs=null;
 	private HashMap<String, HandlerConfig>  handlersConfigs=null;
+	
+	/**
+	 * Only core IOC container is initialized.
+	 * @param provider
+	 */
 	public AppContext(ClassesProvider provider){
-   		this(AppMode.CORE,provider);
+   		 this(AppMode.CORE,provider);
     }
+	/**
+	 * Context is created for web application.
+	 * @param iocMode
+	 * @param provider
+	 */
 	public AppContext(AppMode iocMode,ClassesProvider provider){
-		 this.loadContext(provider,iocMode);
+		 this.bootstrap(provider,iocMode);
 	  }
 	
 	/**
-	 * Loads and initializes the context.
+	 * bootstraps and initializes the context.
 	 * @param iocConfig
 	 * @param iocMode
 	 */
-	private void loadContext(ClassesProvider provider,AppMode iocMode) {
+	private void bootstrap(ClassesProvider provider,AppMode iocMode) {
 		LOG.info("Initilizing IOC container.");
-		new AnnotaionReader(this, provider,iocMode);
+		AnnotaionReader.generateConfig(this, provider, iocMode);
 		LOG.debug("Initializing singleton beans...");
 		beanConfigs.values().stream()
 							.filter(beanDef -> beanDef.getScope()==SINGLETON)
@@ -70,13 +82,19 @@ public class AppContext implements BeanFactory{
 							        );
 				 break;
 			case PROTOTYPE:
-				obj=this.getNewBean(beanId);
+				 obj=this.getNewBean(beanId);
 				 break;
 			default:
 				break;
 			}
-		  this.injectContainer(obj);
-		/*  if(beanDefinition.isHasProxy()) {
+			
+			if(obj instanceof ContainerAware) {
+				
+				((ContainerAware) obj).setContainer(this);
+	    		
+			}
+			
+			/*  if(beanDefinition.isHasProxy()) {
 			  return beanDefinition.getProxy();
 		   }*/
 		  return obj;
@@ -98,7 +116,8 @@ public class AppContext implements BeanFactory{
 		   BeanDefinition beanDef= this.beanConfigs.get(beanName);
 		   try {
 			   Class<?> clazz = Class.forName(beanDef.getClassName());
-			   final Object object=clazz.newInstance();
+			   final Object object=  clazz.getConstructor().newInstance();
+			   //final Object object=clazz.newInstance();
 			   beanDef.getProperties().stream().forEach(beanProp ->{
 				   try {
 						 Field field=clazz.getDeclaredField(beanProp.getName());
@@ -129,35 +148,34 @@ public class AppContext implements BeanFactory{
 	
 	
 	
-	
 	private static Object getPrimitive(Field field, String properyValue) {
 		try {
 			Object value = null;
 			String type = field.getType().getName();
 			switch (type) {
 			case INT_TYPE:
-				value = new Integer(properyValue);
+				value= Integer.parseInt(type);
 				break;
 			case LONG_TYPE:
-				value = new Long(properyValue);
+				value = Long.parseLong(properyValue);
 				break;
 			case BYTE_TYPE:
-				value = new Byte(properyValue);
+				value = Byte.parseByte(properyValue);
 				break;
 			case BOOLEAN_TYPE:
-				value = new Boolean(properyValue);
+				value = Boolean.parseBoolean(properyValue);
 				break;
 			case FLOAT_TYPE:
-				value = new Float(properyValue);
+				value = Float.parseFloat(properyValue);
 				break;
 			case DOUBLE_TYPE:
-				value = new Double(properyValue);
+				value = Double.parseDouble(properyValue);
 				break;
 			case SHORT_TYPE:
-				value = new Short(properyValue);
+				value = Short.parseShort(properyValue);
 				break;
 			case CHAR_TYPE:
-				value = new Character(properyValue.charAt(0));
+				value = Character.valueOf(properyValue.charAt(0));
 				break;
 			default:
 				value = properyValue;
@@ -195,11 +213,7 @@ public class AppContext implements BeanFactory{
 		 return null;
 	}
 	
-	 public void injectContainer(Object obj) {
-	    	if(obj instanceof ContainerAware) {
-	    		((ContainerAware) obj).setContainer(this);
-	    		}
-	    	}
+
 	public boolean isValidPath(String path){
 		return handlersConfigs.keySet().contains(path);
 	}

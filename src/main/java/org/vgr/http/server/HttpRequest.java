@@ -15,8 +15,10 @@ public class HttpRequest {
 	private static final Logger LOG=LoggerFactory.getLogger(HttpRequest.class);
 	private Map<String,String> headers=new HashMap<String,String>();
 	private Map<String,String> params=new HashMap<String,String>();
+	
 	private String method;
 	private String uri;
+	private String httpVersion="";
 	
 	public HttpRequest(Socket socket) {
 		try {
@@ -43,7 +45,7 @@ public class HttpRequest {
           try {
         	  String[] str=line.split(" ");
      		  method=str[0];
-     		String  HTTP_VERSION=str[2];
+     		  httpVersion=str[2];
      		  String uriStr=str[1];
      		  if(uriStr.contains("?")) {
      			 String[] uriParts=uriStr.split("\\?");
@@ -92,6 +94,12 @@ public class HttpRequest {
 
 	public HttpSession getSession(boolean b) {
 		return null;
+	}
+	public String getHttpVersion() {
+		return httpVersion;
+	}
+	public void setHttpVersion(String httpVersion) {
+		this.httpVersion = httpVersion;
 	}
 
 }

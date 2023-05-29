@@ -13,16 +13,26 @@ import org.vgr.ioc.core.ClassesProvider;
 import org.vgr.ioc.core.AppContext;
 import org.vgr.ioc.core.AppMode;
 /**
- * @author Vengopal
+ * @author Venugopal
  */
 public class Application{
 	private static final Logger LOG=LoggerFactory.getLogger(Application.class);
 	
 	public static void main(String...strings){
-		 LOG.info("Loading context..");
-		  //Lambda expression.
+		  String fileName="classes.txt";
+		  LOG.info("Bootstrapping context from : {} ",fileName);
+		  ClassesProvider provider=Application.initializeProvider(fileName);
+		  provider.defaultMethod();
+		  AppContext container = new AppContext(AppMode.WEB, provider);
+		  LOG.debug("Application is gonna started...");
+		  HttpServer httpServer =(HttpServer)container.getBean("httpServer");
+		  httpServer.start();
+	}
+	
+	 private static ClassesProvider initializeProvider(String fileName) {
+		 //Lambda expression.
 		  ClassesProvider provider=()->{
-			  try (Stream<String> stream = Files.lines(Paths.get(ClassLoader.getSystemResource("classes.txt").toURI()))) {
+			     try (Stream<String> stream = Files.lines(Paths.get(ClassLoader.getSystemResource(fileName).toURI()))) {
 					return stream.collect(Collectors.toSet());
 				 }catch (Exception e) {
 					  e.printStackTrace();
@@ -31,14 +41,9 @@ public class Application{
 				}
 				return Collections.emptySet();
 			};
-		 
-		  LOG.debug("Application is gonna started...");
-		  provider.defaultMethod();
-		  AppContext container = new AppContext(AppMode.WEB, provider);
-		  HttpServer httpServer =(HttpServer)container.getBean("httpServer");
-		  httpServer.start();
+			return provider;
 	}
-	
+
 	public boolean testLogleves() {
 		//LOG.fatal("FATAL");
 		LOG.error("ERROR");

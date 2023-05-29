@@ -16,6 +16,6 @@ public interface ClassesProvider {
 	
 	public Set<String> classesToScan();
 	default void defaultMethod () {
-		LOG.info("Coming from deafult method");
+	     LOG.info("Coming from deafult method");
 	}
 }

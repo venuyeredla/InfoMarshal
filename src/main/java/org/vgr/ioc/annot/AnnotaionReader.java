@@ -4,37 +4,36 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vgr.ioc.core.AppContext;
+import org.vgr.ioc.core.AppMode;
 import org.vgr.ioc.core.BeanDefinition;
 import org.vgr.ioc.core.BeanProperty;
 import org.vgr.ioc.core.ClassesProvider;
 import org.vgr.ioc.core.HandlerConfig;
-import org.vgr.ioc.core.AppContext;
-import org.vgr.ioc.core.AppMode;
 
 public class AnnotaionReader {
+	
 	private static final Logger LOGGER=LoggerFactory.getLogger(AnnotaionReader.class);
-	private AppMode mode=AppMode.CORE;
-	public AnnotaionReader() {}
-	public AnnotaionReader(AppContext iocContainer, ClassesProvider proivder,AppMode mode){
-		this.mode=mode;
-		this.createConfig(iocContainer, proivder.classesToScan());
-	}
+	
 	/**
-	 * Provides  application config by reading annotation information.
+	 * Scans annotated class builds application configuration.
 	 */
-	private void createConfig(AppContext iocContainer , Set<String> classesToScan){
+	public static void generateConfig(AppContext iocContainer , ClassesProvider provider,AppMode mode){
+		
 			HashMap<String, BeanDefinition> beansConfigMap=new HashMap<String, BeanDefinition>();
 			HashMap<String, HandlerConfig> handlers = new HashMap<String, HandlerConfig>();
+			
 			LOGGER.info("Scanning classes for annotations and creating appliction configuration.");
-		    classesToScan.stream().forEach(className ->{
+			provider.classesToScan().stream().forEach(className ->{
 			  try {
 				Class<?> clazz=Class.forName(className);
+				
+				//Controller controller1 = clazz.getDeclaredAnnotation(Controller.class);
 				Arrays.asList(clazz.getDeclaredAnnotations())
 				    .stream()
 				    .filter(classAnnotation ->  classAnnotation instanceof Controller || classAnnotation instanceof Service || classAnnotation instanceof Dao)
@@ -90,6 +89,7 @@ public class AnnotaionReader {
 				e.printStackTrace();
 			}
 		  });
+		    
 		    iocContainer.setBeanContainer(beansConfigMap);
 		    LOGGER.info("IOC managed beans = {"+beansConfigMap.keySet().stream().collect(Collectors.joining(",")) +"}");
 		    if(mode==AppMode.WEB) {

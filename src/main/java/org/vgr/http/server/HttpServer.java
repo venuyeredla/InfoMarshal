@@ -10,19 +10,17 @@ import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vgr.ioc.annot.Inject;
 import org.vgr.ioc.annot.Service;
-import org.vgr.ioc.core.RequestDispatcher;
+import org.vgr.ioc.core.AppContext;
+import org.vgr.ioc.core.ContainerAware;
 
 /**
  * HttpServer starting point. SocketServer is started on given port and waits for HTTP requests.
  * Whenever there is new request, new socket is created and request processing is delegated to RequestProcessor. 
- * @author vyeredla
- *
  */
 
 @Service()
-public class HttpServer implements Runnable{
+public class HttpServer implements Runnable,ContainerAware{
 	private static final Logger LOG=LoggerFactory.getLogger(HttpServer.class);
    /**
      * Maximum time to wait on Socket.getInputStream().read() (in milliseconds)
@@ -31,14 +29,15 @@ public class HttpServer implements Runnable{
      */
 	
     public static final int SOCKET_READ_TIMEOUT = 5000;
+    
     private int SERVER_PORT=2050;
-    ServerSocket socketServer=null;
+    
+    ServerSocket serverSocket=null;
     ExecutorService executorService=Executors.newFixedThreadPool(10);
     
-	@Inject("requestDispatcher")
-	RequestDispatcher requestDispatcher=null;
 	private boolean stopSignal=false;
-	public HttpServer() {	}
+	
+	public HttpServer() {}
 	public HttpServer(int port) {
 		this.SERVER_PORT=port;
 	}
@@ -46,18 +45,19 @@ public class HttpServer implements Runnable{
 	@Override
 	public void run() {
 	try{
-		socketServer=new ServerSocket(SERVER_PORT);
+		serverSocket=new ServerSocket(SERVER_PORT);
 		LOG.info("Server Started at port: "+SERVER_PORT);
 		while(!stopSignal) {
 			 Thread.sleep(0);
-		  	 socketServer.setReuseAddress(true);
-		  	 this.handleRequest(socketServer.accept());
+			 serverSocket.setReuseAddress(true);
+			 Socket requestSocket = serverSocket.accept();
+		  	 this.handleRequest(requestSocket);
 		   }
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 		}finally {
 			try {
-				socketServer.close();
+				serverSocket.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -65,16 +65,15 @@ public class HttpServer implements Runnable{
 	}
 	
 	public boolean handleRequest(Socket socket) {
-		RequestProcessor processor= new RequestProcessor(socket, new HttpRequest(socket), new HttpResponse());
-		processor.setRequestDispatcher(requestDispatcher);
+		RequestProcessor processor= new RequestProcessor(socket);
+		
 		Future<String> future = executorService.submit(processor);
 		try {
-			String string = future.get();
+			String futureValue  = future.get();
+			LOG.info("Future value : {}",futureValue);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -93,7 +92,10 @@ public class HttpServer implements Runnable{
 		LOG.info("Server Stop request submitted at port: "+SERVER_PORT);
 		return true;
 	}
-	public void setRequestDispatcher(RequestDispatcher requestDispatcher) {
-		this.requestDispatcher = requestDispatcher;
+	@Override
+	public void setContainer(AppContext iocContainer) {
+		// TODO Auto-generated method stub
+		
 	}
+	
 }

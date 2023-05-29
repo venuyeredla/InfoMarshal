@@ -1,26 +1,31 @@
 package org.vgr.http.server;
 
+import java.lang.reflect.Method;
 import java.net.Socket;
 import java.util.concurrent.Callable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vgr.ioc.annot.Service;
-import org.vgr.ioc.core.RequestDispatcher;
+import org.vgr.ioc.core.AppContext;
+import org.vgr.ioc.core.ContainerAware;
+import org.vgr.ioc.core.HandlerConfig;
 
 @Service("requestProcessor")
-public class RequestProcessor implements Callable<String>{
+public class RequestProcessor implements Callable<String>, ContainerAware{
+	
 	private static final Logger LOG=LoggerFactory.getLogger(RequestProcessor.class);
+	
+	AppContext iocContainer = null;
+	
 	String viewPath="/static/html/%viewname%.html";
-	/*@Inject(ref="requestDispatcher")*/
-	RequestDispatcher requestDispatcher=null;
 	private Socket socket=null; 
 	private HttpRequest httpRequest=null;
 	private HttpResponse httpResponse=null;
 	
-	public RequestProcessor(Socket skt,HttpRequest request,HttpResponse response) {
-			this.httpRequest=request;
-			this.httpResponse=response;
+	public RequestProcessor(Socket skt) {
+			this.httpRequest=new HttpRequest(socket);
+			this.httpResponse=new HttpResponse();
 			this.socket=skt;
 	}
 
@@ -33,7 +38,7 @@ public class RequestProcessor implements Callable<String>{
 				this.setMimeType(uri);
 				httpResponse.writeText(socket,uri);
 			}else {
-				String nextView=requestDispatcher.doRequestProcessing(httpRequest,httpResponse);
+				String nextView=this.doRequestProcessing(httpRequest,httpResponse);
 				if(httpResponse.getMimeType()==MimeType.JSON) {
 					httpResponse.writeJson(socket);
 					return result;
@@ -49,6 +54,31 @@ public class RequestProcessor implements Callable<String>{
 		return result;
 	}
 	
+	
+	
+	
+	public String doRequestProcessing(HttpRequest request, HttpResponse response) {
+		String viewName = "error";
+		try {
+			String servletPath = request.getUri();
+			if (iocContainer.isValidPath(servletPath)) {
+				HandlerConfig handlerConfig = iocContainer.getHandlerConfig(servletPath);
+				response.setMimeType(handlerConfig.getMimeType());
+				Object controller = iocContainer.getBean(handlerConfig.getController());
+				Method method = controller.getClass().getMethod(handlerConfig.getMethod(),
+						new Class[] { HttpRequest.class, HttpResponse.class });
+				viewName = (String) method.invoke(controller, request, response);
+				if (viewName.startsWith("redirect:")) {
+					viewName = viewName.substring(9);
+				}
+				return viewName;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return viewName;
+	}
+
 	private void setMimeType(String uri) {
 		String fileExt=uri.substring(uri.lastIndexOf(".")+1).toLowerCase();
 		switch (fileExt) {
@@ -77,11 +107,9 @@ public class RequestProcessor implements Callable<String>{
 		this.socket = socket;
 	}
 
-	public RequestDispatcher getRequestDispatcher() {
-		return requestDispatcher;
+	@Override
+	public void setContainer(AppContext iocContainer) {
+		this.iocContainer=iocContainer;
 	}
-
-	public void setRequestDispatcher(RequestDispatcher requestDispatcher) {
-		this.requestDispatcher = requestDispatcher;
-	}
+	
 }

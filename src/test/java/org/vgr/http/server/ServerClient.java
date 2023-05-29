@@ -29,7 +29,7 @@ public class ServerClient {
 	}
 	@Test
 	public void testServer(){
-		  String serverName = "localhost"; int port =8080;
+		  String serverName = "localhost"; int port =2050;
 	      try
 	      {
 	         System.out.println("Fetching data from--"+serverName+ ":" + port);
