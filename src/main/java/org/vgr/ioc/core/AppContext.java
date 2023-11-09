@@ -75,8 +75,7 @@ public class AppContext implements BeanFactory{
 			Object obj=null;
 			switch (beanDefinition.getScope()) {
 			case SINGLETON:
-				obj=Optional.ofNullable(beanDefinition.getObject()).
-							 orElseGet(()-> {
+				obj=Optional.ofNullable(beanDefinition.getObject()).orElseGet(()-> {
 								        beanDefinition.setObject(this.getNewBean(beanId));
 										return beanDefinition.getObject();}
 							        );
@@ -88,11 +87,7 @@ public class AppContext implements BeanFactory{
 				break;
 			}
 			
-			if(obj instanceof ContainerAware) {
-				
-				((ContainerAware) obj).setContainer(this);
-	    		
-			}
+		
 			
 			/*  if(beanDefinition.isHasProxy()) {
 			  return beanDefinition.getProxy();
@@ -102,7 +97,7 @@ public class AppContext implements BeanFactory{
 			e.printStackTrace();
 			LOG.error(e.getMessage());
 			LOG.error("Exiting the application");
-			System.exit(1);
+		//	System.exit(1);
 		}
 		 return null;
 	}
@@ -134,19 +129,19 @@ public class AppContext implements BeanFactory{
 							e.printStackTrace();
 						}
 			   });
-			   
 /*			   if(beanDef.isHasProxy()) {
 				   beanDef.setProxy(getProxyObject(beanDef,object,this));
 			   }
-*/			   
+*/			   if(object instanceof ContainerAware) {
+				((ContainerAware) object).setContainer(this);
+				}
 			   return object;
 		   } catch (Exception e) {
 			  e.printStackTrace();
 		   }
 		   return null;
-			}
-	
-	
+	}
+
 	
 	private static Object getPrimitive(Field field, String properyValue) {
 		try {

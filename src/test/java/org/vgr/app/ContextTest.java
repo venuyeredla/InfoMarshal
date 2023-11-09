@@ -19,7 +19,6 @@ public class ContextTest {
 		};
 		AppContext applicationContext=new AppContext(classesProvider);
 		Application  log=(Application)applicationContext.getBean("application");
-		log.testLogleves();
 		System.out.println();
 		Assert.assertTrue(true);
 	}

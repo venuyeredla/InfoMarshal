@@ -6,12 +6,13 @@ import java.util.concurrent.Callable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vgr.ioc.annot.Service;
+import org.vgr.ioc.annot.BeanScope;
+import org.vgr.ioc.annot.Component;
 import org.vgr.ioc.core.AppContext;
 import org.vgr.ioc.core.ContainerAware;
 import org.vgr.ioc.core.HandlerConfig;
 
-@Service("requestProcessor")
+@Component(value="requestProcessor",scope = BeanScope.PROTOTYPE)
 public class RequestProcessor implements Callable<String>, ContainerAware{
 	
 	private static final Logger LOG=LoggerFactory.getLogger(RequestProcessor.class);
@@ -23,7 +24,11 @@ public class RequestProcessor implements Callable<String>, ContainerAware{
 	private HttpRequest httpRequest=null;
 	private HttpResponse httpResponse=null;
 	
-	public RequestProcessor(Socket skt) {
+	public RequestProcessor() {
+	}
+	
+	public void setRequestSocket(Socket skt) {
+			this.socket=skt;
 			this.httpRequest=new HttpRequest(socket);
 			this.httpResponse=new HttpResponse();
 			this.socket=skt;
@@ -34,6 +39,7 @@ public class RequestProcessor implements Callable<String>, ContainerAware{
 		String result="success";
 		try {
 			String uri=httpRequest.getUri();
+			LOG.info("Incoming request is : {} ", uri);
 			if(uri.startsWith("/static")) {
 				this.setMimeType(uri);
 				httpResponse.writeText(socket,uri);
@@ -53,8 +59,6 @@ public class RequestProcessor implements Callable<String>, ContainerAware{
 		}
 		return result;
 	}
-	
-	
 	
 	
 	public String doRequestProcessing(HttpRequest request, HttpResponse response) {

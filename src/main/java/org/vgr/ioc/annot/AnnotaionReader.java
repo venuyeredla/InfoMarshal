@@ -31,17 +31,21 @@ public class AnnotaionReader {
 			LOGGER.info("Scanning classes for annotations and creating appliction configuration.");
 			provider.classesToScan().stream().forEach(className ->{
 			  try {
+				LOGGER.info("Reading class meta data."+className);
 				Class<?> clazz=Class.forName(className);
 				
 				//Controller controller1 = clazz.getDeclaredAnnotation(Controller.class);
 				Arrays.asList(clazz.getDeclaredAnnotations())
 				    .stream()
-				    .filter(classAnnotation ->  classAnnotation instanceof Controller || classAnnotation instanceof Service || classAnnotation instanceof Dao)
+				    .filter(classAnnotation -> classAnnotation instanceof Component ||  classAnnotation instanceof Controller || classAnnotation instanceof Service || classAnnotation instanceof Dao)
 				    .findFirst().ifPresent(classAnnotation ->{
-						 BeanDefinition beanDef=null;
 						 String beanId=null;
  						 BeanScope beanScope=null;
-						 if(classAnnotation instanceof Controller){
+ 						 if (classAnnotation instanceof Component) {
+ 							 Component component=(Component)classAnnotation;
+ 							 beanId=component.value();
+ 							 beanScope=component.scope();
+ 						 }else if(classAnnotation instanceof Controller){
 							 Controller controller=(Controller)classAnnotation;
 							 beanId=controller.value();
 							 beanScope=controller.scope();
@@ -64,7 +68,7 @@ public class AnnotaionReader {
 						    	beanScope=dao.scope();
 						     }
 						 beanId=getBeanId(clazz.getName(),beanId);
-						 beanDef=new BeanDefinition(beanId,clazz.getName(),beanScope);
+						 BeanDefinition beanDef=new BeanDefinition(beanId,clazz.getName(),beanScope);
 						 List<BeanProperty> beanProperties=new ArrayList<BeanProperty>();
 						 Arrays.asList(clazz.getDeclaredFields()).stream()
 						 	   .filter(field -> field.isAnnotationPresent(Inject.class) )

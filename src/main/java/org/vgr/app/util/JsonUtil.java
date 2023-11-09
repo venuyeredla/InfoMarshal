@@ -7,7 +7,6 @@ public class JsonUtil {
 	private static String COLON=":";
 	private static String CAMA=",";
 	
-	
 	public static StringBuilder toJson(String key, String[] elements){
 		StringBuilder jsonString=new StringBuilder("{\""+key+"\":[");
 		if(elements.length>=0){
@@ -33,6 +32,5 @@ public class JsonUtil {
 		json.append("}");
 		return new String(json);
 	}
-	
 	
 }

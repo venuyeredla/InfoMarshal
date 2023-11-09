@@ -1,4 +1,4 @@
 org.vgr.ioc.core.JdbcTemplate
 org.vgr.app.controllers.AppController
 org.vgr.http.server.HttpServer
-org.vgr.ioc.core.RequestDispatcher
+org.vgr.http.server.RequestProcessor

@@ -2,10 +2,10 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.app</groupId>
-	<artifactId>jPilot</artifactId>
+	<artifactId>infomarshal</artifactId>
 	<packaging>jar</packaging>
 	<version>1.0</version>
-	<name>jPilot</name>
+	<name>Info Marshal</name>
 	<url>http://maven.apache.org</url>
 	<properties>
 	 <slf4j.version>1.7.25</slf4j.version>

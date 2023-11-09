@@ -43,14 +43,4 @@ public class Application{
 			};
 			return provider;
 	}
-
-	public boolean testLogleves() {
-		//LOG.fatal("FATAL");
-		LOG.error("ERROR");
-		LOG.warn("WARN");
-		LOG.info("INFO");
-		LOG.debug("DEBUG");
-		LOG.trace("TRACE");
-		return true;
-	}
 }

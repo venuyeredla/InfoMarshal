@@ -35,6 +35,8 @@ public class HttpServer implements Runnable,ContainerAware{
     ServerSocket serverSocket=null;
     ExecutorService executorService=Executors.newFixedThreadPool(10);
     
+    private AppContext iocContainer;
+    
 	private boolean stopSignal=false;
 	
 	public HttpServer() {}
@@ -65,7 +67,8 @@ public class HttpServer implements Runnable,ContainerAware{
 	}
 	
 	public boolean handleRequest(Socket socket) {
-		RequestProcessor processor= new RequestProcessor(socket);
+		RequestProcessor processor= (RequestProcessor)this.iocContainer.getBean("requestProcessor");
+		processor.setRequestSocket(socket);
 		
 		Future<String> future = executorService.submit(processor);
 		try {
@@ -94,7 +97,7 @@ public class HttpServer implements Runnable,ContainerAware{
 	}
 	@Override
 	public void setContainer(AppContext iocContainer) {
-		// TODO Auto-generated method stub
+		this.iocContainer=iocContainer;
 		
 	}
 	

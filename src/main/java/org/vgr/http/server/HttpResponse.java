@@ -33,6 +33,24 @@ public class HttpResponse  {
 	 * @param fileName
 	 * @throws IOException
 	 */
+	
+	private void writeHeader(PrintWriter printWriter,int contentSize) {
+		 headers.put("HTTP/1.1", status.getDesc());
+		 headers.put("Content-Type", mimeType.getMimeType());
+		 headers.put("Date", new Date().toString());
+		 headers.put("Server", "My Server/1.0 (Ubuntu)");
+		 headers.put("Last-Modified", new Date().toString());
+		 headers.put("Connection", this.close);
+		 //headers.put("Content-Length", "");
+		 //headers.put("Set-Cookie", "");
+		 StringBuilder str=new StringBuilder();
+		 headers.forEach((key,value)->{
+			 str.append(key+": "+value+NEW_LINE);
+		 });
+		 printWriter.write(new String(str));
+		 printWriter.append("\n\r");
+	  }
+	
 	public void writeText(Socket socket,String fileName) throws IOException {
 		 PrintWriter printWriter=new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
  		 String data=this.getTextData(fileName);
@@ -59,25 +77,6 @@ public class HttpResponse  {
 	     printWriter.close();
   }     
 	
-	
-	private void writeHeader(PrintWriter printWriter,int contentSize) {
-		 headers.put("HTTP/1.1", status.getDesc());
-		 headers.put("Content-Type", mimeType.getMimeType());
-		 headers.put("Date", new Date().toString());
-		 headers.put("Server", "My Server/1.0 (Ubuntu)");
-		 headers.put("Last-Modified", new Date().toString());
-		 headers.put("Connection", this.close);
-		 //headers.put("Content-Length", "");
-		 //headers.put("Set-Cookie", "");
-		 StringBuilder str=new StringBuilder();
-		 headers.forEach((key,value)->{
-			 str.append(key+": "+value+NEW_LINE);
-		 });
-		 printWriter.write(new String(str));
-		 printWriter.append("\n\r");
-	  }
-	
-
 	public String getTextData(String fileName) {
 		 InputStream is=this.getClass().getResourceAsStream(fileName);
 		 try(BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(is, "UTF-8"))) {

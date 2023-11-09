@@ -16,9 +16,12 @@ import org.vgr.ioc.annot.Handler;
 public class AppController {
 	private static final Logger LOG=LoggerFactory.getLogger(AppController.class);
 	
-	@Handler("/")
+	@Handler(value="/",mimeType=MimeType.JSON)
     public String home(HttpRequest servletRequest,HttpResponse servletResponse) {
-		 return "home";
+		Map<String,String> data=new HashMap<String,String>(); 
+		 data.put("Application", "Running...");
+		 servletResponse.setData(data);
+		 return "json";
 	 }
 	
 	@Handler("/home.htm")
