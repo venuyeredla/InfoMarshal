@@ -2,6 +2,7 @@ package org.vgr.store.io;
 
 import java.io.BufferedOutputStream;
 import java.io.Closeable;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -19,25 +20,40 @@ import org.slf4j.LoggerFactory;
 /**
  * Used to write data in terms of blocks
  * 
- * @author vyeredla
+ * @author Author
  *
  */
 public class DataWriter implements Closeable {
 	private static final Logger LOG = LoggerFactory.getLogger(DataWriter.class);
+	
 	private OutputStream os = null;
-	private String fileName;
+	private File file;
 	private int bytesWritten = 0;
 
 	/**
 	 * @param fileName
 	 * @param append  -- if false creates new file.
 	 */
-	public DataWriter(String fileName, boolean append) {
+	public DataWriter(File file, boolean append) {
 		try {
-			this.fileName = fileName;
-			this.os = new BufferedOutputStream(new FileOutputStream(fileName, append));
+			this.file = file;
+			this.os = new BufferedOutputStream(new FileOutputStream(this.file, append));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
+			LOG.error("Error in opening file ", e);
+		}
+	}
+	
+	/**
+	 * @param fileName
+	 * @param append  -- if false creates new file.
+	 */
+	public DataWriter(String file, boolean append) {
+		try {
+			this.os = new BufferedOutputStream(new FileOutputStream(this.file, append));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			LOG.error("Error in opening file ", e);
 		}
 	}
 
@@ -47,13 +63,13 @@ public class DataWriter implements Closeable {
 
 	public void writeBlock(int offset, ByteBuf block) {
 		try {
-			Path path = FileSystems.getDefault().getPath(fileName);
+			Path path = FileSystems.getDefault().getPath(this.file.getAbsolutePath());
 			SeekableByteChannel sbc = Files.newByteChannel(path, StandardOpenOption.WRITE);
 			sbc.position(offset);
 			ByteBuffer byteBuffer = ByteBuffer.wrap(block.getBytes());
 			sbc.write(byteBuffer);
 			sbc.close();
-			// LOG.info("No of bytes written : "+block.getBytes().length);
+			//LOG.info("No of bytes written : "+block.getBytes().length);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -74,7 +90,7 @@ public class DataWriter implements Closeable {
 
 	public void update(int offset, byte[] bytes) {
 		try {
-			Path path = FileSystems.getDefault().getPath(fileName);
+			Path path = FileSystems.getDefault().getPath(file.getAbsolutePath());
 			SeekableByteChannel sbc = Files.newByteChannel(path, StandardOpenOption.WRITE);
 			sbc.position(offset);
 			ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);

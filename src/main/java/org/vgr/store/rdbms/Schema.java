@@ -3,7 +3,7 @@ package org.vgr.store.rdbms;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SchemaInfo {
+public class Schema {
 	private int pageId = 0;
 	private String name;
 	private String user;
@@ -13,7 +13,12 @@ public class SchemaInfo {
 	private short tablesSize;
 	private Map<String, Integer> tables;
 	private boolean existed;
-	public SchemaInfo() {}
+	private boolean updated;
+	
+	public Schema () {
+		
+	}
+	
 	/**
 	 * Creates new schema and saves to the disk
 	 * 
@@ -21,11 +26,11 @@ public class SchemaInfo {
 	 * @param userName
 	 * @param passWord
 	 */
-	public SchemaInfo(String name, String userName, String passWord) {
+	public Schema(String name, String userName, String passWord) {
+		this.pageId = 0;
 		this.name = name;
 		this.user = userName;
 		this.pass = passWord;
-		this.pageId = 0;
 		this.pages = 1;
 		this.hasTables = false;
 		this.tablesSize = 0;
@@ -140,6 +145,17 @@ public class SchemaInfo {
 
 	public void setPages(int pages) {
 		this.pages = pages;
+	}
+	
+	
+	
+
+	public boolean isUpdated() {
+		return updated;
+	}
+
+	public void setUpdated(boolean updated) {
+		this.updated = updated;
 	}
 
 	@Override

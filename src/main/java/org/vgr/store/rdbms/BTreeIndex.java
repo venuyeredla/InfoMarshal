@@ -20,11 +20,11 @@ public class BTreeIndex implements Closeable {
 	private Store store = null;
 	public BtreeNode root;
 	private int degree = DBConstatnts.DEGREE;
-	private SchemaInfo schemaInfo = null;
+	private Schema schemaInfo = null;
 	private Table table;
 	Map<Integer, BtreeNode> nodeBuffer = null;
 	
-	public BTreeIndex(SchemaInfo schemaInfo, Table table, Store store) {
+	public BTreeIndex(Schema schemaInfo, Table table, Store store) {
 		this.schemaInfo=schemaInfo;
 		this.store = store;
 		this.table=table;

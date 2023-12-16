@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.http.HttpRequest;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -27,9 +30,9 @@ public class ServerClient {
 		e.printStackTrace();
 	}
 	}
-	@Test
+	//@Test
 	public void testServer(){
-		  String serverName = "localhost"; int port =2050;
+		  String serverName = "localhost"; int port =8080;
 	      try
 	      {
 	         System.out.println("Fetching data from--"+serverName+ ":" + port);
@@ -49,7 +52,23 @@ public class ServerClient {
 	         e.printStackTrace();
 	      }
 	      
-	   
 	
 	}
+	
+	
+	@Test
+	public void testHttpClient() {
+		try {
+			HttpRequest request = HttpRequest.newBuilder()
+					  .uri(new URI("https://postman-echo.com/get"))
+					  .GET()
+					  .build();
+			
+			
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
 }

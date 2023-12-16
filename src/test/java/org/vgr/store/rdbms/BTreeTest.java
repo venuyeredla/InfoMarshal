@@ -1,16 +1,16 @@
-package org.vgr.store.ds;
+package org.vgr.store.rdbms;
 
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import org.vgr.store.io.FileUtil;
+import org.vgr.store.ds.Page;
 import org.vgr.util.RandomUtil;
 
 public class BTreeTest {
 	private static BTree bTree=null;
-	static String index=FileUtil.getPath("btree.idx");
+	static String index="";
 	@Test
 	@Ignore
 	public void testInsert() {

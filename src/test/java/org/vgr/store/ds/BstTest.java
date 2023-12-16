@@ -12,7 +12,7 @@ import org.vgr.util.RandomUtil;
 
 public class BstTest {
 	private static final Logger LOG=LoggerFactory.getLogger(BstTest.class);
-	String indexFile=FileUtil.getPath("bst.idx");
+	String indexFile="";
 	
 	@Test
 	@Ignore

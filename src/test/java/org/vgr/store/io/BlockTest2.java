@@ -1,15 +1,15 @@
 package org.vgr.store.io;
-import static org.vgr.store.io.IOConstants.BLOCK_SIZE;
+import static org.vgr.store.io.StoreConstants.BLOCK_SIZE;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class BlockTest2 {
-	static String blockFile=FileUtil.getPath("block.dat");
 	@BeforeClass
 	public void writeTest() {
-		DataWriter writer=new DataWriter(blockFile,false);
+		String file="";
+		DataWriter writer=new DataWriter(file,false);
 		for(int i=0;i<10;i++) {
 			ByteBuf block=new ByteBuf();
 			block.write("Block and venu "+i);
@@ -26,7 +26,8 @@ public class BlockTest2 {
 	
 	@AfterClass
    public void readTest() {
-	   DataReader reader=new DataReader(blockFile);
+		String file="";
+	   DataReader reader=new DataReader(file);
 	   for(int i=0;i<10;i++) {
 		    int offset=i*BLOCK_SIZE;
 		    ByteBuf block=reader.readBlock(offset);

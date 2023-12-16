@@ -10,13 +10,14 @@ import java.util.List;
  * 
  */
 public class ByteBuf{
-	int capacity=128;
+	int capacity;
 	private byte[] bytes;
 	private int wPos;//points to the next position to be written.
 	private int rPos;
 
 	public ByteBuf() {
-		bytes=new byte[capacity];
+		this.capacity=StoreConstants.BUFFER_SIZE;
+		bytes=new byte[this.capacity];
 		wPos=0;
 		rPos=-1;
 	}

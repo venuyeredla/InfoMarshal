@@ -4,8 +4,8 @@ import org.vgr.store.io.ByteBuf;
 
 public interface Store {
 	
-	public boolean writeSchemaInfo(SchemaInfo schemaInfo,int pageNum);
-	public SchemaInfo getSchemaInfo(int pageNum) ;
+	public boolean writeSchemaInfo(Schema schemaInfo,int pageNum);
+	public Schema getSchemaInfo(int pageNum) ;
 	public boolean writeTable(Table table,int pageNum);
 	public Table getTable(int pageNum);
 	public boolean writeTableRow();

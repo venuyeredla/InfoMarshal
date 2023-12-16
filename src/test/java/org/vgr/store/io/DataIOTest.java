@@ -3,8 +3,10 @@ package org.vgr.store.io;
 import java.util.LinkedHashMap;
 
 public class DataIOTest {
-	String file=FileUtil.getPath("io.data");
+	
 	public void writeTest() {
+		
+		String file="";
 		DataWriter writer=new DataWriter(file,false);
 		ByteBuf block=new ByteBuf(100);
 		block.write("venugopal Reddy");
@@ -23,6 +25,7 @@ public class DataIOTest {
 		block.readMap().forEach((k,v)-> {System.out.println(k+" - "+v);});
 	   }
 public void readTest() {
+	String file="";
 		DataReader reader=new DataReader(file);
 		ByteBuf block=reader.readBlock(0);
 		System.out.println("String :"+block.readString());

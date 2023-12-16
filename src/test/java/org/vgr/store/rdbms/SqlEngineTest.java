@@ -17,7 +17,7 @@ public class SqlEngineTest {
 	
 	@BeforeClass
 	public static void init() {
-		sqlEngine=new SqlEngine("test", "tst", "tst");
+		sqlEngine=new SqlEngine("test", "tst", "tst",false);
 	}
 	
 	@AfterClass
@@ -53,6 +53,8 @@ public class SqlEngineTest {
 	@Test
 	@Ignore
 	public void insert() {
+		this.createTable();
+		
 		for(int i=1;i<30000;i++) {
 			TableRow row=new TableRow();
 			row.addColumn("id",i);

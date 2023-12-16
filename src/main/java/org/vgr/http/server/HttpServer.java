@@ -30,7 +30,7 @@ public class HttpServer implements Runnable,ContainerAware{
 	
     public static final int SOCKET_READ_TIMEOUT = 5000;
     
-    private int SERVER_PORT=2050;
+    private int SERVER_PORT=8080;
     
     ServerSocket serverSocket=null;
     ExecutorService executorService=Executors.newFixedThreadPool(10);

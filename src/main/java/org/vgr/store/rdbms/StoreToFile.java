@@ -1,6 +1,7 @@
 package org.vgr.store.rdbms;
 
-import static org.vgr.store.io.IOConstants.*;
+import static org.vgr.store.io.StoreConstants.BLOCK_SIZE;
+
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -14,23 +15,38 @@ import org.slf4j.LoggerFactory;
 import org.vgr.store.io.ByteBuf;
 import org.vgr.store.io.DataReader;
 import org.vgr.store.io.DataWriter;
+import org.vgr.store.io.StoreConstants;
 
-public class FileStore implements Store,Closeable{
+public class StoreToFile implements Store,Closeable{
 	
-	private static final Logger LOG = LoggerFactory.getLogger(FileStore.class);
+	private static final Logger LOG = LoggerFactory.getLogger(StoreToFile.class);
+	
+	private static String DB_PATH="/Users/venugopal/Documents/work/store/rdbms/dbname.db";
+	
 	private DataWriter writer;
 	private DataReader reader;
 	Map<Integer,BtreeNode> bufferPages=null;
 	private boolean existed;
 
-	public FileStore(String dbFile) {
-		this.existed = new File(dbFile).exists();
-		this.writer = new DataWriter(dbFile, this.existed);
-		this.reader = new DataReader(dbFile);
+	public StoreToFile(String dbName,String userName, String passWord, boolean ifNot) {
+		dbName=dbName.toLowerCase();
+		DB_PATH=DB_PATH.replaceAll("dbname", dbName);
+		LOG.info("OS block size is : "+BLOCK_SIZE);
+		File dbstore= new File(DB_PATH);
+		this.existed = dbstore.exists();
+		if (!this.existed) {
+			try {
+				dbstore.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		this.writer = new DataWriter(dbstore, this.existed);
+		this.reader = new DataReader(dbstore);
 	}
 
 	@Override
-	public boolean writeSchemaInfo(SchemaInfo schemaInfo,int pageNum) {
+	public boolean writeSchemaInfo(Schema schemaInfo,int pageNum) {
 		ByteBuf block = new ByteBuf();
 		block.write(schemaInfo.getPageId())
 		     .write(schemaInfo.getSchemaName())
@@ -43,14 +59,14 @@ public class FileStore implements Store,Closeable{
 			schemaInfo.getTables().forEach((k,v)->{ block.write(k); block.write(v);});
 		   }
 		  this.writeBlock(pageNum, block);
-		  System.out.println("Total numuber of pages  : " + schemaInfo.getPages());  
+		  LOG.info("Written schema on page num : " + pageNum);  
 		 return true;
 	}
 	
 	@Override
-	public SchemaInfo getSchemaInfo(int pageNum) {
+	public Schema getSchemaInfo(int pageNum) {
 		ByteBuf b=this.readBlock(pageNum);
-		SchemaInfo schemaInfo=new SchemaInfo();
+		Schema schemaInfo=new Schema();
 		schemaInfo.setPageId(b.readInt());
 		schemaInfo.setSchemaName(b.readString());
 		schemaInfo.setUserName(b.readString());
@@ -71,7 +87,7 @@ public class FileStore implements Store,Closeable{
 
 	@Override
 	public boolean writeTable(Table table,int pageNum) {
-		ByteBuf block=new ByteBuf();
+		ByteBuf block=new ByteBuf(StoreConstants.BUFFER_SIZE);
 		block.write(table.getName());
 		block.write(table.getNum());
 		block.write(table.getPrimary());
@@ -120,7 +136,7 @@ public class FileStore implements Store,Closeable{
 	}
 	
 	public void writeIdxNode(BtreeNode node) {
-		ByteBuf block = new ByteBuf();
+		ByteBuf block = new ByteBuf(StoreConstants.BUFFER_SIZE);
 		BtreeNodeType nodeType=node.isLeaf()?BtreeNodeType.LEAF:BtreeNodeType.INTERNAL;
 		block.write(node.getId())// Page Number
 		     .writeByte(nodeType.getNodVal())

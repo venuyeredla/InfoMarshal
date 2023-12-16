@@ -1,5 +1,4 @@
 package org.vgr.store.rdbms;
-import static org.vgr.store.io.IOConstants.*;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.HashMap;
@@ -8,43 +7,42 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vgr.store.io.ByteBuf;
-import org.vgr.store.io.FileUtil;
 
 public class SqlEngine implements Closeable {
 	private static final Logger LOG = LoggerFactory.getLogger(SqlEngine.class);
-	private static String DB_SUFFIX=".db";
-	private FileStore fileStore=null;
-	private SchemaInfo schemaInfo=null;
+	
+	private StoreToFile fileStore=null;
+	private Schema schema=null;
 	private static int SCHEMA_PAGE_ID=0;
 	private Map<String, BTreeIndex> tableIndexers=new HashMap<>();
 	private Map<String, Table> tables=new HashMap<>();
 	
-	public SqlEngine(String schema, String userName, String passWord) {
-		  LOG.info("DB engine started ");
-		  LOG.info("OS block size is : "+BLOCK_SIZE);
-		  schema=schema.toLowerCase();
-		  String dbFile=FileUtil.getPath(schema+DB_SUFFIX);
-		  fileStore=new FileStore(dbFile);	
-		  initSchema(schema, userName, passWord);
+	public SqlEngine(String dbname, String userName, String passWord, boolean ifNot) {
+		  LOG.info("DB engine bootstrapping ");
+		  fileStore=new StoreToFile(dbname, userName, passWord,ifNot);	
+		  initSchema(dbname, userName, passWord);
 	}
 	
-	private void initSchema(String schema, String userName, String passWord) {
+	private void initSchema(String schemaName, String userName, String passWord) {
 		 boolean existed=fileStore.isExisted();
 		 if(existed) {
-			 LOG.info("Schema already existed and will be loaded...");
-			 schemaInfo=fileStore.getSchemaInfo(SCHEMA_PAGE_ID);// loads existing schema 
+			 LOG.info("Loading existing schema.");
+			 schema=fileStore.getSchemaInfo(SCHEMA_PAGE_ID);// loads existing schema 
 		 }else {
-			 schemaInfo=new SchemaInfo(schema, userName, passWord);
+			 schema=new Schema(schemaName, userName, passWord);
+			 fileStore.writeSchemaInfo(this.schema, SCHEMA_PAGE_ID);
+			 fileStore.setExisted(true);
 			 LOG.info("New scheama created. Name : "+schema);
 		 }
 	 }
 	
 	public void createTable(Table table) {
-		 if(!schemaInfo.contains(table.getName())) {
-			 table.setNum(schemaInfo.nextTableId());
-			 int pageNum=schemaInfo.nextPage();
+		 if(!schema.contains(table.getName())) {
+			 table.setNum(schema.nextTableId());
+			 int pageNum=schema.nextPage();
 			 fileStore.writeTable(table, pageNum);
-			 schemaInfo.addTable(table.getName(), pageNum);
+			 schema.addTable(table.getName(), pageNum);
+			 schema.setUpdated(true);
 			 LOG.info("Table created : "+table.getName() +" Page number : "+pageNum);
 		 }else {
 			 LOG.info("Table already existed : "+table.getName());
@@ -52,7 +50,7 @@ public class SqlEngine implements Closeable {
 	 }
 
 	public Table getTable(String tableName) {
-		int pageNum=schemaInfo.tablePage(tableName);
+		int pageNum=schema.tablePage(tableName);
 		if(pageNum!=-1) {
 			if (tables.containsKey(tableName)) {
 				return tables.get(tableName);
@@ -75,7 +73,7 @@ public class SqlEngine implements Closeable {
 		if(bTreeIndex!=null) {
 			return bTreeIndex;
 		}else {
-			bTreeIndex=new BTreeIndex(this.schemaInfo, table,fileStore);;
+			bTreeIndex=new BTreeIndex(this.schema, table,fileStore);;
 			tableIndexers.put(table.getName(), bTreeIndex);
 		}
 		return bTreeIndex;
@@ -102,7 +100,7 @@ public class SqlEngine implements Closeable {
 	
 	public TableRow select(String tableName,int id) {
 		Table table=this.getTable(tableName);
-		BTreeIndex bTreeIndex=new BTreeIndex(this.schemaInfo,table,fileStore);
+		BTreeIndex bTreeIndex=new BTreeIndex(this.schema,table,fileStore);
 		int pageid=bTreeIndex.search(id);
 		if(pageid!=-1) {
 			ByteBuf bytes=fileStore.readBlock(pageid);
@@ -120,6 +118,11 @@ public class SqlEngine implements Closeable {
 			}
 			 return tableRow;
 		}
+		try {
+			bTreeIndex.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 	
@@ -127,6 +130,7 @@ public class SqlEngine implements Closeable {
 	
 	@Override
 	public void close() throws IOException {
+		LOG.info("Shtting down DB. ");
 		tableIndexers.forEach((key,tableIndexer)->{
 			try {
 				tableIndexer.close();
@@ -134,14 +138,18 @@ public class SqlEngine implements Closeable {
 				e.printStackTrace();
 			}
 		});
-		tables.forEach((key,val)->{	fileStore.writeTable(val, val.getPageid());	});
-		fileStore.writeSchemaInfo(this.schemaInfo, SCHEMA_PAGE_ID);
+		
+		if(schema.isUpdated()) {
+			fileStore.writeSchemaInfo(this.schema, SCHEMA_PAGE_ID);
+			tables.forEach((key,val)->{	fileStore.writeTable(val, val.getPageid());	});
+		}
+		
 		fileStore.close();
+		LOG.info("Shtting down completed. ");
 	}
 	
-	
 	private int nextPage() {
-	   return schemaInfo.nextPage();
+	   return schema.nextPage();
 	 }
 	
 }

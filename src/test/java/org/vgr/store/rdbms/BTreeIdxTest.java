@@ -12,18 +12,17 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vgr.store.io.FileUtil;
 import org.vgr.util.RandomUtil;
 
 public class BTreeIdxTest {
 	private static final Logger LOG = LoggerFactory.getLogger(BTreeIdxTest.class);
 	private static BTreeIndex bTree=null;
-	static String index=FileUtil.getPath("btree.idx");
+	static String index="";
 	@BeforeClass
 	public static void init() {
 		//FileStore fileStore=new FileStore(index);
-		Store store=new MapStore();
-		SchemaInfo schemaInfo=new SchemaInfo("test", "tst", "tst");
+		Store store=new StoreToMap();
+		Schema schemaInfo=new Schema("test", "tst", "tst");
 		bTree=new BTreeIndex(schemaInfo,null,store);
 	}
 	

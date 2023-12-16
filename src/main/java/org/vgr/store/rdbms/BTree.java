@@ -1,5 +1,5 @@
-package org.vgr.store.ds;
-import static org.vgr.store.io.IOConstants.*;
+	package org.vgr.store.rdbms;
+import static org.vgr.store.io.StoreConstants.*;
 import java.io.Closeable;
 import java.io.File;
 import java.util.ArrayList;
@@ -7,10 +7,10 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vgr.store.ds.Page;
 import org.vgr.store.io.ByteBuf;
 import org.vgr.store.io.DataReader;
 import org.vgr.store.io.DataWriter;
-import org.vgr.store.rdbms.SchemaInfo;
 
 /**
  * B-Tree implementation
@@ -20,17 +20,20 @@ import org.vgr.store.rdbms.SchemaInfo;
  */
 public class BTree implements Closeable {
 	private static final Logger LOG = LoggerFactory.getLogger(BTree.class);
+	
 	public Page root;
 	private int degree = Page.degree;
 	private DataWriter writer;
 	private DataReader reader;
-	private SchemaInfo schemaInfo = null;
+	private Schema schemaInfo = null;
 	private List<Page> unsavedPages = null;
 
 	public BTree(String dbFile) {
-		boolean exists = new File(dbFile).exists();
-		this.writer = new DataWriter(dbFile, exists);
-		this.reader = new DataReader(dbFile);
+		
+		File file= new File(dbFile);
+		boolean exists =file.exists();
+		this.writer = new DataWriter(file, exists);
+		this.reader = new DataReader(file);
 		unsavedPages = new ArrayList<>();
 	}
 
@@ -251,9 +254,6 @@ public class BTree implements Closeable {
 		return schemaInfo.nextPage();
 	}
 
-	private void initialize() {
-		schemaInfo = new SchemaInfo("venudb", "venugopal", "venugopal");
-	}
 	public void closeWriter() {
 		this.writer.close();
 	}

@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.vgr.app.util.JsonUtil;
 
 public class HttpResponse  {
+	
 	private static final Logger LOGGER=LoggerFactory.getLogger(HttpResponse.class);
     private HttpMethod method;
     private HttpStatus status=HttpStatus.OK; 
@@ -23,59 +24,74 @@ public class HttpResponse  {
     private String close="close";
 	private static String NEW_LINE=" \n";
 	private Map<String,String> data;
+	
+	private String filenName;
+	
 	Map<String,String> headers=null;
 	public HttpResponse() {
 		headers=new LinkedHashMap<String,String>();
 	}
-	/**
-	 * Reads files like Write text data like JS,html,css.
-	 * @param socket
-	 * @param fileName
-	 * @throws IOException
-	 */
 	
-	private void writeHeader(PrintWriter printWriter,int contentSize) {
-		 headers.put("HTTP/1.1", status.getDesc());
-		 headers.put("Content-Type", mimeType.getMimeType());
-		 headers.put("Date", new Date().toString());
-		 headers.put("Server", "My Server/1.0 (Ubuntu)");
-		 headers.put("Last-Modified", new Date().toString());
-		 headers.put("Connection", this.close);
-		 //headers.put("Content-Length", "");
-		 //headers.put("Set-Cookie", "");
-		 StringBuilder str=new StringBuilder();
-		 headers.forEach((key,value)->{
-			 str.append(key+": "+value+NEW_LINE);
-		 });
-		 printWriter.write(new String(str));
-		 printWriter.append("\n\r");
-	  }
 	
-	public void writeText(Socket socket,String fileName) throws IOException {
-		 PrintWriter printWriter=new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
- 		 String data=this.getTextData(fileName);
-		 int contentSize=data.getBytes().length;
-         this.writeHeader(printWriter, contentSize);		 
-	     printWriter.append(data+"\n");
-	     printWriter.flush();
-	     printWriter.close();
-    }
+	public void writeResposne(Socket socket) {
+		try {
+			 PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
+			
+			 printWriter.append("HTTP/1.1 "+status.getDesc() +NEW_LINE);
+			 headers.put("Content-Type", mimeType.getMimeType());
+			 headers.put("Date", new Date().toString());
+			 headers.put("Server", "My Server/1.0 (Ubuntu)");
+			 headers.put("Last-Modified", new Date().toString());
+			 headers.put("Connection", this.close);
+			 //headers.put("Content-Length", "");
+			 //headers.put("Set-Cookie", "");
+			 StringBuilder str=new StringBuilder();
+			 headers.forEach((key,value)->{
+				 str.append(key+": "+value+NEW_LINE);
+			 });
+			 printWriter.write(new String(str));
+			 printWriter.append("\n\r"); 
+			 
+			 
+			 switch (this.getMimeType()){
+			 
+			case TEXT:
+				 String textData=this.getTextData(filenName);
+				 int contentSize=textData.getBytes().length;
+				 printWriter.append(data+"\n");
+				 break;
+			 
+			 case JSON:
+				   printWriter.append(JsonUtil.toJson(data)+"\n");
+				   printWriter.flush();
+				   printWriter.close();
+				 
+				 break ;
+				 
+			 case JS:
+				 
+				 String josnData=this.getTextData(filenName);
+				  contentSize=josnData.getBytes().length;
+				 printWriter.append(data+"\n");
+				 break;
+				 
+			default :
+				break;
+				 
+			 }
+			 
+			 printWriter.flush();
+			 printWriter.close();
+			 LOGGER.info("Flushed data and closed printwriter");
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	
-	public void writeJson(Socket socket) throws IOException {
-		 PrintWriter printWriter=new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
-		 this.writeHeader(printWriter, 0);		 
-	     printWriter.append(JsonUtil.toJson(data)+"\n");
-	     printWriter.flush();
-	     printWriter.close();
-   }
 	
-	public void writeBinary(Socket socket) throws IOException {
-		 PrintWriter printWriter=new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
-		 this.writeHeader(printWriter, 0);		 
-	     printWriter.append(JsonUtil.toJson(data)+"\n");
-	     printWriter.flush();
-	     printWriter.close();
-  }     
+
+
 	
 	public String getTextData(String fileName) {
 		 InputStream is=this.getClass().getResourceAsStream(fileName);
@@ -92,6 +108,7 @@ public class HttpResponse  {
 		}
 	}
 
+	
     public MimeType getMimeType() {
 		return mimeType;
 	}
@@ -113,5 +130,13 @@ public class HttpResponse  {
 	public void setData(Map<String,String> data) {
 		this.data = data;
 	}
+	public String getFilenName() {
+		return filenName;
+	}
+	public void setFilenName(String filenName) {
+		this.filenName = filenName;
+	}
+	
+	
 	
 }

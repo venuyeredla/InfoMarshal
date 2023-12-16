@@ -19,7 +19,7 @@ public class AppController {
 	@Handler(value="/",mimeType=MimeType.JSON)
     public String home(HttpRequest servletRequest,HttpResponse servletResponse) {
 		Map<String,String> data=new HashMap<String,String>(); 
-		 data.put("Application", "Running...");
+		 data.put("Application", "New Running...");
 		 servletResponse.setData(data);
 		 return "json";
 	 }

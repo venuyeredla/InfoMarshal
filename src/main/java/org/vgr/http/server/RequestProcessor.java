@@ -1,5 +1,6 @@
 package org.vgr.http.server;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.Socket;
 import java.util.concurrent.Callable;
@@ -37,25 +38,32 @@ public class RequestProcessor implements Callable<String>, ContainerAware{
 	@Override
 	public String call() {
 		String result="success";
+		String uri=httpRequest.getUri();
 		try {
-			String uri=httpRequest.getUri();
+			
 			LOG.info("Incoming request is : {} ", uri);
 			if(uri.startsWith("/static")) {
 				this.setMimeType(uri);
-				httpResponse.writeText(socket,uri);
+				httpResponse.setFilenName(uri);
 			}else {
 				String nextView=this.doRequestProcessing(httpRequest,httpResponse);
-				if(httpResponse.getMimeType()==MimeType.JSON) {
-					httpResponse.writeJson(socket);
-					return result;
-				}
 				nextView=viewPath.replaceAll("%viewname%", nextView);
 				LOG.debug("Next view name is :"+nextView);
-				httpResponse.writeText(socket,nextView);
+				httpResponse.setFilenName(uri);
 			}
-	   	    socket.close();
+			
+			httpResponse.writeResposne(socket);
+			
 		}catch(Exception e) {
 			e.printStackTrace();
+			LOG.info("Unable to find requested resource : {} ", uri);
+		} finally {
+			  try {
+				socket.close();
+				
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 		return result;
 	}

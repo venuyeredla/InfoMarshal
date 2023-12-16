@@ -1,5 +1,5 @@
 package org.vgr.store.rdbms;
-import static org.vgr.store.io.IOConstants.*;
+import static org.vgr.store.io.StoreConstants.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,12 +7,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vgr.store.io.ByteBuf;
 
-public class MapStore implements Store {
-	private static final Logger LOG = LoggerFactory.getLogger(MapStore.class);
+public class StoreToMap implements Store {
+	private static final Logger LOG = LoggerFactory.getLogger(StoreToMap.class);
 	Map<Integer, ByteBuf> mapStore = null;
 	Map<Integer, BtreeNode> bufferPages = null;
 
-	public MapStore() {
+	public StoreToMap() {
 		mapStore = new HashMap<>();
 		bufferPages = new HashMap<>();
 	}
@@ -84,13 +84,13 @@ public class MapStore implements Store {
 
 	
 	@Override
-	public boolean writeSchemaInfo(SchemaInfo schemaInfo,int pageNum) {
+	public boolean writeSchemaInfo(Schema schemaInfo,int pageNum) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 	
 	@Override
-	public SchemaInfo getSchemaInfo(int pageNum) {
+	public Schema getSchemaInfo(int pageNum) {
 		// TODO Auto-generated method stub
 		return null;
 	}

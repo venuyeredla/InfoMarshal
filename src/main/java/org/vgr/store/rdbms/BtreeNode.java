@@ -3,6 +3,7 @@ package org.vgr.store.rdbms;
 import java.util.Arrays;
 
 public class BtreeNode {
+	
 	public static int degree = DBConstatnts.DEGREE; // Minimum degree (defines the range for number of keys)
 	private int id;
 	private int parentId;

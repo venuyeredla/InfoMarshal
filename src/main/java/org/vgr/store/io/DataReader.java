@@ -1,8 +1,9 @@
 package org.vgr.store.io;
 
-import static org.vgr.store.io.IOConstants.*;
+import static org.vgr.store.io.StoreConstants.*;
 import java.io.BufferedInputStream;
 import java.io.Closeable;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -21,20 +22,31 @@ import java.nio.file.StandardOpenOption;
  */
 public class DataReader implements Closeable{
 	private InputStream is=null;
-	private String fileName;
+	private File file;
 
-    public DataReader(String fileName) {
+    public DataReader(File fileName) {
 		  try {
-				this.fileName=fileName;
+				this.file=fileName;
 				this.is=new BufferedInputStream(new FileInputStream(fileName));
 		   } catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
 	   }
+    
+    public DataReader(String fileName) {
+		  try {
+				this.is=new BufferedInputStream(new FileInputStream(fileName));
+		   } catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+	   }
+    
 	public DataReader(InputStream in) {
 		this.is=new BufferedInputStream(in);
 		this.is.mark(0);
 	  }
+	
+	
 
 	public ByteBuf readBytes(int size) {
 		try {
@@ -63,7 +75,7 @@ public class DataReader implements Closeable{
 	
 	public ByteBuf readBlock(int offset) {
 		try {
-		    Path path=FileSystems.getDefault().getPath(fileName);
+		    Path path=FileSystems.getDefault().getPath(file.getAbsolutePath());
 			SeekableByteChannel sbc=Files.newByteChannel(path, StandardOpenOption.READ);
 			sbc.position(offset);
 		    ByteBuffer byteBuffer=ByteBuffer.allocate(BLOCK_SIZE);
@@ -94,9 +106,6 @@ public class DataReader implements Closeable{
 		}
 	}
 	
-	public void setFileName(String fileName) {
-		this.fileName = fileName;
-	}
 	
 	public InputStream getIs() {
 		return is;
